@@ -1368,7 +1368,12 @@ if(_dateInput){
   const _today=new Date();
   _dateInput.min=_today.toISOString().split('T')[0];
 }
-renderLoads(LOCAL);
+// Гарантируем рендер после загрузки DOM
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>renderLoads(LOCAL));
+} else {
+  renderLoads(LOCAL);
+}
 </script>
 <!-- MODAL: SETTINGS -->
 <div class="overlay" id="settingsOverlay" onclick="closeOverlay('settingsOverlay',event)">
