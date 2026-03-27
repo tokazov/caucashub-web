@@ -962,6 +962,7 @@ function doLogin(){
   if(!email||!pass){alert('Заполните email и пароль');return;}
   setTimeout(()=>{
     user={name:email.split('@')[0],email};
+    localStorage.setItem('ch_user',JSON.stringify(user));
     document.getElementById('loginSuccess').style.display='block';
     setTimeout(()=>{
       closeModal('authOverlay');
@@ -976,6 +977,7 @@ function doRegister(){
   if(!name||!email||!pass){alert('Заполните все обязательные поля');return;}
   setTimeout(()=>{
     user={name,email};
+    localStorage.setItem('ch_user',JSON.stringify(user));
     document.getElementById('regSuccess').style.display='block';
     setTimeout(()=>{
       closeModal('authOverlay');
@@ -994,6 +996,7 @@ function showUserState(){
 }
 function doLogout(){
   user=null;
+  localStorage.removeItem('ch_user');
   document.getElementById('btnLogin').style.display='';
   document.getElementById('btnReg').style.display='';
   document.getElementById('userAvatar').style.display='none';
@@ -1242,6 +1245,9 @@ function doRespond(){
 // showSection расширен через оригинал выше
 
 // ── INIT ──────────────────────────────────────────────
+// Восстанавливаем сессию
+const _saved=localStorage.getItem('ch_user');
+if(_saved){try{user=JSON.parse(_saved);showUserState();}catch(e){localStorage.removeItem('ch_user');}}
 renderLoads(LOCAL);
 </script>
 <!-- NOTIF PANEL -->
