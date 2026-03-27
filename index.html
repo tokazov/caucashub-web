@@ -1082,6 +1082,7 @@ function showSection(name, el){
   const bnav=document.querySelectorAll('.bitem');
   if(map[name]!==undefined) bnav[map[name]].classList.add('active');
   if(name==='trucks') renderTrucks();
+  if(name==='orders' && typeof _renderOrders==='function') _renderOrders();
 }
 
 // ── SCOPE ─────────────────────────────────────────────
@@ -1245,12 +1246,7 @@ function doRespond(){
   },1000);
 }
 
-// Переопределяем showSection для Заказов
-const _origShowSection=showSection;
-function showSection(name,el){
-  _origShowSection(name,el);
-  if(name==='orders') _renderOrders();
-}
+// showSection расширен через оригинал выше
 
 // ── INIT ──────────────────────────────────────────────
 renderLoads(LOCAL);
