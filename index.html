@@ -307,9 +307,11 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <option value="700-1500">₾700–1500 / 50–500</option>
     <option value="1500-99999">₾1500+ / 00+</option>
   </select>
-  <button class="fbtn" onclick="filterLoads()">Найти</button>
-  <button class="post-btn" onclick="openPostLoad()">+ <span>Разместить груз</span></button>
   <div class="fcount" id="fcount">187 грузов</div>
+  <div style="width:100%;display:flex;gap:8px;margin-top:2px">
+    <button class="fbtn" onclick="filterLoads()" style="flex:1">Найти</button>
+    <button class="post-btn" onclick="openPostLoad()" style="flex:1">+ <span>Разместить</span></button>
+  </div>
 </div>
 
 <!-- STATS -->
