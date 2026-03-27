@@ -601,8 +601,6 @@ let addrSelected={pFrom:null, pTo:null};
 
 function addrSearch(field, val){
   clearTimeout(addrTimers[field]);
-  const dropId='dropP'+field.slice(1,2).toUpperCase()+field.slice(2);
-  const drop=document.getElementById('drop'+field.slice(0,1).toUpperCase()+field.slice(1).replace('p','P'));
   const dropEl=document.getElementById('dropP'+(field==='pFrom'?'From':'To'));
   if(!dropEl) return;
   if(val.trim().length<2){dropEl.classList.remove('open');return;}
