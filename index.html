@@ -3,42 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0"><title>CaucasHub.ge — Биржа грузов Кавказа</title>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=aef19e33-8ea1-4039-8353-2f0df688664a&lang=ru_RU" type="text/javascript"></script>
+<title>CaucasHub.ge — Биржа грузов Кавказа</title>
 
 
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f0f2f5; color:#1a1a2e; }
-
-/* NOTIFICATIONS */
-.notif-btn { position:relative; background:transparent; border:none; cursor:pointer; padding:4px 6px; }
-.notif-icon { font-size:20px; }
-.notif-badge { position:absolute; top:0; right:0; background:#e74c3c; color:#fff; border-radius:50%; width:16px; height:16px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; display:none; }
-.notif-badge.has { display:flex; }
-.notif-panel { display:none; position:absolute; top:60px; right:16px; width:340px; background:#fff; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.15); z-index:300; max-height:480px; overflow-y:auto; }
-.notif-panel.open { display:block; }
-.notif-header { padding:14px 16px; border-bottom:1px solid #f0f0f0; display:flex; justify-content:space-between; align-items:center; }
-.notif-title { font-weight:700; font-size:15px; }
-.notif-clear { font-size:12px; color:#3498db; cursor:pointer; background:none; border:none; }
-.notif-item { padding:12px 16px; border-bottom:1px solid #f5f5f5; cursor:pointer; transition:background .1s; }
-.notif-item:hover { background:#fffbf0; }
-.notif-item.unread { border-left:3px solid #f7b731; background:#fffdf5; }
-.notif-item .n-title { font-weight:600; font-size:14px; margin-bottom:3px; }
-.notif-item .n-body { font-size:13px; color:#666; line-height:1.4; }
-.notif-item .n-time { font-size:11px; color:#aaa; margin-top:4px; }
-.notif-actions { display:flex; gap:6px; margin-top:8px; }
-.n-btn-accept { background:#2ecc71; color:#fff; border:none; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; }
-.n-btn-reject { background:#f0f2f5; color:#555; border:none; padding:5px 12px; border-radius:6px; font-size:12px; cursor:pointer; }
-.n-btn-done { background:#f7b731; color:#1a1a2e; border:none; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; }
-.notif-empty { padding:32px; text-align:center; color:#aaa; font-size:14px; }
-
-/* STATUS BADGES */
-.status-badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:12px; font-weight:700; }
-.status-pending  { background:#fff3e0; color:#f39c12; }
-.status-accepted { background:#e8f5e9; color:#2e7d32; }
-.status-transit  { background:#e3f2fd; color:#1565c0; }
-.status-done     { background:#f0f4ff; color:#5c35d6; }
-.status-rated    { background:#f5f5f5; color:#888; }
 
 /* HEADER */
 .header { background:#1a1a2e; padding:0 16px; display:flex; align-items:center; justify-content:space-between; height:54px; position:sticky; top:0; z-index:200; box-shadow:0 2px 8px rgba(0,0,0,.3); }
@@ -78,8 +49,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .post-btn:hover { background:#27ae60; }
 
 /* TABLE */
-.thead { display:grid; grid-template-columns:2.2fr 1.8fr 1fr 1.2fr 1fr 1fr 100px; padding:10px 14px; background:#e8eaf0; font-size:12px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:.6px; border-bottom:1px solid #d0d4df; }
-.row { display:grid; grid-template-columns:2.2fr 1.8fr 1fr 1.2fr 1fr 1fr 100px; padding:12px 14px; background:#fff; border-bottom:1px solid #f2f2f2; cursor:pointer; align-items:center; border-left:3px solid transparent; transition:background .12s; }
+.thead { display:grid; grid-template-columns:2.2fr 1.8fr 1fr 1.2fr 1fr 1fr 90px; padding:10px 16px; background:#e8eaf0; font-size:12px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:.6px; border-bottom:1px solid #d0d4df; }
+.row { display:grid; grid-template-columns:2.2fr 1.8fr 1fr 1.2fr 1fr 1fr 90px; padding:14px 16px; background:#fff; border-bottom:1px solid #f2f2f2; cursor:pointer; align-items:center; border-left:3px solid transparent; transition:background .12s; }
 .row:hover { background:#fffbf0; }
 .row.urgent { border-left-color:#e74c3c; }
 .row.fresh { border-left-color:#2ecc71; }
@@ -93,7 +64,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .badge-new { background:#2ecc71; color:#fff; }
 .badge-urgent { background:#e74c3c; color:#fff; }
 .badge-intl { background:#3498db; color:#fff; }
-.btn-resp { background:#f7b731; color:#1a1a2e; border:none; padding:7px 10px; border-radius:6px; font-size:13px; font-weight:700; cursor:pointer; white-space:nowrap; }
+.btn-resp { background:#f7b731; color:#1a1a2e; border:none; padding:8px 14px; border-radius:6px; font-size:14px; font-weight:700; cursor:pointer; }
 .btn-resp:hover { background:#e6a820; }
 .load-more { text-align:center; padding:16px; background:#fff; }
 .load-more button { background:#f0f2f5; border:none; padding:10px 24px; border-radius:8px; font-size:13px; color:#555; cursor:pointer; }
@@ -202,7 +173,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 <!-- HEADER -->
 <div class="header">
   <div>
-    <a href="/" style="text-decoration:none"><span class="logo">Caucas<span>Hub</span><sub>.ge</sub></span></a>
+    <span class="logo">Caucas<span>Hub</span><sub>.ge</sub></span>
   </div>
   <div class="hright">
     <div style="display:flex;gap:2px">
@@ -210,20 +181,10 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <button class="lang-btn" onclick="setLang('ge',this)">GE</button>
       <button class="lang-btn" onclick="setLang('en',this)">EN</button>
     </div>
-    <button class="notif-btn" id="notifBtn" onclick="toggleNotifs()" style="display:none">
-      <span class="notif-icon">🔔</span>
-      <span class="notif-badge" id="notifBadge">0</span>
-    </button>
     <button class="btn-login" id="btnLogin" onclick="openAuth('login')">Войти</button>
     <button class="btn-reg" id="btnReg" onclick="openAuth('register')">Регистрация</button>
     <div class="user-avatar" id="userAvatar" style="display:none" onclick="openProfile()">ТК</div>
-<!-- NOTIFICATIONS PANEL -->
-<div class="notif-panel" id="notifPanel">
-  <div class="notif-header">
-    <span class="notif-title">🔔 Уведомления</span>
-    <button class="notif-clear" onclick="clearNotifs()">Все прочитаны</button>
   </div>
-  <div id="notifList"><div class="notif-empty">Нет новых уведомлений</div></div>
 </div>
 
 <!-- SCOPE -->
@@ -840,121 +801,6 @@ function openCargo(d){
 }
 
 // ── RESPOND ───────────────────────────────────────────
-// ── NOTIFICATIONS ─────────────────────────────────────────
-let notifications=[];
-let myOrders=[];
-const STATUS_LABELS={
-  pending: {label:'⏳ Ожидание', cls:'status-pending'},
-  accepted:{label:'✅ Принят',   cls:'status-accepted'},
-  transit: {label:'🚛 В пути',  cls:'status-transit'},
-  done:    {label:'✔️ Завершён', cls:'status-done'},
-  rated:   {label:'⭐ Оценён',  cls:'status-rated'},
-};
-
-function pushNotif(title,body,actions){
-  const n={id:Date.now()+(Math.random()*100|0),title,body,actions,unread:true,time:new Date()};
-  notifications.unshift(n);
-  renderNotifList();
-  updateBadge();
-}
-function renderNotifList(){
-  const list=document.getElementById('notifList');
-  if(!list) return;
-  if(!notifications.length){list.innerHTML='<div class="notif-empty">Нет уведомлений</div>';return;}
-  list.innerHTML=notifications.map(n=>{
-    const ts=n.time.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
-    const ah=(n.actions||[]).map(a=>`<button class="${a.cls}" onclick="${a.fn}">${a.label}</button>`).join('');
-    return `<div class="notif-item${n.unread?' unread':''}" onclick="markRead(${n.id})">
-      <div class="n-title">${n.title}</div>
-      <div class="n-body">${n.body}</div>
-      ${ah?`<div class="notif-actions">${ah}</div>`:''}
-      <div class="n-time">${ts}</div>
-    </div>`;
-  }).join('');
-}
-function markRead(id){const n=notifications.find(x=>x.id===id);if(n)n.unread=false;renderNotifList();updateBadge();}
-function clearNotifs(){notifications.forEach(n=>n.unread=false);renderNotifList();updateBadge();}
-function updateBadge(){
-  const c=notifications.filter(n=>n.unread).length;
-  const b=document.getElementById('notifBadge');
-  if(b){b.textContent=c;b.classList.toggle('has',c>0);}
-}
-function toggleNotifs(){
-  const p=document.getElementById('notifPanel');
-  if(p){p.classList.toggle('open');if(p.classList.contains('open'))clearNotifs();}
-}
-document.addEventListener('click',e=>{
-  const p=document.getElementById('notifPanel'),b=document.getElementById('notifBtn');
-  if(p&&b&&!p.contains(e.target)&&!b.contains(e.target))p.classList.remove('open');
-});
-
-function renderOrders(){
-  const empty=document.getElementById('ordersEmpty'),list=document.getElementById('ordersList');
-  if(!myOrders.length){if(empty)empty.style.display='block';if(list)list.style.display='none';return;}
-  if(empty)empty.style.display='none';
-  if(!list)return;
-  list.style.display='block';
-  list.innerHTML=myOrders.map(o=>{
-    const s=STATUS_LABELS[o.status]||STATUS_LABELS.pending;
-    let actions='';
-    if(o.role==='carrier'&&o.status==='accepted')
-      actions=`<button class="n-btn-done" onclick="markDelivered(${o.id})" style="margin-top:8px">🚛 Груз доставлен</button>`;
-    if(o.role==='shipper'&&o.status==='pending')
-      actions=`<div style="display:flex;gap:6px;margin-top:8px"><button class="n-btn-accept" onclick="acceptOrder(${o.id})">✅ Принять</button><button class="n-btn-reject" onclick="rejectOrder(${o.id})">❌ Отклонить</button></div>`;
-    if(o.status==='done')
-      actions=`<button onclick="rateOrder(${o.id})" style="margin-top:8px;background:#f0f2f5;border:none;padding:5px 14px;border-radius:6px;font-size:13px;cursor:pointer">⭐ Оставить отзыв</button>`;
-    const ts=new Date(o.created).toLocaleString('ru',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-    const borderClr=o.status==='transit'?'#3498db':o.status==='done'?'#2ecc71':'#f7b731';
-    return `<div style="padding:14px 16px;background:#fff;border-bottom:1px solid #f2f2f2;border-left:3px solid ${borderClr}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div style="font-weight:700;font-size:15px">${o.title}</div>
-        <span class="status-badge ${s.cls}">${s.label}</span>
-      </div>
-      <div style="font-size:13px;color:#888">💰 $${o.price} · ${ts}</div>
-      ${actions}
-    </div>`;
-  }).join('');
-}
-
-function acceptOrder(id){
-  const o=myOrders.find(x=>x.id===id);if(!o)return;
-  o.status='accepted';renderOrders();
-  pushNotif('✅ Заявка принята!',`Груз "${o.title}" принят. Ожидайте перевозчика.`,[{label:'🚛 Доставлен',cls:'n-btn-done',fn:`markDelivered(${id})`}]);
-}
-function rejectOrder(id){
-  const o=myOrders.find(x=>x.id===id);if(!o)return;
-  myOrders=myOrders.filter(x=>x.id!==id);renderOrders();
-  pushNotif('❌ Заявка отклонена',`Груз "${o.title}" отклонён грузовладельцем.`,[]);
-}
-function markDelivered(id){
-  const o=myOrders.find(x=>x.id===id);if(!o)return;
-  o.status='done';renderOrders();
-  pushNotif('🎉 Груз доставлен!',`"${o.title}" — доставлен успешно. Оставьте отзыв.`,[{label:'⭐ Оценить',cls:'n-btn-done',fn:`rateOrder(${id})`}]);
-  setTimeout(()=>{
-    const or=myOrders.find(x=>x.id===id);
-    if(or&&or.status==='done')
-      pushNotif('⏰ Не забудьте оценить!',`Оставьте отзыв о грузе "${or.title}".`,[{label:'⭐ Оценить',cls:'n-btn-done',fn:`rateOrder(${id})`}]);
-  },120000);
-}
-function rateOrder(id){
-  const o=myOrders.find(x=>x.id===id);if(!o)return;
-  const r=prompt(`Оцените сделку "${o.title}" (1-5):`, '5');
-  if(r&&+r>=1&&+r<=5){o.status='rated';renderOrders();pushNotif('⭐ Спасибо за отзыв!',`Оценка ${r}/5 сохранена. Рейтинг обновлён.`,[]);}
-}
-setInterval(()=>{
-  myOrders.forEach(o=>{
-    if(o.status==='accepted'){
-      const h=(Date.now()-o.created)/3600000;
-      if(h>=24&&!o.reminded){
-        o.reminded=true;
-        pushNotif('⏰ Напоминание о грузе',`Груз "${o.title}" в пути более 24ч. Доставили?`,[
-          {label:'✅ Доставлен',cls:'n-btn-accept',fn:`markDelivered(${o.id})`}
-        ]);
-      }
-    }
-  });
-},30000);
-
 function doRespond(){
   if(!user){ closeModal('cargoOverlay'); openAuth('login'); return; }
   const btn=document.getElementById('btnRespond');
@@ -962,26 +808,22 @@ function doRespond(){
   setTimeout(()=>{
     document.getElementById('respondSuccess').style.display='block';
     btn.textContent='✅ Заявка отправлена';
+    // добавляем в мои заказы
     addToOrders();
   },1000);
 }
 function addToOrders(){
-  const title=document.getElementById('mTitle').textContent;
-  const priceText=document.getElementById('mPrice').textContent.replace('$','').replace(',','');
-  const price=parseInt(priceText)||0;
-  const id=Date.now();
-  const order={id,title,price,status:'pending',role:'carrier',created:Date.now()};
-  myOrders.unshift(order);
-  renderOrders();
-  // Уведомление перевозчику
-  pushNotif('📤 Отклик отправлен!',`Ваш отклик на "${title}" отправлен. Ожидайте одобрения грузовладельца.`,[]);
-  // Имитация: через 5 сек грузовладелец "одобряет"
-  setTimeout(()=>{
-    pushNotif('📦 Новый отклик на ваш груз',`Перевозчик "${user.name}" откликнулся на "${title}" за $${price}.`,[
-      {label:'✅ Принять',cls:'n-btn-accept',fn:`acceptOrder(${id})`},
-      {label:'❌ Отклонить',cls:'n-btn-reject',fn:`rejectOrder(${id})`}
-    ]);
-  },5000);
+  const list=document.getElementById('ordersList');
+  const empty=document.getElementById('ordersEmpty');
+  if(!list.innerHTML.includes('Нет активных')){
+    empty.style.display='none';
+    list.style.display='block';
+    const item=document.createElement('div');
+    item.style='padding:14px 16px;background:#fff;border-bottom:1px solid #f2f2f2;display:flex;justify-content:space-between;align-items:center';
+    const title=document.getElementById('mTitle').textContent;
+    item.innerHTML=`<div><div style="font-weight:700">${title}</div><div style="font-size:12px;color:#888;margin-top:2px">Отклик отправлен · ${new Date().toLocaleTimeString('ru')}</div></div><span class="badge" style="background:#fff3e0;color:#f39c12;padding:4px 10px;border-radius:12px;font-size:12px">В обработке</span>`;
+    list.prepend(item);
+  }
 }
 function showPhone(){
   alert('📞 Контакт доступен после регистрации\n\nДля связи с перевозчиком войдите в аккаунт');
@@ -1033,14 +875,8 @@ function showUserState(){
   document.getElementById('userAvatar').style.display='flex';
   document.getElementById('userAvatar').textContent=user.name.slice(0,2).toUpperCase();
   document.getElementById('profileName').textContent=user.name;
-  // Показываем колокольчик
-  const nb=document.getElementById('notifBtn');
-  if(nb) nb.style.display='';
+  // показываем заказы
   document.getElementById('ordersEmpty').innerHTML='<div class="icon">📋</div><div style="font-size:18px;font-weight:700;color:#555;margin-bottom:8px">Нет активных заказов</div><div style="font-size:14px">Откликайтесь на грузы — они появятся здесь</div>';
-  // Web Push permission
-  if(typeof Notification!=='undefined'&&Notification.permission==='default'){
-    setTimeout(()=>Notification.requestPermission(),2000);
-  }
 }
 function doLogout(){
   user=null;
@@ -1160,6 +996,5 @@ function closeOverlay(id,e){ if(e.target===document.getElementById(id)) closeMod
 // ── INIT ──────────────────────────────────────────────
 renderLoads(LOCAL);
 </script>
-<script src="https://api-maps.yandex.ru/2.1/?apikey=aef19e33-8ea1-4039-8353-2f0df688664a&lang=ru_RU" type="text/javascript" async></script>
 </body>
 </html>
