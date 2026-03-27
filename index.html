@@ -258,6 +258,20 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <input class="city-input" id="fTo" placeholder="🏁 Куда" autocomplete="off" oninput="filterCity('to',this.value)" onfocus="openDrop('to')" onblur="setTimeout(()=>closeDrop('to'),200)">
     <div class="city-dropdown" id="dropTo"></div>
   </div>
+  <select class="fsel" id="fCountry" onchange="filterByCountry(this.value)" style="display:none">
+    <option value="">🌍 Страна</option>
+    <option value="GE">🇬🇪 Грузия</option>
+    <option value="TR">🇹🇷 Турция</option>
+    <option value="AM">🇦🇲 Армения</option>
+    <option value="AZ">🇦🇿 Азербайджан</option>
+    <option value="RU">🇷🇺 Россия</option>
+    <option value="UA">🇺🇦 Украина</option>
+    <option value="CN">🇨🇳 Китай</option>
+    <option value="DE">🇩🇪 Германия</option>
+    <option value="PL">🇵🇱 Польша</option>
+    <option value="IT">🇮🇹 Италия</option>
+    <option value="BG">🇧🇬 Болгария</option>
+  </select>
   <select class="fsel"><option>📅 Дата</option><option>Сегодня</option><option>Завтра</option><option>На неделе</option></select>
   <select class="fsel" id="fType"><option value="">🚛 Кузов</option><option>Тент</option><option>Рефрижератор</option><option>Рефтент</option><option>Мегатент</option><option>Бортовой</option><option>Термос</option><option>Фургон (до 3.5т)</option><option>Контейнер</option><option>Автовоз</option><option>Эвакуатор</option><option>Цистерна</option><option>Зерновоз</option><option>Самосвал</option></select>
   <button class="fbtn" onclick="filterLoads()">Найти</button>
@@ -388,6 +402,38 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <div class="modal-title">Разместить груз</div>
     <div class="modal-sub">Заполните данные — перевозчики увидят ваш груз сразу</div>
     <div class="success-msg" id="postSuccess">✅ Груз размещён! Перевозчики уже видят ваше объявление.</div>
+    <div class="form-group" id="countryFromWrap" style="display:none">
+      <label>🌍 Страна отправки</label>
+      <select class="form-select" id="pFromCountry" onchange="updateFormForIntl()">
+        <option value="GE">🇬🇪 Грузия</option>
+        <option value="TR">🇹🇷 Турция</option>
+        <option value="AM">🇦🇲 Армения</option>
+        <option value="AZ">🇦🇿 Азербайджан</option>
+        <option value="RU">🇷🇺 Россия</option>
+        <option value="UA">🇺🇦 Украина</option>
+        <option value="CN">🇨🇳 Китай</option>
+        <option value="DE">🇩🇪 Германия</option>
+        <option value="PL">🇵🇱 Польша</option>
+        <option value="IT">🇮🇹 Италия</option>
+        <option value="BG">🇧🇬 Болгария</option>
+      </select>
+    </div>
+    <div class="form-group" id="countryToWrap" style="display:none">
+      <label>🌍 Страна доставки</label>
+      <select class="form-select" id="pToCountry">
+        <option value="GE">🇬🇪 Грузия</option>
+        <option value="TR">🇹🇷 Турция</option>
+        <option value="AM">🇦🇲 Армения</option>
+        <option value="AZ">🇦🇿 Азербайджан</option>
+        <option value="RU">🇷🇺 Россия</option>
+        <option value="UA">🇺🇦 Украина</option>
+        <option value="CN">🇨🇳 Китай</option>
+        <option value="DE">🇩🇪 Германия</option>
+        <option value="PL">🇵🇱 Польша</option>
+        <option value="IT">🇮🇹 Италия</option>
+        <option value="BG">🇧🇬 Болгария</option>
+      </select>
+    </div>
     <div class="form-group">
       <label>📍 Точный адрес отправки</label>
       <div class="addr-wrap">
@@ -1032,6 +1078,41 @@ function setLang(l,btn){
 // ── MODALS ────────────────────────────────────────────
 function closeModal(id){ document.getElementById(id).classList.remove('on'); }
 function closeOverlay(id,e){ if(e.target===document.getElementById(id)) closeModal(id); }
+
+// ── COUNTRY FILTER ────────────────────────────────────
+const COUNTRY_FLAGS={'GE':'🇬🇪','TR':'🇹🇷','AM':'🇦🇲','AZ':'🇦🇿','RU':'🇷🇺','UA':'🇺🇦','CN':'🇨🇳','DE':'🇩🇪','PL':'🇵🇱','IT':'🇮🇹','BG':'🇧🇬'};
+const COUNTRY_NAMES={'GE':'Грузия','TR':'Турция','AM':'Армения','AZ':'Азербайджан','RU':'Россия','UA':'Украина','CN':'Китай','DE':'Германия','PL':'Польша','IT':'Италия','BG':'Болгария'};
+
+// Показываем/скрываем фильтр стран при переключении Local/Intl
+const _origSetScope=setScope;
+function setScope(s,el){
+  _origSetScope(s,el);
+  const cf=document.getElementById('fCountry');
+  if(cf) cf.style.display=s==='intl'?'':'none';
+  // В форме показываем поля стран если выбрано intl
+  updateFormForIntl();
+}
+
+function filterByCountry(code){
+  let data=[...INTL];
+  if(code){
+    data=data.filter(d=>{
+      // Ищем флаг страны в поле to
+      const flag=COUNTRY_FLAGS[code];
+      return d.to.includes(flag)||d.from.includes(flag)||d.to.toUpperCase().includes(code);
+    });
+  }
+  renderLoads(data);
+  document.getElementById('fcount').textContent=data.length+' грузов';
+}
+
+function updateFormForIntl(){
+  const isIntl=scope==='intl';
+  const wFrom=document.getElementById('countryFromWrap');
+  const wTo=document.getElementById('countryToWrap');
+  if(wFrom) wFrom.style.display=isIntl?'block':'none';
+  if(wTo) wTo.style.display=isIntl?'block':'none';
+}
 
 // ── NOTIFICATIONS ─────────────────────────────────────
 let _notifs=[], _orders=[];
