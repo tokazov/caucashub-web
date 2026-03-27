@@ -127,7 +127,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 /* MAP */
 .map-wrap { display:none; background:#fff; border-bottom:1px solid #eee; }
 .map-wrap.open { display:block; }
-#routeMap { height:260px; }
+#routeMap { height:300px; }
 .map-info { padding:10px 16px; display:flex; align-items:center; justify-content:space-between; }
 .map-route-label { font-size:14px; font-weight:700; }
 .map-dist { font-size:12px; color:#888; background:#f0f2f5; padding:4px 10px; border-radius:6px; }
@@ -542,7 +542,7 @@ function showRouteMap(){
   const f=selectedFrom, t=selectedTo;
   const dist=Math.round(Math.sqrt(Math.pow((f.lat-t.lat)*111,2)+Math.pow((f.lng-t.lng)*111*Math.cos(f.lat*Math.PI/180),2)));
   document.getElementById('mapRouteLabel').textContent=`${f.name} → ${t.name}`;
-  document.getElementById('mapDist').textContent=`~${dist} км`;
+  document.getElementById('mapDist').textContent=`~${dist} км`; // будет обновлено после OSRM
 
   if(!map){
     map=L.map('routeMap',{zoomControl:true,scrollWheelZoom:false});
@@ -560,10 +560,36 @@ function showRouteMap(){
   const mTo=L.marker([t.lat,t.lng],{icon:iconTo}).bindPopup(`<b>${t.name}</b><br>${t.region}`).addTo(map);
   markers=[mFrom,mTo];
 
-  routeLine=L.polyline([[f.lat,f.lng],[t.lat,t.lng]],{color:'#f7b731',weight:3,dashArray:'8 6',opacity:.9}).addTo(map);
+  // Запрашиваем реальный маршрут по дорогам через OSRM
+  document.getElementById('mapDist').textContent='⏳ Строим маршрут...';
+  fetch(`https://router.project-osrm.org/route/v1/driving/${f.lng},${f.lat};${t.lng},${t.lat}?overview=full&geometries=geojson`)
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.routes&&data.routes[0]){
+        const route=data.routes[0];
+        const realDist=Math.round(route.distance/1000);
+        const realTime=Math.round(route.duration/3600*10)/10;
+        document.getElementById('mapDist').textContent=`${realDist} км · ~${realTime} ч`;
+        const coords=route.geometry.coordinates.map(c=>[c[1],c[0]]);
+        routeLine=L.polyline(coords,{color:'#f7b731',weight:5,opacity:.9}).addTo(map);
+        const bounds=L.latLngBounds(coords);
+        map.fitBounds(bounds,{padding:[40,40]});
+      } else {
+        // fallback — прямая линия
+        routeLine=L.polyline([[f.lat,f.lng],[t.lat,t.lng]],{color:'#f7b731',weight:3,dashArray:'8 6',opacity:.9}).addTo(map);
+        const bounds=L.latLngBounds([[f.lat,f.lng],[t.lat,t.lng]]);
+        map.fitBounds(bounds,{padding:[40,40]});
+        document.getElementById('mapDist').textContent=`~${dist} км`;
+      }
+    })
+    .catch(()=>{
+      // fallback без интернета
+      routeLine=L.polyline([[f.lat,f.lng],[t.lat,t.lng]],{color:'#f7b731',weight:3,dashArray:'8 6',opacity:.9}).addTo(map);
+      const bounds=L.latLngBounds([[f.lat,f.lng],[t.lat,t.lng]]);
+      map.fitBounds(bounds,{padding:[40,40]});
+      document.getElementById('mapDist').textContent=`~${dist} км`;
+    });
 
-  const bounds=L.latLngBounds([[f.lat,f.lng],[t.lat,t.lng]]);
-  map.fitBounds(bounds,{padding:[40,40]});
   setTimeout(()=>map.invalidateSize(),100);
 }
 function closeMap(){
