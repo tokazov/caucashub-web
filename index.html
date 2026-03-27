@@ -1344,11 +1344,11 @@ function _rate(id){const o=_orders.find(x=>x.id===id);if(!o)return;const r=promp
 // showSection расширен через оригинал выше
 
 // ── INIT ──────────────────────────────────────────────
-// Восстанавливаем сессию
-const _saved=localStorage.getItem('ch_user');
-if(_saved){try{user=JSON.parse(_saved);showUserState();}catch(e){_lsDel('ch_user');
-  const od2=document.getElementById('onlineDot');
-  if(od2)od2.style.display='none';}}
+// Восстанавливаем сессию безопасно
+try{
+  const _saved=_lsGet('ch_user');
+  if(_saved){user=JSON.parse(_saved);showUserState();}
+}catch(e){_lsDel('ch_user');}
 // Устанавливаем min дату для календаря
 const _dateInput=document.getElementById('fDate');
 if(_dateInput){
