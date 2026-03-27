@@ -995,7 +995,7 @@ function doLogin(){
   if(!email||!pass){alert('Заполните email и пароль');return;}
   setTimeout(()=>{
     user={name:email.split('@')[0],email};
-    localStorage.setItem('ch_user',JSON.stringify(user));
+    _lsSet('ch_user',JSON.stringify(user));
     document.getElementById('loginSuccess').style.display='block';
     setTimeout(()=>{
       closeModal('authOverlay');
@@ -1010,7 +1010,7 @@ function doRegister(){
   if(!name||!email||!pass){alert('Заполните все обязательные поля');return;}
   setTimeout(()=>{
     user={name,email};
-    localStorage.setItem('ch_user',JSON.stringify(user));
+    _lsSet('ch_user',JSON.stringify(user));
     document.getElementById('regSuccess').style.display='block';
     setTimeout(()=>{
       closeModal('authOverlay');
@@ -1029,7 +1029,7 @@ function showUserState(){
 }
 function doLogout(){
   user=null;
-  localStorage.removeItem('ch_user');
+  _lsDel('ch_user');
   const od2=document.getElementById('onlineDot');
   if(od2)od2.style.display='none';
   document.getElementById('btnLogin').style.display='';
@@ -1269,7 +1269,7 @@ function showUserState(){
 // ── INIT ──────────────────────────────────────────────
 // Восстанавливаем сессию
 const _saved=localStorage.getItem('ch_user');
-if(_saved){try{user=JSON.parse(_saved);showUserState();}catch(e){localStorage.removeItem('ch_user');
+if(_saved){try{user=JSON.parse(_saved);showUserState();}catch(e){_lsDel('ch_user');
   const od2=document.getElementById('onlineDot');
   if(od2)od2.style.display='none';}}
 renderLoads(LOCAL);
