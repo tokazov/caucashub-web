@@ -885,6 +885,9 @@ let scope='local', lang='ru', user=null, cargoData=[...LOCAL];
 
 // ── RENDER LOADS ─────────────────────────────────────
 function renderLoads(data){
+  // Фильтруем занятые грузы
+  data=data.filter(d=>d.status!=='taken');
+  document.getElementById('fcount').textContent=data.length+' грузов';
   const list=document.getElementById('cargoList');
   list.innerHTML='';
   data.forEach(d=>{
@@ -939,7 +942,9 @@ function renderTrucks(){
 
 // ── OPEN CARGO MODAL ─────────────────────────────────
 window.allLoads=[...LOCAL,...INTL];
+let currentCargoId=null;
 function openCargo(d){
+  currentCargoId=d.id;
   document.getElementById('mTitle').textContent=`${d.from} → ${d.to}`;
   document.getElementById('mSub').textContent=`#${d.scope.toUpperCase()}-${String(d.id).padStart(5,'0')} · ${d.co} · Добавлен сегодня`;
   document.getElementById('mAva').textContent=d.co.slice(0,2).toUpperCase();
