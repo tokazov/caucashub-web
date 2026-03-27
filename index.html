@@ -3,192 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CaucasHub — Caucasus Freight Exchange</title>
+<title>CaucasHub.ge — Биржа грузов Кавказа</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f2f5; color: #1a1a2e; }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f0f2f5; color:#1a1a2e; }
 
-  .header {
-    background: #1a1a2e;
-    padding: 0 16px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 54px;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  }
-  .logo { color: #fff; font-size: 21px; font-weight: 900; letter-spacing: -0.5px; }
-  .logo span { color: #f7b731; }
-  .logo-sub { font-size: 10px; color: #888; letter-spacing: 1px; font-weight: 400; margin-left: 2px; vertical-align: middle; }
-  .header-right { display: flex; gap: 8px; align-items: center; }
-  .btn-login { background: transparent; color: #ccc; border: 1px solid #444; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; }
-  .btn-register { background: #f7b731; color: #1a1a2e; border: none; padding: 6px 14px; border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer; }
-  .lang-switch { display: flex; gap: 2px; }
-  .lang-btn { background: transparent; border: 1px solid #333; color: #888; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; transition: all 0.15s; }
-  .lang-btn.active { background: #f7b731; color: #1a1a2e; border-color: #f7b731; font-weight: 700; }
+/* HEADER */
+.header { background:#1a1a2e; padding:0 16px; display:flex; align-items:center; justify-content:space-between; height:54px; position:sticky; top:0; z-index:200; box-shadow:0 2px 8px rgba(0,0,0,.3); }
+.logo { color:#fff; font-size:21px; font-weight:900; }
+.logo span { color:#f7b731; }
+.logo sub { font-size:10px; color:#888; }
+.hright { display:flex; gap:8px; align-items:center; }
+.lang-btn { background:transparent; border:1px solid #333; color:#888; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer; }
+.lang-btn.active { background:#f7b731; color:#1a1a2e; border-color:#f7b731; font-weight:700; }
+.btn-login { background:transparent; color:#ccc; border:1px solid #444; padding:6px 12px; border-radius:6px; font-size:13px; cursor:pointer; }
+.btn-login:hover { border-color:#f7b731; color:#f7b731; }
+.btn-reg { background:#f7b731; color:#1a1a2e; border:none; padding:6px 14px; border-radius:6px; font-size:13px; font-weight:700; cursor:pointer; }
 
-  /* SCOPE TABS */
-  .scope-bar {
-    background: #16213e;
-    display: flex;
-    padding: 0 16px;
-    gap: 0;
-    border-bottom: 1px solid #0d1526;
-  }
-  .scope-tab {
-    padding: 10px 20px;
-    font-size: 13px;
-    color: #888;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-    font-weight: 500;
-  }
-  .scope-tab.active { color: #f7b731; border-bottom-color: #f7b731; }
+/* SCOPE */
+.scope-bar { background:#16213e; display:flex; padding:0 16px; border-bottom:1px solid #0d1526; }
+.scope-tab { padding:10px 20px; font-size:13px; color:#888; cursor:pointer; border-bottom:2px solid transparent; font-weight:500; }
+.scope-tab.active { color:#f7b731; border-bottom-color:#f7b731; }
 
-  /* NAV TABS */
-  .nav-tabs {
-    background: #1a1a2e;
-    display: flex;
-    padding: 0 16px;
-    border-bottom: 1px solid #111;
-  }
-  .nav-tab { padding: 9px 14px; color: #666; font-size: 12px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
-  .nav-tab.active { color: #f7b731; border-bottom-color: #f7b731; font-weight: 600; }
+/* NAV */
+.nav-tabs { background:#1a1a2e; display:flex; padding:0 16px; border-bottom:1px solid #111; }
+.nav-tab { padding:9px 14px; color:#555; font-size:12px; cursor:pointer; border-bottom:2px solid transparent; background:none; border-top:none; border-left:none; border-right:none; }
+.nav-tab.active { color:#f7b731; border-bottom-color:#f7b731; font-weight:600; }
 
-  /* STATS */
-  .stats-bar { background: #0d1526; padding: 7px 16px; display: flex; gap: 20px; font-size: 11px; color: #666; }
-  .stat { display: flex; align-items: center; gap: 5px; }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.3} }
-  .stat strong { color: #aaa; }
+/* STATS */
+.stats-bar { background:#0d1526; padding:7px 16px; display:flex; gap:20px; font-size:11px; color:#666; }
+.dot { width:6px; height:6px; border-radius:50%; background:#2ecc71; display:inline-block; margin-right:4px; animation:pulse 2s infinite; }
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
 
-  /* FILTERS */
-  .filters {
-    background: #fff;
-    padding: 10px 16px;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-    border-bottom: 1px solid #eee;
-    position: sticky; top: 54px; z-index: 98;
-    box-shadow: 0 2px 4px rgba(0,0,0,.06);
-  }
-  .fsel {
-    border: 1.5px solid #e0e0e0; border-radius: 8px;
-    padding: 7px 10px; font-size: 13px; color: #333;
-    background: #fff; cursor: pointer; outline: none;
-  }
-  .fsel:focus { border-color: #f7b731; }
-  .fbtn { background: #1a1a2e; color: #fff; border: none; padding: 7px 18px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
-  .fcount { background: #f7b731; color: #1a1a2e; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-left: auto; }
+/* FILTERS */
+.filters { background:#fff; padding:10px 16px; display:flex; gap:8px; flex-wrap:wrap; align-items:center; border-bottom:1px solid #eee; position:sticky; top:54px; z-index:98; box-shadow:0 2px 4px rgba(0,0,0,.06); }
+.fsel { border:1.5px solid #e0e0e0; border-radius:8px; padding:7px 10px; font-size:13px; color:#333; background:#fff; cursor:pointer; outline:none; }
+.fsel:focus { border-color:#f7b731; }
+.fbtn { background:#1a1a2e; color:#fff; border:none; padding:7px 18px; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; }
+.fbtn:hover { background:#2a2a4e; }
+.fcount { background:#f7b731; color:#1a1a2e; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700; margin-left:auto; }
+.post-btn { background:#2ecc71; color:#fff; border:none; padding:7px 16px; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer; }
+.post-btn:hover { background:#27ae60; }
 
-  /* TABLE HEADER */
-  .thead {
-    display: grid;
-    grid-template-columns: 2.2fr 1.8fr 1fr 1.2fr 1fr 1fr 85px;
-    padding: 8px 16px;
-    background: #e8eaf0;
-    font-size: 10px; color: #777; font-weight: 700;
-    text-transform: uppercase; letter-spacing: .6px;
-    border-bottom: 1px solid #d0d4df;
-  }
+/* TABLE */
+.thead { display:grid; grid-template-columns:2.2fr 1.8fr 1fr 1.2fr 1fr 1fr 90px; padding:8px 16px; background:#e8eaf0; font-size:10px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:.6px; border-bottom:1px solid #d0d4df; }
+.row { display:grid; grid-template-columns:2.2fr 1.8fr 1fr 1.2fr 1fr 1fr 90px; padding:11px 16px; background:#fff; border-bottom:1px solid #f2f2f2; cursor:pointer; align-items:center; border-left:3px solid transparent; transition:background .12s; }
+.row:hover { background:#fffbf0; }
+.row.urgent { border-left-color:#e74c3c; }
+.row.fresh { border-left-color:#2ecc71; }
+.row.intl { border-left-color:#3498db; }
+.route { font-weight:700; font-size:14px; }
+.arrow { color:#f7b731; }
+.sub { font-size:11px; color:#999; margin-top:2px; }
+.tag { display:inline-block; font-size:11px; padding:2px 8px; border-radius:4px; font-weight:600; }
+.price { font-size:15px; font-weight:900; }
+.badge { font-size:10px; padding:2px 6px; border-radius:10px; font-weight:700; display:inline-block; margin-top:2px; }
+.badge-new { background:#2ecc71; color:#fff; }
+.badge-urgent { background:#e74c3c; color:#fff; }
+.badge-intl { background:#3498db; color:#fff; }
+.btn-resp { background:#f7b731; color:#1a1a2e; border:none; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; }
+.btn-resp:hover { background:#e6a820; }
+.load-more { text-align:center; padding:16px; background:#fff; }
+.load-more button { background:#f0f2f5; border:none; padding:10px 24px; border-radius:8px; font-size:13px; color:#555; cursor:pointer; }
 
-  /* ROW */
-  .row {
-    display: grid;
-    grid-template-columns: 2.2fr 1.8fr 1fr 1.2fr 1fr 1fr 85px;
-    padding: 11px 16px;
-    background: #fff;
-    border-bottom: 1px solid #f2f2f2;
-    cursor: pointer;
-    align-items: center;
-    transition: background .12s;
-    border-left: 3px solid transparent;
-  }
-  .row:hover { background: #fffbf0; }
-  .row.urgent { border-left-color: #e74c3c; }
-  .row.fresh  { border-left-color: #2ecc71; }
-  .row.intl   { border-left-color: #3498db; }
+/* TRUCKS TAB */
+.truck-row { display:grid; grid-template-columns:2fr 1.5fr 1fr 1.2fr 1fr 90px; padding:11px 16px; background:#fff; border-bottom:1px solid #f2f2f2; cursor:pointer; align-items:center; border-left:3px solid transparent; transition:background .12s; }
+.truck-row:hover { background:#fffbf0; }
 
-  .route { font-weight: 700; font-size: 14px; }
-  .arrow { color: #f7b731; margin: 0 3px; }
-  .sub   { font-size: 11px; color: #999; margin-top: 2px; }
-  .stars { color: #f7b731; font-size: 10px; }
+/* RATES TAB */
+.rates-table { width:100%; border-collapse:collapse; background:#fff; }
+.rates-table th { background:#e8eaf0; padding:10px 16px; text-align:left; font-size:11px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
+.rates-table td { padding:12px 16px; border-bottom:1px solid #f2f2f2; font-size:14px; }
+.rate-up { color:#2ecc71; font-weight:700; }
+.rate-down { color:#e74c3c; font-weight:700; }
 
-  .tag {
-    display: inline-block; font-size: 11px;
-    padding: 2px 8px; border-radius: 4px;
-    font-weight: 600; background: #f0f2f5; color: #555;
-  }
-  .tag-ref    { background: #e3f2fd; color: #1565c0; }
-  .tag-tent   { background: #f3e5f5; color: #6a1b9a; }
-  .tag-bort   { background: #e8f5e9; color: #2e7d32; }
-  .tag-termos { background: #fff3e0; color: #bf360c; }
-  .tag-gazel  { background: #fce4ec; color: #880e4f; }
+/* ORDERS TAB */
+.orders-empty { text-align:center; padding:60px 20px; color:#aaa; }
+.orders-empty .icon { font-size:48px; margin-bottom:12px; }
 
-  .price { font-size: 15px; font-weight: 900; }
-  .date-today { color: #2ecc71; font-weight: 700; font-size: 12px; }
-  .date-tom   { color: #f7b731; font-weight: 600; font-size: 12px; }
-  .date-norm  { color: #777; font-size: 12px; }
+/* MODALS */
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:1000; align-items:center; justify-content:center; padding:16px; }
+.overlay.on { display:flex; }
+.modal { background:#fff; width:100%; max-width:480px; border-radius:16px; padding:24px; max-height:90vh; overflow-y:auto; animation:fadeIn .2s ease; position:relative; }
+.modal-bottom { background:#fff; width:100%; max-width:560px; border-radius:16px 16px 0 0; padding:20px; max-height:90vh; overflow-y:auto; align-self:flex-end; animation:slideUp .25s ease; position:relative; }
+@keyframes fadeIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-title { font-size:20px; font-weight:900; margin-bottom:4px; }
+.modal-sub { font-size:13px; color:#999; margin-bottom:20px; }
+.form-group { margin-bottom:14px; }
+.form-group label { font-size:12px; color:#666; font-weight:600; display:block; margin-bottom:5px; text-transform:uppercase; letter-spacing:.4px; }
+.form-input { width:100%; border:1.5px solid #e0e0e0; border-radius:8px; padding:10px 12px; font-size:14px; outline:none; transition:border-color .2s; }
+.form-input:focus { border-color:#f7b731; }
+.form-select { width:100%; border:1.5px solid #e0e0e0; border-radius:8px; padding:10px 12px; font-size:14px; outline:none; background:#fff; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.btn-primary { width:100%; background:#f7b731; color:#1a1a2e; border:none; padding:13px; border-radius:10px; font-size:15px; font-weight:800; cursor:pointer; margin-top:8px; }
+.btn-primary:hover { background:#e6a820; }
+.btn-secondary { width:100%; background:#f0f2f5; color:#333; border:none; padding:11px; border-radius:10px; font-size:14px; cursor:pointer; margin-top:8px; }
+.close-btn { position:absolute; top:16px; right:16px; background:#f0f2f5; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; }
+.handle { width:40px; height:4px; background:#ddd; border-radius:2px; margin:0 auto 14px; }
+.divider { height:1px; background:#f0f0f0; margin:14px 0; }
+.tabs-auth { display:flex; border-bottom:1px solid #f0f0f0; margin-bottom:20px; }
+.tab-auth { flex:1; padding:10px; text-align:center; font-size:14px; color:#999; cursor:pointer; border-bottom:2px solid transparent; background:none; border-top:none; border-left:none; border-right:none; }
+.tab-auth.active { color:#1a1a2e; border-bottom-color:#f7b731; font-weight:700; }
 
-  .badge { font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: 700; display: inline-block; margin-top: 2px; }
-  .badge-new    { background: #2ecc71; color: #fff; }
-  .badge-urgent { background: #e74c3c; color: #fff; }
-  .badge-intl   { background: #3498db; color: #fff; }
+/* USER AVATAR */
+.user-avatar { width:32px; height:32px; background:#f7b731; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#1a1a2e; font-weight:800; font-size:13px; cursor:pointer; }
 
-  .btn-resp { background: #f7b731; color: #1a1a2e; border: none; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; }
+/* SUCCESS */
+.success-msg { background:#e8f5e9; border:1px solid #2ecc71; border-radius:8px; padding:12px 16px; font-size:13px; color:#2e7d32; margin-bottom:14px; display:none; }
 
-  .load-more { text-align: center; padding: 16px; background: #fff; }
-  .load-more button { background: #f0f2f5; border: none; padding: 10px 24px; border-radius: 8px; font-size: 13px; color: #555; cursor: pointer; }
+/* BOTTOM NAV */
+.bnav { display:none; position:fixed; bottom:0; left:0; right:0; background:#1a1a2e; padding:8px 0; z-index:100; }
+.bitem { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; color:#555; font-size:10px; cursor:pointer; padding:3px 0; background:none; border:none; }
+.bitem.active { color:#f7b731; }
+.bicon { font-size:20px; }
 
-  /* MODAL */
-  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 1000; align-items: flex-end; justify-content: center; }
-  .overlay.on { display: flex; }
-  .modal {
-    background: #fff; width: 100%; max-width: 560px;
-    border-radius: 16px 16px 0 0; padding: 20px;
-    max-height: 90vh; overflow-y: auto;
-    animation: up .25s ease;
-    position: relative;
-  }
-  @keyframes up { from{transform:translateY(100%)} to{transform:translateY(0)} }
-  .handle { width: 40px; height: 4px; background: #ddd; border-radius: 2px; margin: 0 auto 14px; }
-  .m-title { font-size: 19px; font-weight: 900; margin-bottom: 2px; }
-  .m-sub   { font-size: 12px; color: #999; margin-bottom: 14px; }
-  .m-company { display: flex; align-items: center; gap: 10px; background: #f8f9fa; border-radius: 10px; padding: 11px; margin-bottom: 14px; }
-  .avatar { width: 42px; height: 42px; background: #1a1a2e; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #f7b731; font-weight: 900; font-size: 14px; flex-shrink: 0; }
-  .m-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-  .mf label { font-size: 10px; color: #aaa; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 2px; }
-  .mf value { font-size: 14px; font-weight: 700; color: #1a1a2e; }
-  .divider { height: 1px; background: #f0f0f0; margin: 12px 0; }
-  .m-price-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-  .m-price { font-size: 28px; font-weight: 900; }
-  .m-actions { display: flex; gap: 10px; }
-  .btn-main { flex: 1; background: #f7b731; color: #1a1a2e; border: none; padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 800; cursor: pointer; }
-  .btn-call { background: #f0f2f5; border: none; padding: 14px; border-radius: 10px; font-size: 18px; cursor: pointer; width: 54px; }
-  .close-btn { position: absolute; top: 16px; right: 16px; background: #f0f2f5; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; }
+/* CONTENT SECTIONS */
+.section { display:none; }
+.section.active { display:block; }
 
-  /* BOTTOM NAV */
-  .bnav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: #1a1a2e; padding: 8px 0; z-index: 100; }
-  .bitem { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; color: #555; font-size: 10px; cursor: pointer; padding: 3px 0; }
-  .bitem.active { color: #f7b731; }
-  .bicon { font-size: 20px; }
-  .fab { display: none; position: fixed; bottom: 68px; right: 16px; background: #f7b731; color: #1a1a2e; border: none; width: 52px; height: 52px; border-radius: 50%; font-size: 26px; cursor: pointer; box-shadow: 0 4px 16px rgba(247,183,49,.5); z-index: 99; align-items: center; justify-content: center; }
-
-  @media(max-width:640px) {
-    .thead { display: none; }
-    .row { display: block; padding: 12px 16px; }
-    .row > *:not(:first-child) { display: none; }
-    .row .mob-sub { display: flex !important; gap: 8px; margin-top: 4px; flex-wrap: wrap; }
-    .bnav { display: flex; }
-    .fab { display: flex; }
-    .cargo-list { padding-bottom: 64px; }
-    .fsel { font-size: 12px; padding: 6px 8px; }
-    .lang-btn { padding: 3px 6px; font-size: 10px; }
-  }
+@media(max-width:640px){
+  .thead { display:none; }
+  .row,.truck-row { display:block; padding:12px 16px; }
+  .bnav { display:flex; }
+  .cargo-list { padding-bottom:64px; }
+  .fsel { font-size:12px; padding:6px 8px; }
+  .post-btn span { display:none; }
+}
 </style>
 </head>
 <body>
@@ -196,21 +137,21 @@
 <!-- HEADER -->
 <div class="header">
   <div>
-    <span class="logo">Caucas<span>Hub</span></span>
-    <span class="logo-sub">.ge</span>
+    <span class="logo">Caucas<span>Hub</span><sub>.ge</sub></span>
   </div>
-  <div class="header-right">
-    <div class="lang-switch">
+  <div class="hright">
+    <div style="display:flex;gap:2px">
       <button class="lang-btn active" onclick="setLang('ru',this)">RU</button>
       <button class="lang-btn" onclick="setLang('ge',this)">GE</button>
       <button class="lang-btn" onclick="setLang('en',this)">EN</button>
     </div>
-    <button class="btn-login" id="btnLogin">Войти</button>
-    <button class="btn-register" id="btnReg">Регистрация</button>
+    <button class="btn-login" id="btnLogin" onclick="openAuth('login')">Войти</button>
+    <button class="btn-reg" id="btnReg" onclick="openAuth('register')">Регистрация</button>
+    <div class="user-avatar" id="userAvatar" style="display:none" onclick="openProfile()">ТК</div>
   </div>
 </div>
 
-<!-- SCOPE TABS -->
+<!-- SCOPE -->
 <div class="scope-bar">
   <div class="scope-tab active" onclick="setScope('local',this)" id="sLocal">🇬🇪 Локальные</div>
   <div class="scope-tab" onclick="setScope('intl',this)" id="sIntl">🌍 Международные</div>
@@ -218,302 +159,549 @@
 
 <!-- NAV TABS -->
 <div class="nav-tabs">
-  <div class="nav-tab active">📦 Грузы</div>
-  <div class="nav-tab">🚛 Транспорт</div>
-  <div class="nav-tab">📊 Ставки</div>
-  <div class="nav-tab">📋 Мои заказы</div>
+  <button class="nav-tab active" onclick="showSection('loads',this)">📦 Грузы</button>
+  <button class="nav-tab" onclick="showSection('trucks',this)">🚛 Транспорт</button>
+  <button class="nav-tab" onclick="showSection('rates',this)">📊 Ставки</button>
+  <button class="nav-tab" onclick="showSection('orders',this)">📋 Мои заказы</button>
 </div>
 
 <!-- STATS -->
-<div class="stats-bar">
-  <div class="stat"><div class="dot"></div><strong id="statCargo">187</strong>&nbsp;грузов</div>
-  <div class="stat"><strong id="statTrucks">634</strong>&nbsp;машин онлайн</div>
-  <div class="stat"><strong id="statComp">2,841</strong>&nbsp;компаний</div>
+<div class="stats-bar" id="statsBar">
+  <span><span class="dot"></span><strong id="statLoads">187</strong> грузов</span>
+  <span><strong id="statTrucks">634</strong> машин онлайн</span>
+  <span><strong>2,841</strong> компаний</span>
 </div>
 
 <!-- FILTERS -->
 <div class="filters">
-  <select class="fsel" id="fFrom">
-    <option value="">📍 Откуда</option>
-    <option>Тбилиси</option><option>Батуми</option>
-    <option>Поти</option><option>Кутаиси</option><option>Рустави</option>
-  </select>
-  <select class="fsel" id="fTo">
-    <option value="">🏁 Куда</option>
-    <option>Тбилиси</option><option>Батуми</option><option>Поти</option>
-    <option>Ереван</option><option>Стамбул</option><option>Баку</option><option>Москва</option>
-  </select>
-  <select class="fsel">
-    <option>📅 Дата</option>
-    <option>Сегодня</option><option>Завтра</option><option>На неделе</option>
-  </select>
-  <select class="fsel">
-    <option>🚛 Кузов</option>
-    <option>Тент</option><option>Рефрижератор</option>
-    <option>Бортовой</option><option>Термос</option><option>Газель</option>
-  </select>
-  <button class="fbtn" id="btnSearch">Найти</button>
+  <select class="fsel" id="fFrom"><option value="">📍 Откуда</option><option>Тбилиси</option><option>Батуми</option><option>Поти</option><option>Кутаиси</option><option>Рустави</option></select>
+  <select class="fsel" id="fTo"><option value="">🏁 Куда</option><option>Тбилиси</option><option>Батуми</option><option>Поти</option><option>Ереван</option><option>Стамбул</option><option>Баку</option><option>Москва</option></select>
+  <select class="fsel"><option>📅 Дата</option><option>Сегодня</option><option>Завтра</option><option>На неделе</option></select>
+  <select class="fsel" id="fType"><option>🚛 Кузов</option><option>Тент</option><option>Рефрижератор</option><option>Бортовой</option><option>Термос</option><option>Газель</option></select>
+  <button class="fbtn" onclick="filterLoads()">Найти</button>
+  <button class="post-btn" onclick="openPostLoad()">+ <span>Разместить груз</span></button>
   <div class="fcount" id="fcount">187 грузов</div>
 </div>
 
-<!-- TABLE HEADER -->
-<div class="thead">
-  <div>ОТКУДА → КУДА</div><div>КОМПАНИЯ / РЕЙТИНГ</div>
-  <div>ВЕС</div><div>КУЗОВ</div><div>ЦЕНА</div><div>ДАТА</div><div></div>
+<!-- ═══ SECTION: LOADS ═══ -->
+<div class="section active" id="sec-loads">
+  <div class="thead">
+    <div>ОТКУДА → КУДА</div><div>КОМПАНИЯ</div><div>ВЕС</div><div>КУЗОВ</div><div>ЦЕНА</div><div>ДАТА</div><div></div>
+  </div>
+  <div class="cargo-list" id="cargoList"></div>
 </div>
 
-<!-- CARGO LIST -->
-<div class="cargo-list" id="list"></div>
+<!-- ═══ SECTION: TRUCKS ═══ -->
+<div class="section" id="sec-trucks">
+  <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1.2fr 1fr 90px;padding:8px 16px;background:#e8eaf0;font-size:10px;color:#777;font-weight:700;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #d0d4df;">
+    <div>МАШИНА / МАРШРУТ</div><div>КОМПАНИЯ</div><div>ТОННАЖ</div><div>КУЗОВ</div><div>ДАТА</div><div></div>
+  </div>
+  <div id="truckList"></div>
+</div>
 
-<!-- MODAL -->
-<div class="overlay" id="overlay" onclick="closeOverlay(event)">
+<!-- ═══ SECTION: RATES ═══ -->
+<div class="section" id="sec-rates">
+  <div style="padding:16px;background:#fff;border-bottom:1px solid #eee">
+    <div style="font-size:13px;color:#888;margin-bottom:4px">Средние ставки на маршрутах · обновлено сегодня</div>
+  </div>
+  <table class="rates-table">
+    <thead><tr><th>МАРШРУТ</th><th>ТЕНТ $/км</th><th>РЕФРИЖ $/км</th><th>ТРЕНД</th><th>ОБЪЁМ/НЕД</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Тбилиси → Батуми</strong></td><td>$0.85–1.10</td><td>$1.20–1.50</td><td class="rate-up">↑ +8%</td><td>47 рейсов</td></tr>
+      <tr><td><strong>Поти → Тбилиси</strong></td><td>$0.90–1.15</td><td>$1.30–1.60</td><td class="rate-down">↓ -3%</td><td>38 рейсов</td></tr>
+      <tr><td><strong>Тбилиси → Ереван</strong></td><td>$2.80–3.50</td><td>$3.80–4.50</td><td class="rate-up">↑ +12%</td><td>29 рейсов</td></tr>
+      <tr><td><strong>Тбилиси → Стамбул</strong></td><td>$0.95–1.20</td><td>$1.40–1.80</td><td>→ 0%</td><td>22 рейса</td></tr>
+      <tr><td><strong>Батуми → Стамбул</strong></td><td>$0.90–1.15</td><td>$1.35–1.70</td><td class="rate-up">↑ +5%</td><td>18 рейсов</td></tr>
+      <tr><td><strong>Тбилиси → Баку</strong></td><td>$1.80–2.20</td><td>$2.50–3.00</td><td class="rate-down">↓ -5%</td><td>14 рейсов</td></tr>
+      <tr><td><strong>Кутаиси → Тбилиси</strong></td><td>$0.70–0.90</td><td>$1.00–1.30</td><td>→ 0%</td><td>31 рейс</td></tr>
+      <tr><td><strong>Тбилиси → Москва</strong></td><td>$0.95–1.10</td><td>$1.40–1.70</td><td class="rate-up">↑ +3%</td><td>11 рейсов</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══ SECTION: ORDERS ═══ -->
+<div class="section" id="sec-orders">
+  <div class="orders-empty" id="ordersEmpty">
+    <div class="icon">📋</div>
+    <div style="font-size:18px;font-weight:700;color:#555;margin-bottom:8px">Нет активных заказов</div>
+    <div style="font-size:14px;margin-bottom:20px">Войдите в аккаунт чтобы видеть свои заказы</div>
+    <button class="btn-primary" style="max-width:200px;margin:0 auto" onclick="openAuth('login')">Войти</button>
+  </div>
+  <div id="ordersList" style="display:none"></div>
+</div>
+
+<!-- ═══ MODAL: AUTH ═══ -->
+<div class="overlay" id="authOverlay" onclick="closeOverlay('authOverlay',event)">
   <div class="modal">
-    <div class="handle"></div>
-    <button class="close-btn" onclick="closeModal()">✕</button>
-    <div class="m-title" id="mTitle"></div>
-    <div class="m-sub" id="mSub"></div>
-    <div class="m-company">
-      <div class="avatar" id="mAva"></div>
-      <div>
-        <div style="font-weight:700;font-size:14px" id="mComp"></div>
-        <div style="font-size:12px;color:#888;margin-top:2px" id="mStats"></div>
+    <button class="close-btn" onclick="closeModal('authOverlay')">✕</button>
+    <div style="display:flex;border-bottom:1px solid #f0f0f0;margin-bottom:20px">
+      <button class="tab-auth active" id="tabLogin" onclick="switchAuth('login')">Войти</button>
+      <button class="tab-auth" id="tabRegister" onclick="switchAuth('register')">Регистрация</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="formLogin">
+      <div class="success-msg" id="loginSuccess">✅ Вход выполнен успешно!</div>
+      <div class="form-group">
+        <label>Email</label>
+        <input class="form-input" type="email" id="loginEmail" placeholder="your@email.com">
       </div>
-    </div>
-    <div class="m-grid">
-      <div class="mf"><label id="lFrom">Откуда</label><value id="mFrom"></value></div>
-      <div class="mf"><label id="lTo">Куда</label><value id="mTo"></value></div>
-      <div class="mf"><label id="lDate">Дата загрузки</label><value id="mDate" style="color:#2ecc71"></value></div>
-      <div class="mf"><label id="lWeight">Вес груза</label><value id="mWeight"></value></div>
-      <div class="mf"><label id="lType">Тип кузова</label><value id="mType"></value></div>
-      <div class="mf"><label id="lPay">Оплата</label><value id="mPay"></value></div>
-    </div>
-    <div class="divider"></div>
-    <div style="margin-bottom:12px">
-      <div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px" id="lDesc">Описание</div>
-      <div style="font-size:13px;color:#444;line-height:1.5" id="mDesc"></div>
-    </div>
-    <div class="divider"></div>
-    <div class="m-price-row">
-      <div>
-        <div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px" id="lRate">Ставка</div>
-        <div class="m-price" id="mPrice"></div>
+      <div class="form-group">
+        <label>Пароль</label>
+        <input class="form-input" type="password" id="loginPass" placeholder="••••••••">
       </div>
-      <div style="text-align:right">
-        <div style="font-size:11px;color:#aaa" id="lDist">Расстояние</div>
-        <div style="font-weight:700;font-size:15px" id="mKm"></div>
-        <div style="font-size:11px;color:#bbb" id="mPkm"></div>
-      </div>
+      <button class="btn-primary" onclick="doLogin()">Войти в аккаунт</button>
+      <div style="text-align:center;margin-top:12px;font-size:13px;color:#888">Нет аккаунта? <a href="#" onclick="switchAuth('register')" style="color:#f7b731;font-weight:700">Зарегистрироваться</a></div>
     </div>
-    <div class="m-actions">
-      <button class="btn-main" id="btnRespond">Откликнуться на груз</button>
-      <button class="btn-call" onclick="alert('📞 +995 555 *** ***')">📞</button>
+
+    <!-- REGISTER -->
+    <div id="formRegister" style="display:none">
+      <div class="success-msg" id="regSuccess">✅ Аккаунт создан! Добро пожаловать!</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Имя / Компания</label>
+          <input class="form-input" type="text" id="regName" placeholder="ООО ГрузТранс">
+        </div>
+        <div class="form-group">
+          <label>Телефон</label>
+          <input class="form-input" type="tel" id="regPhone" placeholder="+995 555 ___">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input class="form-input" type="email" id="regEmail" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label>Пароль</label>
+        <input class="form-input" type="password" id="regPass" placeholder="Минимум 8 символов">
+      </div>
+      <div class="form-group">
+        <label>Вы:</label>
+        <select class="form-select" id="regRole">
+          <option value="carrier">🚛 Перевозчик — ищу грузы</option>
+          <option value="shipper">📦 Грузовладелец — ищу машины</option>
+          <option value="both">🔄 И перевозчик и грузовладелец</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="doRegister()">Создать аккаунт</button>
+      <div style="text-align:center;margin-top:12px;font-size:13px;color:#888">Уже есть аккаунт? <a href="#" onclick="switchAuth('login')" style="color:#f7b731;font-weight:700">Войти</a></div>
     </div>
   </div>
 </div>
 
-<!-- FAB -->
-<button class="fab" onclick="alert('➕ Разместить груз')">+</button>
+<!-- ═══ MODAL: POST LOAD ═══ -->
+<div class="overlay" id="postOverlay" onclick="closeOverlay('postOverlay',event)">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('postOverlay')">✕</button>
+    <div class="modal-title">Разместить груз</div>
+    <div class="modal-sub">Заполните данные — перевозчики увидят ваш груз сразу</div>
+    <div class="success-msg" id="postSuccess">✅ Груз размещён! Перевозчики уже видят ваше объявление.</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Откуда</label>
+        <select class="form-select" id="pFrom">
+          <option>Тбилиси</option><option>Батуми</option><option>Поти</option><option>Кутаиси</option><option>Рустави</option><option>Другой</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Куда</label>
+        <select class="form-select" id="pTo">
+          <option>Батуми</option><option>Тбилиси</option><option>Поти</option><option>Ереван</option><option>Стамбул</option><option>Баку</option><option>Москва</option><option>Другой</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Вес (кг)</label>
+        <input class="form-input" type="number" id="pWeight" placeholder="5000">
+      </div>
+      <div class="form-group">
+        <label>Тип кузова</label>
+        <select class="form-select" id="pTruck">
+          <option>Тент</option><option>Рефрижератор</option><option>Бортовой</option><option>Термос</option><option>Газель</option><option>Контейнер</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Дата загрузки</label>
+        <input class="form-input" type="date" id="pDate">
+      </div>
+      <div class="form-group">
+        <label>Ставка ($)</label>
+        <input class="form-input" type="number" id="pPrice" placeholder="350">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Описание груза</label>
+      <input class="form-input" type="text" id="pDesc" placeholder="Стройматериалы, паллеты, документы готовы...">
+    </div>
+    <div class="form-group">
+      <label>Тип оплаты</label>
+      <select class="form-select" id="pPay">
+        <option>Наличные сразу</option><option>Безнал 3 дня</option><option>Безнал 7 дней</option><option>50% предоплата</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="pUrgent"> <strong>Срочный груз</strong>
+      </label>
+    </div>
+    <button class="btn-primary" onclick="doPostLoad()">📦 Разместить груз</button>
+    <button class="btn-secondary" onclick="closeModal('postOverlay')">Отмена</button>
+  </div>
+</div>
+
+<!-- ═══ MODAL: CARGO DETAIL ═══ -->
+<div class="overlay" id="cargoOverlay" onclick="closeOverlay('cargoOverlay',event)" style="align-items:flex-end">
+  <div class="modal-bottom">
+    <div class="handle"></div>
+    <button class="close-btn" onclick="closeModal('cargoOverlay')">✕</button>
+    <div class="modal-title" id="mTitle"></div>
+    <div class="modal-sub" id="mSub"></div>
+    <div style="display:flex;align-items:center;gap:10px;background:#f8f9fa;border-radius:10px;padding:11px;margin-bottom:14px">
+      <div id="mAva" style="width:42px;height:42px;background:#1a1a2e;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#f7b731;font-weight:900;font-size:14px;flex-shrink:0"></div>
+      <div>
+        <div id="mComp" style="font-weight:700;font-size:14px"></div>
+        <div id="mStats" style="font-size:12px;color:#888"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px" id="mGrid"></div>
+    <div style="font-size:13px;color:#444;line-height:1.5;margin-bottom:14px;padding:10px;background:#f8f9fa;border-radius:8px" id="mDesc"></div>
+    <div class="divider"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div>
+        <div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px">Ставка</div>
+        <div id="mPrice" style="font-size:28px;font-weight:900"></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:#aaa">Расстояние</div>
+        <div id="mKm" style="font-size:15px;font-weight:700"></div>
+      </div>
+    </div>
+    <div class="success-msg" id="respondSuccess">✅ Заявка отправлена! Заказчик получит уведомление.</div>
+    <div style="display:flex;gap:10px">
+      <button id="btnRespond" style="flex:1;background:#f7b731;color:#1a1a2e;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer" onclick="doRespond()">Откликнуться на груз</button>
+      <button style="background:#f0f2f5;border:none;padding:14px;border-radius:10px;font-size:18px;cursor:pointer;width:54px" onclick="showPhone()">📞</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: PROFILE ═══ -->
+<div class="overlay" id="profileOverlay" onclick="closeOverlay('profileOverlay',event)">
+  <div class="modal">
+    <button class="close-btn" onclick="closeModal('profileOverlay')">✕</button>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="width:64px;height:64px;background:#f7b731;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#1a1a2e;font-weight:900;font-size:24px;margin:0 auto 10px" id="profileAva">ТК</div>
+      <div style="font-weight:700;font-size:18px" id="profileName">Тимур Токазов</div>
+      <div style="font-size:13px;color:#888" id="profileRole">Перевозчик · ⭐ 4.9 · 47 рейсов</div>
+    </div>
+    <div class="divider"></div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+      <button style="text-align:left;background:#f8f9fa;border:none;padding:12px 16px;border-radius:8px;font-size:14px;cursor:pointer" onclick="showSection('orders',document.querySelectorAll('.nav-tab')[3]);closeModal('profileOverlay')">📋 Мои заказы</button>
+      <button style="text-align:left;background:#f8f9fa;border:none;padding:12px 16px;border-radius:8px;font-size:14px;cursor:pointer" onclick="openPostLoad();closeModal('profileOverlay')">📦 Разместить груз</button>
+      <button style="text-align:left;background:#f8f9fa;border:none;padding:12px 16px;border-radius:8px;font-size:14px;cursor:pointer">⚙️ Настройки аккаунта</button>
+      <button style="text-align:left;background:#f8f9fa;border:none;padding:12px 16px;border-radius:8px;font-size:14px;cursor:pointer">📊 Моя аналитика</button>
+    </div>
+    <button class="btn-secondary" onclick="doLogout()">🚪 Выйти</button>
+  </div>
+</div>
 
 <!-- BOTTOM NAV -->
 <div class="bnav">
-  <div class="bitem active"><div class="bicon">📦</div><div id="bnCargo">Грузы</div></div>
-  <div class="bitem"><div class="bicon">🚛</div><div id="bnTruck">Машины</div></div>
-  <div class="bitem"><div class="bicon">📋</div><div id="bnOrders">Заказы</div></div>
-  <div class="bitem"><div class="bicon">💬</div><div id="bnChat">Чат</div></div>
-  <div class="bitem"><div class="bicon">👤</div><div id="bnProfile">Профиль</div></div>
+  <button class="bitem active" onclick="showSection('loads',null)"><div class="bicon">📦</div><div>Грузы</div></button>
+  <button class="bitem" onclick="showSection('trucks',null)"><div class="bicon">🚛</div><div>Машины</div></button>
+  <button class="bitem" onclick="openPostLoad()"><div class="bicon">➕</div><div>Груз</div></button>
+  <button class="bitem" onclick="showSection('orders',null)"><div class="bicon">📋</div><div>Заказы</div></button>
+  <button class="bitem" onclick="openProfile()"><div class="bicon">👤</div><div>Профиль</div></button>
 </div>
 
 <script>
-// ── TRANSLATIONS ──────────────────────────────────────────────
-const T = {
-  ru: {
-    login:'Войти', reg:'Регистрация',
-    sLocal:'🇬🇪 Локальные', sIntl:'🌍 Международные',
-    statCargo:'грузов', statTrucks:'машин онлайн', statComp:'компаний',
-    fFrom:'📍 Откуда', fTo:'🏁 Куда',
-    fDate:'📅 Дата', fType:'🚛 Кузов', fBtn:'Найти',
-    th:['ОТКУДА → КУДА','КОМПАНИЯ / РЕЙТИНГ','ВЕС','КУЗОВ','ЦЕНА','ДАТА',''],
-    lFrom:'Откуда', lTo:'Куда', lDate:'Дата загрузки', lWeight:'Вес груза',
-    lType:'Тип кузова', lPay:'Оплата', lDesc:'Описание', lRate:'Ставка', lDist:'Расстояние',
-    btnRespond:'Откликнуться на груз',
-    bnCargo:'Грузы', bnTruck:'Машины', bnOrders:'Заказы', bnChat:'Чат', bnProfile:'Профиль',
-    today:'Сегодня', tomorrow:'Завтра',
-  },
-  ge: {
-    login:'შესვლა', reg:'რეგისტრაცია',
-    sLocal:'🇬🇪 ადგილობრივი', sIntl:'🌍 საერთაშორისო',
-    statCargo:'ტვირთი', statTrucks:'მანქანა ონლაინ', statComp:'კომპანია',
-    fFrom:'📍 საიდან', fTo:'🏁 სად',
-    fDate:'📅 თარიღი', fType:'🚛 კუზოვი', fBtn:'ძიება',
-    th:['საიდან → სად','კომპანია / რეიტინგი','წონა','კუზოვი','ფასი','თარიღი',''],
-    lFrom:'საიდან', lTo:'სად', lDate:'ჩატვირთვის თარიღი', lWeight:'ტვირთის წონა',
-    lType:'კუზოვის ტიპი', lPay:'გადახდა', lDesc:'აღწერა', lRate:'ტარიფი', lDist:'მანძილი',
-    btnRespond:'გამოხმაურება',
-    bnCargo:'ტვირთი', bnTruck:'მანქანები', bnOrders:'შეკვეთები', bnChat:'ჩატი', bnProfile:'პროფილი',
-    today:'დღეს', tomorrow:'ხვალ',
-  },
-  en: {
-    login:'Log in', reg:'Sign up',
-    sLocal:'🇬🇪 Local', sIntl:'🌍 International',
-    statCargo:'loads', statTrucks:'trucks online', statComp:'companies',
-    fFrom:'📍 From', fTo:'🏁 To',
-    fDate:'📅 Date', fType:'🚛 Truck type', fBtn:'Search',
-    th:['FROM → TO','COMPANY / RATING','WEIGHT','TYPE','PRICE','DATE',''],
-    lFrom:'From', lTo:'To', lDate:'Loading date', lWeight:'Weight',
-    lType:'Truck type', lPay:'Payment', lDesc:'Description', lRate:'Rate', lDist:'Distance',
-    btnRespond:'Apply for load',
-    bnCargo:'Loads', bnTruck:'Trucks', bnOrders:'Orders', bnChat:'Chat', bnProfile:'Profile',
-    today:'Today', tomorrow:'Tomorrow',
-  }
-};
-
-// ── DATA ──────────────────────────────────────────────────────
+// ── DATA ────────────────────────────────────────────
 const LOCAL = [
-  { id:1, from:'თბილისი / Тбилиси',  to:'ბათუმი / Батуми',   co:'Экспресс-Груз', ava:'ЭГ', rat:'4.9', trips:142, kg:'5 000 კგ / 5 000 кг', type:'tent',   tag:'Тент',     price:'$280',  date:'today',  badge:'new',    km:'~312 км', pkm:'$0.90/км', from2:'Тбилиси, Дидубе', to2:'Батуми, порт', dt:'Сегодня 14:00', pay:'Нал, сразу', desc:'Стройматериалы (плитка). 12 паллет. Документы готовы.', scope:'local' },
-  { id:2, from:'ფოთი / Поти',         to:'თბილისი / Тбилиси', co:'АгроТранс',      ava:'АТ', rat:'5.0', trips:89,  kg:'12 000 кг',            type:'ref',    tag:'Рефриж.',  price:'$450',  date:'tomorrow',badge:null,     km:'~380 км', pkm:'$1.18/км', from2:'Поти, терминал А', to2:'Тбилиси, Элиава', dt:'Завтра 08:00', pay:'Безнал 3 дня', desc:'Замороженные продукты. t -18°С. Строго по времени.', scope:'local' },
-  { id:3, from:'თბილისი / Тбилиси',  to:'კუთაისი / Кутаиси', co:'ГрузМастер',     ava:'ГМ', rat:'4.6', trips:67,  kg:'3 000 кг',             type:'bort',   tag:'Борт',     price:'$180',  date:'today',  badge:null,     km:'~230 км', pkm:'$0.78/км', from2:'Тбилиси, Глдани', to2:'Кутаиси, ул.Церетели', dt:'Сегодня 16:00', pay:'Нал', desc:'Мебель разобранная. 6 паллет. Аккуратно, без навала.', scope:'local' },
-  { id:4, from:'ბათუმი / Батуми',     to:'თბილისი / Тбилиси', co:'ФастДелив',      ava:'ФД', rat:'4.8', trips:311, kg:'800 кг',               type:'gazel',  tag:'Газель',   price:'$120',  date:'today',  badge:'new',    km:'~312 км', pkm:'$0.38/км', from2:'Батуми, Шератон', to2:'Тбилиси, Руставели', dt:'Сегодня 15:30', pay:'Нал', desc:'Личные вещи. 12 коробок + 2 чемодана. Хрупкое.', scope:'local' },
-  { id:5, from:'რუსთავი / Рустави',  to:'ფოთი / Поти',        co:'РустГруз',       ava:'РГ', rat:'4.5', trips:44,  kg:'8 000 кг',             type:'termos', tag:'Термос',   price:'$340',  date:'tomorrow',badge:null,     km:'~395 км', pkm:'$0.86/км', from2:'Рустави, завод Азот', to2:'Поти, морпорт', dt:'Завтра 10:00', pay:'Безнал', desc:'Хим. сырьё. Все разрешения есть. Нужен ДОПОГ.', scope:'local' },
-  { id:6, from:'ქუთაისი / Кутаиси',  to:'ბათუმი / Батуми',   co:'КавкасЛог',      ava:'КЛ', rat:'4.7', trips:98,  kg:'6 500 кг',             type:'tent',   tag:'Тент',     price:'$210',  date:'today',  badge:'urgent', km:'~110 км', pkm:'$1.90/км', from2:'Кутаиси, склад 4', to2:'Батуми, склад А2', dt:'СЕГОДНЯ до 17:00', pay:'Нал на месте', desc:'Стройматериалы. Срочно — объект ждёт. Лёгкая загрузка.', scope:'local' },
+  {id:1,from:'Тбилиси',to:'Батуми',kg:5000,type:'tent',typeLabel:'Тент',typeClr:'#f3e5f5',typeClrT:'#6a1b9a',price:280,date:'today',urgent:false,scope:'local',desc:'Стройматериалы (плитка). 12 паллет. Документы готовы. Аккуратная загрузка.',co:'Экспресс-Груз',rat:'4.9',trips:142,pay:'Нал, сразу',from2:'Тбилиси, склад Дидубе',to2:'Батуми, порт',km:'~312 км',badge:'new'},
+  {id:2,from:'Поти',to:'Тбилиси',kg:12000,type:'ref',typeLabel:'Рефриж.',typeClr:'#e3f2fd',typeClrT:'#1565c0',price:450,date:'tomorrow',urgent:false,scope:'local',desc:'Замороженные продукты. t -18°С. Строго по времени. Сертификаты готовы.',co:'АгроТранс',rat:'5.0',trips:89,pay:'Безнал 3 дня',from2:'Поти, терминал А',to2:'Тбилиси, рынок Элиава',km:'~380 км',badge:null},
+  {id:3,from:'Тбилиси',to:'Ереван',kg:20000,type:'tent',typeLabel:'Тент',typeClr:'#f3e5f5',typeClrT:'#6a1b9a',price:890,date:'today',urgent:true,scope:'local',desc:'Промышленное оборудование. Таможня оформлена. Крепление заказчика.',co:'CargoLine',rat:'4.7',trips:203,pay:'Нал на месте',from2:'Тбилиси, Авлабари',to2:'Ереван, Норк',km:'~280 км',badge:'urgent'},
+  {id:4,from:'Кутаиси',to:'Тбилиси',kg:3000,type:'bort',typeLabel:'Борт',typeClr:'#e8f5e9',typeClrT:'#2e7d32',price:180,date:'today',urgent:false,scope:'local',desc:'Мебель разобранная. 6 паллет. Аккуратно, без навала.',co:'ГрузМастер',rat:'4.6',trips:67,pay:'Нал',from2:'Кутаиси, ул.Церетели',to2:'Тбилиси, Глдани',km:'~230 км',badge:null},
+  {id:5,from:'Батуми',to:'Тбилиси',kg:800,type:'gazel',typeLabel:'Газель',typeClr:'#fce4ec',typeClrT:'#880e4f',price:120,date:'today',urgent:false,scope:'local',desc:'Личные вещи. 12 коробок + 2 чемодана. Хрупкое. Контакт при принятии.',co:'ФастДелив',rat:'4.8',trips:311,pay:'Нал',from2:'Батуми, Шератон',to2:'Тбилиси, Руставели',km:'~312 км',badge:'new'},
+  {id:6,from:'Рустави',to:'Поти',kg:8000,type:'termos',typeLabel:'Термос',typeClr:'#fff3e0',typeClrT:'#bf360c',price:340,date:'tomorrow',urgent:false,scope:'local',desc:'Хим. сырьё. Все разрешения есть. Перевозчик должен иметь ДОПОГ.',co:'РустГруз',rat:'4.5',trips:44,pay:'Безнал',from2:'Рустави, завод Азот',to2:'Поти, морпорт',km:'~395 км',badge:null},
 ];
-
 const INTL = [
-  { id:7,  from:'თბილისი / Тбилиси', to:'Ереван 🇦🇲',       co:'CargoLine',     ava:'CL', rat:'4.7', trips:203, kg:'20 000 кг', type:'tent',  tag:'Тент',    price:'$890',   date:'today',   badge:'urgent', km:'~280 км', pkm:'$3.18/км', from2:'Тбилиси, Авлабари', to2:'Ереван, Норк', dt:'СЕГОДНЯ до 18:00', pay:'Нал на месте', desc:'Промышленное оборудование. Таможня оформлена. Опытный водитель.', scope:'intl' },
-  { id:8,  from:'თბილისი / Тбилиси', to:'Стамбул 🇹🇷',      co:'ЕвроТранс',     ava:'ЕТ', rat:'4.9', trips:528, kg:'15 000 кг', type:'ref',   tag:'Рефриж.', price:'$1 200', date:'29 мар',  badge:null,     km:'~1 100 км', pkm:'$1.09/км', from2:'Тбилиси, Ортачала', to2:'Стамбул, Халкалы', dt:'29 марта 06:00', pay:'Безнал, 50% предоплата', desc:'Свежие цитрусовые. CMR, фитосертификат готовы.', scope:'intl' },
-  { id:9,  from:'ფოთი / Поти',        to:'Ереван 🇦🇲',       co:'КавказЛогистик',ava:'КВ', rat:'4.8', trips:187, kg:'18 000 кг', type:'tent',  tag:'Тент',    price:'$750',   date:'today',   badge:'urgent', km:'~580 км', pkm:'$1.29/км', from2:'Поти, контейнерный', to2:'Ереван, ТЛЦ Нубарашен', dt:'СЕГОДНЯ выезд до 16:00', pay:'Нал при разгрузке', desc:'Импорт после растаможки. Срочно.', scope:'intl' },
-  { id:10, from:'თბილისი / Тбилиси', to:'Баку 🇦🇿',          co:'АзерЭкспресс',  ava:'АЭ', rat:'4.7', trips:93,  kg:'10 000 кг', type:'bort',  tag:'Борт',    price:'$520',   date:'30 мар',  badge:'new',    km:'~500 км', pkm:'$1.04/км', from2:'Тбилиси, Isani', to2:'Баку, Бинагади', dt:'30 марта 09:00', pay:'Безнал', desc:'Стройматериалы. 20 паллет. Таможня АЗ на грузоотправителе.', scope:'intl' },
-  { id:11, from:'ბათუმი / Батуми',    to:'Стамбул 🇹🇷',      co:'ТурГруз TR',    ava:'ТТ', rat:'4.6', trips:231, kg:'22 000 кг', type:'tent',  tag:'Тент',    price:'$1 450', date:'31 мар',  badge:null,     km:'~1 400 км', pkm:'$1.04/км', from2:'Батуми, порт', to2:'Стамбул, Амбарлы', dt:'31 марта 07:00', pay:'Безнал 5 дней', desc:'Промтовары. Паромная переправа. Нужен опыт с паромом.', scope:'intl' },
-  { id:12, from:'თბილისი / Тбилиси', to:'Москва 🇷🇺',        co:'РосГрузТранс',  ava:'РТ', rat:'4.5', trips:156, kg:'14 000 кг', type:'tent',  tag:'Тент',    price:'$1 800', date:'28 мар',  badge:'new',    km:'~1 800 км', pkm:'$1.00/км', from2:'Тбилиси, Дидубе', to2:'Москва, МКАДовский склад', dt:'28 марта 07:00', pay:'Безнал 7 дней', desc:'Текстиль. Паллеты 22шт. Документы готовы. TIR.', scope:'intl' },
+  {id:7,from:'Тбилиси',to:'Стамбул 🇹🇷',kg:15000,type:'ref',typeLabel:'Рефриж.',typeClr:'#e3f2fd',typeClrT:'#1565c0',price:1200,date:'29 мар',urgent:false,scope:'intl',desc:'Свежие цитрусовые. CMR, фитосертификат готовы. Опытный перевозчик.',co:'ЕвроТранс',rat:'4.9',trips:528,pay:'Безнал 50%',from2:'Тбилиси, Ортачала',to2:'Стамбул, Халкалы',km:'~1 100 км',badge:null},
+  {id:8,from:'Поти',to:'Ереван 🇦🇲',kg:18000,type:'tent',typeLabel:'Тент',typeClr:'#f3e5f5',typeClrT:'#6a1b9a',price:750,date:'today',urgent:true,scope:'intl',desc:'Импорт после растаможки. Срочно — склад не держит.',co:'КавказЛогистик',rat:'4.8',trips:187,pay:'Нал при разгрузке',from2:'Поти, контейнерный',to2:'Ереван, ТЛЦ Нубарашен',km:'~580 км',badge:'urgent'},
+  {id:9,from:'Тбилиси',to:'Баку 🇦🇿',kg:10000,type:'bort',typeLabel:'Борт',typeClr:'#e8f5e9',typeClrT:'#2e7d32',price:520,date:'30 мар',urgent:false,scope:'intl',desc:'Стройматериалы. 20 паллет. Таможня АЗ на грузоотправителе.',co:'АзерЭкспресс',rat:'4.7',trips:93,pay:'Безнал',from2:'Тбилиси, Isani',to2:'Баку, Бинагади',km:'~500 км',badge:'new'},
+  {id:10,from:'Батуми',to:'Стамбул 🇹🇷',kg:22000,type:'tent',typeLabel:'Тент',typeClr:'#f3e5f5',typeClrT:'#6a1b9a',price:1450,date:'31 мар',urgent:false,scope:'intl',desc:'Промтовары. Паромная переправа Батуми-Стамбул. Нужен опыт с паромом.',co:'ТурГруз TR',rat:'4.6',trips:231,pay:'Безнал 5 дней',from2:'Батуми, порт',to2:'Стамбул, Амбарлы',km:'~1 400 км',badge:null},
+  {id:11,from:'Тбилиси',to:'Москва 🇷🇺',kg:14000,type:'tent',typeLabel:'Тент',typeClr:'#f3e5f5',typeClrT:'#6a1b9a',price:1800,date:'28 мар',urgent:false,scope:'intl',desc:'Текстиль. 22 паллеты. TIR. Документы готовы. Безопасный маршрут.',co:'РосГрузТранс',rat:'4.5',trips:156,pay:'Безнал 7 дней',from2:'Тбилиси, Дидубе',to2:'Москва, МКАДовский склад',km:'~1 800 км',badge:'new'},
+];
+const TRUCKS = [
+  {id:1,from:'Тбилиси',to:'Любое направление',kg:20000,type:'Тент 120м³',date:'Сегодня',co:'Саба Транс',rat:'4.9',trips:87,plate:'GE-123-AB'},
+  {id:2,from:'Батуми',to:'Тбилиси / Поти',kg:5000,type:'Газель 15м³',date:'Сегодня',co:'БатумиЭкс',rat:'4.7',trips:234,plate:'GE-456-BC'},
+  {id:3,from:'Поти',to:'Тбилиси',kg:12000,type:'Рефриж. t-18°C',date:'Завтра',co:'КолдЧейн',rat:'5.0',trips:156,plate:'GE-789-CD'},
+  {id:4,from:'Кутаиси',to:'Любое',kg:15000,type:'Бортовой',date:'Сегодня',co:'КутТранс',rat:'4.6',trips:43,plate:'GE-321-DE'},
 ];
 
-// ── STATE ────────────────────────────────────────────────────
-let lang = 'ru';
-let scope = 'local';
+let scope='local', lang='ru', user=null, cargoData=[...LOCAL];
 
-// ── RENDER LIST ──────────────────────────────────────────────
-function renderList() {
-  const data = scope === 'local' ? LOCAL : INTL;
-  const t = T[lang];
-  const list = document.getElementById('list');
-  list.innerHTML = '';
-
-  data.forEach(d => {
-    const row = document.createElement('div');
-    row.className = 'row' + (d.badge==='urgent'?' urgent':d.badge==='new'?' fresh':d.scope==='intl'?' intl':'');
-    row.onclick = () => openModal(d);
-
-    const dateClass = d.date==='today'?'date-today':d.date==='tomorrow'?'date-tom':'date-norm';
-    const dateText = d.date==='today'?t.today:d.date==='tomorrow'?t.tomorrow:d.date;
-    const badgeHtml = d.badge==='new'?`<span class="badge badge-new">NEW</span>`:d.badge==='urgent'?`<span class="badge badge-urgent">${lang==='ge'?'სასწრაფო':'СРОЧНО'}</span>`:'';
-    const intlBadge = d.scope==='intl' && scope==='intl' ? `<span class="badge badge-intl">${lang==='en'?'INTL':lang==='ge'?'საერთ.':'МЕЖД.'}</span>` : '';
-
-    row.innerHTML = `
+// ── RENDER LOADS ─────────────────────────────────────
+function renderLoads(data){
+  const list=document.getElementById('cargoList');
+  list.innerHTML='';
+  data.forEach(d=>{
+    const borderClr=d.badge==='urgent'?'#e74c3c':d.badge==='new'?'#2ecc71':d.scope==='intl'?'#3498db':'transparent';
+    const dateStr=d.date==='today'?'Сегодня':d.date==='tomorrow'?'Завтра':d.date;
+    const dateClr=d.date==='today'?'#2ecc71':d.date==='tomorrow'?'#f7b731':'#777';
+    const badgeHtml=d.badge==='urgent'?'<span class="badge badge-urgent">СРОЧНО</span>':d.badge==='new'?'<span class="badge badge-new">NEW</span>':'';
+    const row=document.createElement('div');
+    row.className='row'+(d.badge==='urgent'?' urgent':d.badge==='new'?' fresh':d.scope==='intl'?' intl':'');
+    row.onclick=()=>openCargo(d);
+    row.innerHTML=`
       <div>
         <div class="route">${d.from} <span class="arrow">→</span> ${d.to}</div>
-        <div class="sub">${d.co} &nbsp;<span class="stars">★</span> ${d.rat}</div>
-        <div class="mob-sub" style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
-          <span class="tag tag-${d.type}">${d.tag}</span>
-          <span style="font-size:11px;color:#888">${d.kg}</span>
-          ${badgeHtml}${intlBadge}
+        <div class="sub">${d.co} ⭐${d.rat}</div>
+        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+          <span class="tag" style="background:${d.typeClr};color:${d.typeClrT}">${d.typeLabel}</span>
+          <span style="font-size:11px;color:#aaa">${d.kg.toLocaleString()} кг</span>
+          ${badgeHtml}
         </div>
       </div>
-      <div><div style="font-size:13px;font-weight:600">${d.co}</div><div class="sub"><span class="stars">★</span> ${d.rat} · ${d.trips} ${lang==='en'?'trips':lang==='ge'?'მოგზ.':'рейсов'}</div></div>
-      <div style="font-size:13px;color:#333">${d.kg}</div>
-      <div><span class="tag tag-${d.type}">${d.tag}</span></div>
-      <div><div class="price">${d.price}</div></div>
-      <div><div class="${dateClass}">${dateText}</div>${badgeHtml}${intlBadge}</div>
-      <div><button class="btn-resp">${lang==='en'?'Apply':lang==='ge'?'გამოხმ.':'Откликнуться'}</button></div>
+      <div><div style="font-size:13px;font-weight:600">${d.co}</div><div class="sub">★ ${d.rat} · ${d.trips} рейсов</div></div>
+      <div style="font-size:13px;color:#333">${d.kg.toLocaleString()} кг</div>
+      <div><span class="tag" style="background:${d.typeClr};color:${d.typeClrT}">${d.typeLabel}</span></div>
+      <div class="price">$${d.price.toLocaleString()}</div>
+      <div><div style="font-size:12px;font-weight:600;color:${dateClr}">${dateStr}</div>${badgeHtml}</div>
+      <div><button class="btn-resp" onclick="event.stopPropagation();openCargo({...window.allLoads.find(x=>x.id==${d.id})})">Откликнуться</button></div>
     `;
     list.appendChild(row);
   });
-
-  // Load more
-  const lm = document.createElement('div');
-  lm.className = 'load-more';
-  const more = scope==='local' ? (lang==='en'?'Load 181 more':'Загрузить ещё 181 груз ↓') : (lang==='en'?'Load 94 more':'Загрузить ещё 94 груза ↓');
-  lm.innerHTML = `<button>${more}</button>`;
+  const lm=document.createElement('div');
+  lm.className='load-more';
+  lm.innerHTML=`<button onclick="alert('Загружаем ещё...')">Загрузить ещё ${scope==='local'?181:91} груз ↓</button>`;
   list.appendChild(lm);
 }
 
-// ── MODAL ────────────────────────────────────────────────────
-function openModal(d) {
-  const t = T[lang];
-  document.getElementById('mTitle').textContent = `${d.from.split('/')[1]||d.from} → ${d.to}`;
-  document.getElementById('mSub').textContent = `#${d.scope.toUpperCase()}-${String(d.id).padStart(5,'0')} · ${d.co}`;
-  document.getElementById('mAva').textContent = d.ava;
-  document.getElementById('mComp').textContent = d.co;
-  document.getElementById('mStats').textContent = `★ ${d.rat} · ${d.trips} рейсов`;
-  document.getElementById('mFrom').textContent = d.from2;
-  document.getElementById('mTo').textContent = d.to2;
-  document.getElementById('mDate').textContent = d.dt;
-  document.getElementById('mWeight').textContent = d.kg;
-  document.getElementById('mType').textContent = d.tag;
-  document.getElementById('mPay').textContent = d.pay;
-  document.getElementById('mDesc').textContent = d.desc;
-  document.getElementById('mPrice').textContent = d.price;
-  document.getElementById('mKm').textContent = d.km;
-  document.getElementById('mPkm').textContent = d.pkm;
-  // labels
-  document.getElementById('lFrom').textContent = t.lFrom;
-  document.getElementById('lTo').textContent = t.lTo;
-  document.getElementById('lDate').textContent = t.lDate;
-  document.getElementById('lWeight').textContent = t.lWeight;
-  document.getElementById('lType').textContent = t.lType;
-  document.getElementById('lPay').textContent = t.lPay;
-  document.getElementById('lDesc').textContent = t.lDesc;
-  document.getElementById('lRate').textContent = t.lRate;
-  document.getElementById('lDist').textContent = t.lDist;
-  document.getElementById('btnRespond').textContent = t.btnRespond;
-  document.getElementById('overlay').classList.add('on');
+// ── RENDER TRUCKS ─────────────────────────────────────
+function renderTrucks(){
+  const list=document.getElementById('truckList');
+  list.innerHTML='';
+  TRUCKS.forEach(t=>{
+    const row=document.createElement('div');
+    row.className='truck-row';
+    row.innerHTML=`
+      <div>
+        <div class="route">${t.from} <span class="arrow">→</span> ${t.to}</div>
+        <div class="sub">${t.plate}</div>
+      </div>
+      <div><div style="font-size:13px;font-weight:600">${t.co}</div><div class="sub">★ ${t.rat} · ${t.trips} рейсов</div></div>
+      <div style="font-size:13px">${t.kg.toLocaleString()} кг</div>
+      <div style="font-size:12px;color:#555">${t.type}</div>
+      <div style="font-size:12px;color:#2ecc71;font-weight:600">${t.date}</div>
+      <div><button class="btn-resp" onclick="alert('📞 Связаться с перевозчиком\\n\\n${t.co}\\n${t.plate}\\n+995 555 *** ***')">Связаться</button></div>
+    `;
+    list.appendChild(row);
+  });
 }
 
-function closeOverlay(e) { if(e.target===document.getElementById('overlay')) closeModal(); }
-function closeModal() { document.getElementById('overlay').classList.remove('on'); }
-
-// ── LANGUAGE ─────────────────────────────────────────────────
-function setLang(l, btn) {
-  lang = l;
-  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  applyLang();
-  renderList();
+// ── OPEN CARGO MODAL ─────────────────────────────────
+window.allLoads=[...LOCAL,...INTL];
+function openCargo(d){
+  document.getElementById('mTitle').textContent=`${d.from} → ${d.to}`;
+  document.getElementById('mSub').textContent=`#${d.scope.toUpperCase()}-${String(d.id).padStart(5,'0')} · ${d.co} · Добавлен сегодня`;
+  document.getElementById('mAva').textContent=d.co.slice(0,2).toUpperCase();
+  document.getElementById('mComp').textContent=d.co;
+  document.getElementById('mStats').textContent=`★ ${d.rat} · ${d.trips} рейсов · Верифицирован ✅`;
+  document.getElementById('mGrid').innerHTML=`
+    <div><div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Откуда</div><div style="font-size:14px;font-weight:700">${d.from2}</div></div>
+    <div><div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Куда</div><div style="font-size:14px;font-weight:700">${d.to2}</div></div>
+    <div><div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Дата</div><div style="font-size:14px;font-weight:700;color:#2ecc71">${d.date==='today'?'Сегодня':d.date==='tomorrow'?'Завтра':d.date}</div></div>
+    <div><div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Вес</div><div style="font-size:14px;font-weight:700">${d.kg.toLocaleString()} кг</div></div>
+    <div><div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Кузов</div><div style="font-size:14px;font-weight:700">${d.typeLabel}</div></div>
+    <div><div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Оплата</div><div style="font-size:14px;font-weight:700">${d.pay}</div></div>
+  `;
+  document.getElementById('mDesc').textContent=d.desc;
+  document.getElementById('mPrice').textContent=`$${d.price.toLocaleString()}`;
+  document.getElementById('mKm').textContent=d.km;
+  document.getElementById('respondSuccess').style.display='none';
+  document.getElementById('btnRespond').disabled=false;
+  document.getElementById('btnRespond').textContent='Откликнуться на груз';
+  document.getElementById('cargoOverlay').classList.add('on');
 }
 
-function applyLang() {
-  const t = T[lang];
-  document.getElementById('btnLogin').textContent = t.login;
-  document.getElementById('btnReg').textContent = t.reg;
-  document.getElementById('sLocal').textContent = t.sLocal;
-  document.getElementById('sIntl').textContent = t.sIntl;
-  document.getElementById('btnSearch').textContent = t.fBtn;
-  document.getElementById('bnCargo').textContent = t.bnCargo;
-  document.getElementById('bnTruck').textContent = t.bnTruck;
-  document.getElementById('bnOrders').textContent = t.bnOrders;
-  document.getElementById('bnChat').textContent = t.bnChat;
-  document.getElementById('bnProfile').textContent = t.bnProfile;
-  document.getElementById('fcount').textContent = (scope==='local'?'187':'96') + ' ' + t.statCargo;
+// ── RESPOND ───────────────────────────────────────────
+function doRespond(){
+  if(!user){ closeModal('cargoOverlay'); openAuth('login'); return; }
+  const btn=document.getElementById('btnRespond');
+  btn.textContent='Отправляем...'; btn.disabled=true;
+  setTimeout(()=>{
+    document.getElementById('respondSuccess').style.display='block';
+    btn.textContent='✅ Заявка отправлена';
+    // добавляем в мои заказы
+    addToOrders();
+  },1000);
 }
-
-// ── SCOPE ─────────────────────────────────────────────────────
-function setScope(s, el) {
-  scope = s;
-  document.querySelectorAll('.scope-tab').forEach(x => x.classList.remove('active'));
-  el.classList.add('active');
-  const t = T[lang];
-  if(s==='local') {
-    document.getElementById('statCargo').textContent = '187';
-    document.getElementById('statTrucks').textContent = '634';
-    document.getElementById('fcount').textContent = '187 ' + t.statCargo;
-  } else {
-    document.getElementById('statCargo').textContent = '96';
-    document.getElementById('statTrucks').textContent = '413';
-    document.getElementById('fcount').textContent = '96 ' + t.statCargo;
+function addToOrders(){
+  const list=document.getElementById('ordersList');
+  const empty=document.getElementById('ordersEmpty');
+  if(!list.innerHTML.includes('Нет активных')){
+    empty.style.display='none';
+    list.style.display='block';
+    const item=document.createElement('div');
+    item.style='padding:14px 16px;background:#fff;border-bottom:1px solid #f2f2f2;display:flex;justify-content:space-between;align-items:center';
+    const title=document.getElementById('mTitle').textContent;
+    item.innerHTML=`<div><div style="font-weight:700">${title}</div><div style="font-size:12px;color:#888;margin-top:2px">Отклик отправлен · ${new Date().toLocaleTimeString('ru')}</div></div><span class="badge" style="background:#fff3e0;color:#f39c12;padding:4px 10px;border-radius:12px;font-size:12px">В обработке</span>`;
+    list.prepend(item);
   }
-  renderList();
+}
+function showPhone(){
+  alert('📞 Контакт доступен после регистрации\n\nДля связи с перевозчиком войдите в аккаунт');
+  closeModal('cargoOverlay');
+  openAuth('login');
 }
 
-// ── INIT ──────────────────────────────────────────────────────
-renderList();
+// ── AUTH ──────────────────────────────────────────────
+function openAuth(tab){
+  document.getElementById('authOverlay').classList.add('on');
+  switchAuth(tab);
+}
+function switchAuth(tab){
+  document.getElementById('formLogin').style.display=tab==='login'?'block':'none';
+  document.getElementById('formRegister').style.display=tab==='register'?'block':'none';
+  document.getElementById('tabLogin').classList.toggle('active',tab==='login');
+  document.getElementById('tabRegister').classList.toggle('active',tab==='register');
+}
+function doLogin(){
+  const email=document.getElementById('loginEmail').value;
+  const pass=document.getElementById('loginPass').value;
+  if(!email||!pass){alert('Заполните email и пароль');return;}
+  setTimeout(()=>{
+    user={name:email.split('@')[0],email};
+    document.getElementById('loginSuccess').style.display='block';
+    setTimeout(()=>{
+      closeModal('authOverlay');
+      showUserState();
+    },800);
+  },600);
+}
+function doRegister(){
+  const name=document.getElementById('regName').value;
+  const email=document.getElementById('regEmail').value;
+  const pass=document.getElementById('regPass').value;
+  if(!name||!email||!pass){alert('Заполните все обязательные поля');return;}
+  setTimeout(()=>{
+    user={name,email};
+    document.getElementById('regSuccess').style.display='block';
+    setTimeout(()=>{
+      closeModal('authOverlay');
+      showUserState();
+    },800);
+  },600);
+}
+function showUserState(){
+  document.getElementById('btnLogin').style.display='none';
+  document.getElementById('btnReg').style.display='none';
+  document.getElementById('userAvatar').style.display='flex';
+  document.getElementById('userAvatar').textContent=user.name.slice(0,2).toUpperCase();
+  document.getElementById('profileName').textContent=user.name;
+  // показываем заказы
+  document.getElementById('ordersEmpty').innerHTML='<div class="icon">📋</div><div style="font-size:18px;font-weight:700;color:#555;margin-bottom:8px">Нет активных заказов</div><div style="font-size:14px">Откликайтесь на грузы — они появятся здесь</div>';
+}
+function doLogout(){
+  user=null;
+  document.getElementById('btnLogin').style.display='';
+  document.getElementById('btnReg').style.display='';
+  document.getElementById('userAvatar').style.display='none';
+  document.getElementById('ordersList').innerHTML='';
+  document.getElementById('ordersEmpty').style.display='block';
+  document.getElementById('ordersEmpty').innerHTML='<div class="icon">📋</div><div style="font-size:18px;font-weight:700;color:#555;margin-bottom:8px">Нет активных заказов</div><div style="font-size:14px;margin-bottom:20px">Войдите в аккаунт чтобы видеть свои заказы</div><button class="btn-primary" style="max-width:200px;margin:0 auto" onclick="openAuth(\'login\')">Войти</button>';
+  document.getElementById('ordersList').style.display='none';
+  closeModal('profileOverlay');
+}
+function openProfile(){
+  if(!user){openAuth('login');return;}
+  document.getElementById('profileOverlay').classList.add('on');
+}
+
+// ── POST LOAD ─────────────────────────────────────────
+function openPostLoad(){
+  if(!user){openAuth('register');return;}
+  document.getElementById('postSuccess').style.display='none';
+  // ставим сегодняшнюю дату
+  const d=new Date(); const dd=String(d.getDate()).padStart(2,'0'); const mm=String(d.getMonth()+1).padStart(2,'0');
+  document.getElementById('pDate').value=`${d.getFullYear()}-${mm}-${dd}`;
+  document.getElementById('postOverlay').classList.add('on');
+}
+function doPostLoad(){
+  const from=document.getElementById('pFrom').value;
+  const to=document.getElementById('pTo').value;
+  const kg=parseInt(document.getElementById('pWeight').value)||5000;
+  const price=parseInt(document.getElementById('pPrice').value)||300;
+  const truck=document.getElementById('pTruck').value;
+  const desc=document.getElementById('pDesc').value||'Груз без описания';
+  const pay=document.getElementById('pPay').value;
+  const urgent=document.getElementById('pUrgent').checked;
+  const typeMap={'Тент':{typeClr:'#f3e5f5',typeClrT:'#6a1b9a'},'Рефрижератор':{typeClr:'#e3f2fd',typeClrT:'#1565c0'},'Бортовой':{typeClr:'#e8f5e9',typeClrT:'#2e7d32'},'Термос':{typeClr:'#fff3e0',typeClrT:'#bf360c'},'Газель':{typeClr:'#fce4ec',typeClrT:'#880e4f'},'Контейнер':{typeClr:'#f0f2f5',typeClrT:'#555'}};
+  const tc=typeMap[truck]||typeMap['Тент'];
+  const newLoad={id:Date.now(),from,to,kg,type:truck.toLowerCase(),typeLabel:truck,...tc,price,date:'today',urgent,scope:scope==='intl'?'intl':'local',desc,co:user.name,rat:'5.0',trips:0,pay,from2:`${from}, ваш адрес`,to2:`${to}, адрес получателя`,km:'~уточните',badge:urgent?'urgent':'new'};
+  LOCAL.unshift(newLoad);
+  window.allLoads=[...LOCAL,...INTL];
+  document.getElementById('postSuccess').style.display='block';
+  setTimeout(()=>{
+    closeModal('postOverlay');
+    renderLoads(scope==='local'?LOCAL:INTL);
+    document.getElementById('fcount').textContent=LOCAL.length+' грузов';
+  },1200);
+}
+
+// ── FILTER ─────────────────────────────────────────────
+function filterLoads(){
+  const from=document.getElementById('fFrom').value;
+  const to=document.getElementById('fTo').value;
+  const type=document.getElementById('fType').value;
+  let data=scope==='local'?[...LOCAL]:[...INTL];
+  if(from) data=data.filter(d=>d.from.includes(from));
+  if(to) data=data.filter(d=>d.to.includes(to));
+  if(type&&type!=='🚛 Кузов') data=data.filter(d=>d.typeLabel.includes(type.slice(0,4)));
+  renderLoads(data);
+  document.getElementById('fcount').textContent=data.length+' грузов';
+}
+
+// ── SECTIONS ──────────────────────────────────────────
+function showSection(name, el){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.bitem').forEach(b=>b.classList.remove('active'));
+  const map={loads:0,trucks:1,orders:3};
+  const bnav=document.querySelectorAll('.bitem');
+  if(map[name]!==undefined) bnav[map[name]].classList.add('active');
+  if(name==='trucks') renderTrucks();
+}
+
+// ── SCOPE ─────────────────────────────────────────────
+function setScope(s, el){
+  scope=s;
+  document.querySelectorAll('.scope-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const data=s==='local'?LOCAL:INTL;
+  renderLoads(data);
+  document.getElementById('statLoads').textContent=s==='local'?'187':'96';
+  document.getElementById('statTrucks').textContent=s==='local'?'634':'413';
+  document.getElementById('fcount').textContent=data.length+' грузов';
+}
+
+// ── LANG ──────────────────────────────────────────────
+function setLang(l,btn){
+  lang=l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── MODALS ────────────────────────────────────────────
+function closeModal(id){ document.getElementById(id).classList.remove('on'); }
+function closeOverlay(id,e){ if(e.target===document.getElementById(id)) closeModal(id); }
+
+// ── INIT ──────────────────────────────────────────────
+renderLoads(LOCAL);
 </script>
 </body>
 </html>
