@@ -271,6 +271,18 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <option value="PL">🇵🇱 Польша</option>
     <option value="IT">🇮🇹 Италия</option>
     <option value="BG">🇧🇬 Болгария</option>
+    <option value="KZ">🇰🇿 Казахстан</option>
+    <option value="UZ">🇺🇿 Узбекистан</option>
+    <option value="TM">🇹🇲 Туркменистан</option>
+    <option value="KG">🇰🇬 Кыргызстан</option>
+    <option value="TJ">🇹🇯 Таджикистан</option>
+    <option value="MD">🇲🇩 Молдова</option>
+    <option value="BY">🇧🇾 Беларусь</option>
+    <option value="IL">🇮🇱 Израиль</option>
+    <option value="IR">🇮🇷 Иран</option>
+    <option value="AE">🇦🇪 ОАЭ</option>
+    <option value="GR">🇬🇷 Греция</option>
+    <option value="RO">🇷🇴 Румыния</option>
   </select>
   <select class="fsel"><option>📅 Дата</option><option>Сегодня</option><option>Завтра</option><option>На неделе</option></select>
   <select class="fsel" id="fType"><option value="">🚛 Кузов</option><option>Тент</option><option>Рефрижератор</option><option>Рефтент</option><option>Мегатент</option><option>Бортовой</option><option>Термос</option><option>Фургон (до 3.5т)</option><option>Контейнер</option><option>Автовоз</option><option>Эвакуатор</option><option>Цистерна</option><option>Зерновоз</option><option>Самосвал</option></select>
@@ -416,6 +428,20 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
         <option value="PL">🇵🇱 Польша</option>
         <option value="IT">🇮🇹 Италия</option>
         <option value="BG">🇧🇬 Болгария</option>
+        <option value="KZ">🇰🇿 Казахстан</option>
+        <option value="UZ">🇺🇿 Узбекистан</option>
+        <option value="TM">🇹🇲 Туркменистан</option>
+        <option value="KG">🇰🇬 Кыргызстан</option>
+        <option value="TJ">🇹🇯 Таджикистан</option>
+        <option value="MD">🇲🇩 Молдова</option>
+        <option value="BY">🇧🇾 Беларусь</option>
+        <option value="IL">🇮🇱 Израиль</option>
+        <option value="IR">🇮🇷 Иран</option>
+        <option value="IQ">🇮🇶 Ирак</option>
+        <option value="SA">🇸🇦 Саудовская Аравия</option>
+        <option value="AE">🇦🇪 ОАЭ</option>
+        <option value="GR">🇬🇷 Греция</option>
+        <option value="RO">🇷🇴 Румыния</option>
       </select>
     </div>
     <div class="form-group" id="countryToWrap" style="display:none">
@@ -432,6 +458,18 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
         <option value="PL">🇵🇱 Польша</option>
         <option value="IT">🇮🇹 Италия</option>
         <option value="BG">🇧🇬 Болгария</option>
+        <option value="KZ">🇰🇿 Казахстан</option>
+        <option value="UZ">🇺🇿 Узбекистан</option>
+        <option value="TM">🇹🇲 Туркменистан</option>
+        <option value="KG">🇰🇬 Кыргызстан</option>
+        <option value="TJ">🇹🇯 Таджикистан</option>
+        <option value="MD">🇲🇩 Молдова</option>
+        <option value="BY">🇧🇾 Беларусь</option>
+        <option value="IL">🇮🇱 Израиль</option>
+        <option value="IR">🇮🇷 Иран</option>
+        <option value="AE">🇦🇪 ОАЭ</option>
+        <option value="GR">🇬🇷 Греция</option>
+        <option value="RO">🇷🇴 Румыния</option>
       </select>
     </div>
     <div class="form-group">
@@ -1080,7 +1118,7 @@ function closeModal(id){ document.getElementById(id).classList.remove('on'); }
 function closeOverlay(id,e){ if(e.target===document.getElementById(id)) closeModal(id); }
 
 // ── COUNTRY FILTER ────────────────────────────────────
-const COUNTRY_FLAGS={'GE':'🇬🇪','TR':'🇹🇷','AM':'🇦🇲','AZ':'🇦🇿','RU':'🇷🇺','UA':'🇺🇦','CN':'🇨🇳','DE':'🇩🇪','PL':'🇵🇱','IT':'🇮🇹','BG':'🇧🇬'};
+const COUNTRY_FLAGS={'GE':'🇬🇪','TR':'🇹🇷','AM':'🇦🇲','AZ':'🇦🇿','RU':'🇷🇺','UA':'🇺🇦','CN':'🇨🇳','DE':'🇩🇪','PL':'🇵🇱','IT':'🇮🇹','BG':'🇧🇬','KZ':'🇰🇿','UZ':'🇺🇿','TM':'🇹🇲','KG':'🇰🇬','TJ':'🇹🇯','MD':'🇲🇩','BY':'🇧🇾','IL':'🇮🇱','IR':'🇮🇷','AE':'🇦🇪','GR':'🇬🇷','RO':'🇷🇴'};
 const COUNTRY_NAMES={'GE':'Грузия','TR':'Турция','AM':'Армения','AZ':'Азербайджан','RU':'Россия','UA':'Украина','CN':'Китай','DE':'Германия','PL':'Польша','IT':'Италия','BG':'Болгария'};
 
 // Показываем/скрываем фильтр стран при переключении Local/Intl
