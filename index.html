@@ -1026,6 +1026,8 @@ function showUserState(){
   document.getElementById('profileName').textContent=user.name;
   // показываем заказы
   document.getElementById('ordersEmpty').innerHTML='<div class="icon">📋</div><div style="font-size:18px;font-weight:700;color:#555;margin-bottom:8px">Нет активных заказов</div><div style="font-size:14px">Откликайтесь на грузы — они появятся здесь</div>';
+  const nb=document.getElementById('notifBtn');if(nb)nb.style.display='';
+  const od=document.getElementById('onlineDot');if(od)od.style.display='inline-block';
 }
 function doLogout(){
   user=null;
@@ -1252,14 +1254,7 @@ function _delivered(id){const o=_orders.find(x=>x.id===id);if(!o)return;o.status
 function _rate(id){const o=_orders.find(x=>x.id===id);if(!o)return;const r=prompt(`Оцените "${o.title}" (1-5):`,'5');if(r&&+r>=1&&+r<=5){o.status='rated';_renderOrders();pushNotif('⭐ Спасибо!',`Оценка ${r}/5 сохранена.`,[]);}}
 
 // Переопределяем showUserState чтобы показывать колокольчик
-const _origShowUser=showUserState;
-function showUserState(){
-  _origShowUser();
-  const nb=document.getElementById('notifBtn');
-  if(nb)nb.style.display='';
-  const od=document.getElementById('onlineDot');
-  if(od)od.style.display='inline-block';
-}
+
 
 // Переопределяем doRespond чтобы добавлять в _orders
 // doRespond расширена выше
