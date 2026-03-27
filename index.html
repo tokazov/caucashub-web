@@ -1103,6 +1103,10 @@ function setScope(s, el){
   document.getElementById('statLoads').textContent=s==='local'?'187':'96';
   document.getElementById('statTrucks').textContent=s==='local'?'634':'413';
   document.getElementById('fcount').textContent=data.length+' грузов';
+  // Показываем фильтр стран для международных
+  const cf=document.getElementById('fCountry');
+  if(cf) cf.style.display=s==='intl'?'block':'none';
+  if(typeof updateFormForIntl==='function') updateFormForIntl();
 }
 
 // ── LANG ──────────────────────────────────────────────
