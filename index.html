@@ -866,7 +866,7 @@ function renderLoads(data){
       <div><span class="tag" style="background:${d.typeClr};color:${d.typeClrT}">${d.typeLabel}</span></div>
       <div class="price">${d.cur||"\$"}${d.price.toLocaleString()}</div>
       <div><div style="font-size:12px;font-weight:600;color:${dateClr}">${dateStr}</div>${badgeHtml}</div>
-      <div><button class="btn-resp" onclick="event.stopPropagation();openCargo({...window.allLoads.find(x=>x.id==${d.id})})">Откликнуться</button></div>
+      <div><button class="btn-resp" onclick="event.stopPropagation();openCargo({...window.allLoads.find(x=>x.id==${d.id})})">✉️</button></div>
     `;
     list.appendChild(row);
   });
