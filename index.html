@@ -1023,9 +1023,12 @@ function addToOrders(){
   }
 }
 function showPhone(){
-  alert('📞 Контакт доступен после регистрации\n\nДля связи с перевозчиком войдите в аккаунт');
-  closeModal('cargoOverlay');
-  openAuth('login');
+  if(user){
+    alert('📞 Контакт перевозчика\n\n+995 555 *** ***\n\nКонтакт открывается после принятия заявки.');
+  } else {
+    closeModal('cargoOverlay');
+    openAuth('login');
+  }
 }
 
 // ── AUTH ──────────────────────────────────────────────
