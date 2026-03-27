@@ -249,32 +249,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <input class="city-input" id="fTo" placeholder="🏁 Куда" autocomplete="off" oninput="filterCity('to',this.value)" onfocus="openDrop('to')" onblur="setTimeout(()=>closeDrop('to'),200)">
     <div class="city-dropdown" id="dropTo"></div>
   </div>
-  <select class="fsel" id="fCountry" onchange="filterByCountry(this.value)" style="display:none">
-    <option value="">🌍 Страна</option>
-    <option value="GE">🇬🇪 Грузия</option>
-    <option value="TR">🇹🇷 Турция</option>
-    <option value="AM">🇦🇲 Армения</option>
-    <option value="AZ">🇦🇿 Азербайджан</option>
-    <option value="RU">🇷🇺 Россия</option>
-    <option value="UA">🇺🇦 Украина</option>
-    <option value="CN">🇨🇳 Китай</option>
-    <option value="DE">🇩🇪 Германия</option>
-    <option value="PL">🇵🇱 Польша</option>
-    <option value="IT">🇮🇹 Италия</option>
-    <option value="BG">🇧🇬 Болгария</option>
-    <option value="KZ">🇰🇿 Казахстан</option>
-    <option value="UZ">🇺🇿 Узбекистан</option>
-    <option value="TM">🇹🇲 Туркменистан</option>
-    <option value="KG">🇰🇬 Кыргызстан</option>
-    <option value="TJ">🇹🇯 Таджикистан</option>
-    <option value="MD">🇲🇩 Молдова</option>
-    <option value="BY">🇧🇾 Беларусь</option>
-    <option value="IL">🇮🇱 Израиль</option>
-    <option value="IR">🇮🇷 Иран</option>
-    <option value="AE">🇦🇪 ОАЭ</option>
-    <option value="GR">🇬🇷 Греция</option>
-    <option value="RO">🇷🇴 Румыния</option>
-  </select>
+
   <input type="date" class="fsel" id="fDate" style="cursor:pointer;color:#333" onchange="filterByDate(this.value)">
   <select class="fsel" id="fType"><option value="">🚛 Кузов</option><option>Тент</option><option>Рефрижератор</option><option>Рефтент</option><option>Мегатент</option><option>Бортовой</option><option>Термос</option><option>Фургон (до 3.5т)</option><option>Контейнер</option><option>Автовоз</option><option>Эвакуатор</option><option>Цистерна</option><option>Зерновоз</option><option>Самосвал</option></select>
   <select class="fsel" id="fWeight" onchange="filterLoads()">
@@ -771,7 +746,7 @@ function openDrop(dir){
   if(val) filterCity(dir,val);
 }
 function closeDrop(dir){ document.getElementById(dir==='from'?'dropFrom':'dropTo').classList.remove('open'); }
-function selectCity(dir, name, lat, lng){
+function selectCity(dir, name, lat, lng, isCountry){
   const city=CITIES.find(c=>c.name===name)||{name,lat:lat?parseFloat(lat):null,lng:lng?parseFloat(lng):null,region:''};
   if(dir==='from'){
     selectedFrom=city;
@@ -1111,15 +1086,26 @@ function filterLoads(){
   const priceRange=document.getElementById('fPrice')?.value||'';
   let data=scope==='local'?[...LOCAL]:[...INTL];
 
-  // Город откуда
+  // Откуда (страна для intl, город для local)
   if(fromVal){
-    const fromCity=fromVal.split(',')[0].trim();
-    data=data.filter(d=>d.from.toLowerCase().includes(fromCity));
+    const fromQ=fromVal.split(',')[0].trim().toLowerCase();
+    if(scope==='intl'){
+      // Ищем по названию страны в поле from или to
+      data=data.filter(d=>d.from.toLowerCase().includes(fromQ)||d.to.toLowerCase().includes(fromQ)||
+        (d.from2&&d.from2.toLowerCase().includes(fromQ)));
+    } else {
+      data=data.filter(d=>d.from.toLowerCase().includes(fromQ));
+    }
   }
-  // Город куда
+  // Куда (страна для intl, город для local)
   if(toVal){
-    const toCity=toVal.split(',')[0].trim();
-    data=data.filter(d=>d.to.toLowerCase().includes(toCity));
+    const toQ=toVal.split(',')[0].trim().toLowerCase();
+    if(scope==='intl'){
+      data=data.filter(d=>d.to.toLowerCase().includes(toQ)||d.from.toLowerCase().includes(toQ)||
+        (d.to2&&d.to2.toLowerCase().includes(toQ)));
+    } else {
+      data=data.filter(d=>d.to.toLowerCase().includes(toQ));
+    }
   }
   // Тип кузова
   if(type&&type!=='🚛 Кузов') data=data.filter(d=>d.typeLabel.includes(type.slice(0,4)));
@@ -1175,6 +1161,16 @@ function setScope(s, el){
   const cf=document.getElementById('fCountry');
   if(cf) cf.style.display=s==='intl'?'block':'none';
   if(typeof updateFormForIntl==='function') updateFormForIntl();
+  // Меняем placeholder полей откуда/куда
+  const pfrom=document.getElementById('fFrom');
+  const pto=document.getElementById('fTo');
+  if(pfrom) pfrom.placeholder=s==='intl'?'🌍 Страна отправки':'📍 Откуда (город)';
+  if(pto) pto.placeholder=s==='intl'?'🌍 Страна назначения':'🏁 Куда (город)';
+  // Очищаем поля при смене scope
+  if(pfrom) pfrom.value='';
+  if(pto) pto.value='';
+  selectedFrom=null; selectedTo=null;
+  document.getElementById('mapWrap').classList.remove('open');
 }
 
 // ── LANG ──────────────────────────────────────────────
