@@ -49,8 +49,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .post-btn:hover { background:#27ae60; }
 
 /* TABLE */
-.thead { display:grid; grid-template-columns:2fr 1.5fr 0.8fr 1fr 0.9fr 0.9fr 82px; padding:8px 12px; background:#e8eaf0; font-size:11px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid #d0d4df; }
-.row { display:grid; grid-template-columns:2fr 1.5fr 0.8fr 1fr 0.9fr 0.9fr 82px; padding:11px 12px; background:#fff; border-bottom:1px solid #f2f2f2; cursor:pointer; align-items:center; border-left:3px solid transparent; transition:background .12s; }
+.thead { display:grid; grid-template-columns:2.5fr 0.8fr 1.1fr 1fr 1fr 88px; padding:8px 14px; background:#e8eaf0; font-size:11px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid #d0d4df; }
+.row { display:grid; grid-template-columns:2.5fr 0.8fr 1.1fr 1fr 1fr 88px; padding:11px 14px; background:#fff; border-bottom:1px solid #f2f2f2; cursor:pointer; align-items:center; border-left:3px solid transparent; transition:background .12s; }
 .row:hover { background:#fffbf0; }
 .row.urgent { border-left-color:#e74c3c; }
 .row.fresh { border-left-color:#2ecc71; }
@@ -64,7 +64,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .badge-new { background:#2ecc71; color:#fff; }
 .badge-urgent { background:#e74c3c; color:#fff; }
 .badge-intl { background:#3498db; color:#fff; }
-.btn-resp { background:#f7b731; color:#1a1a2e; border:none; padding:6px 6px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; width:100%; }
+.btn-resp { background:#f7b731; color:#1a1a2e; border:none; padding:7px 10px; border-radius:6px; font-size:13px; font-weight:700; cursor:pointer; width:100%; }
 .btn-resp:hover { background:#e6a820; }
 .load-more { text-align:center; padding:16px; background:#fff; }
 .load-more button { background:#f0f2f5; border:none; padding:10px 24px; border-radius:8px; font-size:13px; color:#555; cursor:pointer; }
@@ -862,10 +862,9 @@ function renderLoads(data){
           ${badgeHtml}
         </div>
       </div>
-      <div><div style="font-size:13px;font-weight:600">${d.co}</div><div class="sub">★ ${d.rat} · ${d.trips} рейсов</div></div>
       <div style="font-size:13px;color:#333">${d.kg.toLocaleString()} кг</div>
       <div><span class="tag" style="background:${d.typeClr};color:${d.typeClrT}">${d.typeLabel}</span></div>
-      <div class="price">$${d.price.toLocaleString()}</div>
+      <div class="price">${d.cur||"\$"}${d.price.toLocaleString()}</div>
       <div><div style="font-size:12px;font-weight:600;color:${dateClr}">${dateStr}</div>${badgeHtml}</div>
       <div><button class="btn-resp" onclick="event.stopPropagation();openCargo({...window.allLoads.find(x=>x.id==${d.id})})">Откликнуться</button></div>
     `;
@@ -916,7 +915,7 @@ function openCargo(d){
     <div><div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Оплата</div><div style="font-size:14px;font-weight:700">${d.pay}</div></div>
   `;
   document.getElementById('mDesc').textContent=d.desc;
-  document.getElementById('mPrice').textContent=`$${d.price.toLocaleString()}`;
+  document.getElementById('mPrice').textContent=`${d.cur||'\$'}${d.price.toLocaleString()}`;
   document.getElementById('mKm').textContent=d.km;
   document.getElementById('respondSuccess').style.display='none';
   document.getElementById('btnRespond').disabled=false;
