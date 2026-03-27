@@ -589,6 +589,10 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 </div>
 
 <script>
+// ── SAFE LOCALSTORAGE ─────────────────────────────────
+function _lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){window["_ls_"+k]=v;}}
+function _lsGet(k){try{return localStorage.getItem(k);}catch(e){return window["_ls_"+k]||null;}}
+function _lsDel(k){try{localStorage.removeItem(k);}catch(e){delete window["_ls_"+k];}}
 // ── ADDRESS AUTOCOMPLETE (Nominatim) ─────────────────
 let addrTimers={};
 let addrSelected={pFrom:null, pTo:null};
