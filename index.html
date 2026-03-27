@@ -49,8 +49,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .post-btn:hover { background:#27ae60; }
 
 /* TABLE */
-.thead { display:grid; grid-template-columns:220px 90px 110px 100px 120px; padding:8px 14px; background:#e8eaf0; font-size:11px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid #d0d4df; }
-.row { display:grid; grid-template-columns:220px 90px 110px 100px 120px; padding:11px 14px; background:#fff; border-bottom:1px solid #f2f2f2; cursor:pointer; align-items:center; border-left:3px solid transparent; transition:background .12s; }
+.thead { display:grid; grid-template-columns:minmax(180px,2fr) 80px 100px 90px 80px 80px; padding:8px 14px; background:#e8eaf0; font-size:11px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid #d0d4df; }
+.row { display:grid; grid-template-columns:minmax(180px,2fr) 80px 100px 90px 80px 80px; padding:11px 14px; background:#fff; border-bottom:1px solid #f2f2f2; cursor:pointer; align-items:center; border-left:3px solid transparent; transition:background .12s; }
 .row:hover { background:#fffbf0; }
 .row.urgent { border-left-color:#e74c3c; }
 .row.fresh { border-left-color:#2ecc71; }
@@ -313,7 +313,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 <!-- ═══ SECTION: LOADS ═══ -->
 <div class="section active" id="sec-loads">
   <div class="thead">
-    <div>ОТКУДА → КУДА</div><div>ВЕС</div><div>КУЗОВ</div><div>ЦЕНА</div><div>ДАТА / ОТКЛИК</div>
+    <div>ОТКУДА → КУДА</div><div>ВЕС</div><div>КУЗОВ</div><div>ЦЕНА</div><div>ДАТА</div><div></div>
   </div>
   <div class="cargo-list" id="cargoList"></div>
 </div>
@@ -895,20 +895,13 @@ function renderLoads(data){
       <div>
         <div class="route">${d.from} <span class="arrow">→</span> ${d.to}</div>
         <div class="sub">${d.co} ⭐${d.rat}</div>
-        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
-          <span class="tag" style="background:${d.typeClr};color:${d.typeClrT}">${d.typeLabel}</span>
-          <span style="font-size:11px;color:#aaa">${d.kg.toLocaleString()} кг</span>
-          ${badgeHtml}
-        </div>
+        <div style="margin-top:3px">${badgeHtml}</div>
       </div>
       <div style="font-size:13px;color:#333">${d.kg.toLocaleString()} кг</div>
       <div><span class="tag" style="background:${d.typeClr};color:${d.typeClrT}">${d.typeLabel}</span></div>
       <div class="price">${d.cur||"\$"}${d.price.toLocaleString()}</div>
-      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
-        <div style="font-size:12px;font-weight:600;color:${dateClr}">${dateStr}</div>
-        ${badgeHtml}
-        <button class="btn-resp" style="margin-top:2px" onclick="event.stopPropagation();openCargo({...window.allLoads.find(x=>x.id==${d.id})})">Отклик</button>
-      </div>
+      <div><div style="font-size:12px;font-weight:600;color:${dateClr}">${dateStr}</div>${badgeHtml}</div>
+      <div><button class="btn-resp" onclick="event.stopPropagation();openCargo({...window.allLoads.find(x=>x.id==${d.id})})">Отклик</button></div>
     `;
     list.appendChild(row);
   });
