@@ -1,6 +1,9 @@
-// AI DISPATCHER
+// ── AI DISPATCHER v2 ──────────────────────────────────
 let aiOpen=false;
+let aiRole=null; // 'carrier' | 'shipper' | null
 let aiLoadData={from:null,to:null,desc:null,weight:null,date:null,truck:null,price:null,pay:null};
+let aiCarrierData={from:null,to:null,date:null,truck:null,weightCap:null};
+let aiStep='greeting'; // greeting | ask_role | carrier_flow | shipper_flow
 
 function toggleAI(){
   aiOpen=!aiOpen;
@@ -14,13 +17,141 @@ function aiAddMsg(text,type){
   if(!msgs) return;
   const div=document.createElement('div');
   div.className='ai-msg '+type;
-  div.textContent=text;
+  div.innerHTML=text;
   msgs.appendChild(div);
   msgs.scrollTop=msgs.scrollHeight;
   return div;
 }
 
-function aiUpdateTemplate(){
+function aiAddRoleButtons(){
+  const msgs=document.getElementById('aiMessages');
+  if(!msgs) return;
+  const div=document.createElement('div');
+  div.className='ai-role-btns';
+  div.innerHTML='<button class="ai-role-btn" onclick="setRole(\'carrier\')">🚛 Я водитель / Перевозчик</button><button class="ai-role-btn" onclick="setRole(\'shipper\')">📦 Я грузовладелец</button>';
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function setRole(role){
+  aiRole=role;
+  // Убираем кнопки выбора роли
+  document.querySelectorAll('.ai-role-btns').forEach(el=>el.remove());
+  
+  if(role==='carrier'){
+    aiStep='carrier_flow';
+    aiAddMsg('Отлично! Расскажите о маршруте — откуда и куда едете, когда и какой у вас кузов?','bot');
+  } else {
+    aiStep='shipper_flow';
+    aiAddMsg('Хорошо! Расскажите о грузе — можно свободным текстом или голосом. Например: "5 тонн плитки из Тбилиси в Батуми завтра за 700 лари"','bot');
+    document.getElementById('aiTemplate').style.display='block';
+  }
+}
+
+function detectRole(text){
+  const t=text.toLowerCase();
+  const carrierWords=['водитель','везу','еду','перевозчик','машина','фура','мой кузов','свободен','ищу груз','нужен груз'];
+  const shipperWords=['нужно везти','отправить','доставить','груз','товар','плитка','мебель','продукты','сколько стоит везти'];
+  
+  const isCarrier=carrierWords.some(w=>t.includes(w));
+  const isShipper=shipperWords.some(w=>t.includes(w));
+  
+  if(isCarrier&&!isShipper) return 'carrier';
+  if(isShipper&&!isCarrier) return 'shipper';
+  return null;
+}
+
+function parseCarrier(text){
+  const t=text.toLowerCase();
+  const cities=['тбилиси','батуми','поти','кутаиси','рустави','стамбул','ереван','баку','москва','сочи','алматы','трабзон','анкара'];
+  const found=cities.filter(c=>t.includes(c));
+  if(found[0]&&!aiCarrierData.from) aiCarrierData.from=found[0].charAt(0).toUpperCase()+found[0].slice(1);
+  if(found[1]&&!aiCarrierData.to) aiCarrierData.to=found[1].charAt(0).toUpperCase()+found[1].slice(1);
+  if(t.includes('сегодня')) aiCarrierData.date='Сегодня';
+  else if(t.includes('завтра')) aiCarrierData.date='Завтра';
+  const trucks={тент:'Тент',рефриж:'Рефрижератор',борт:'Бортовой',термос:'Термос',фургон:'Фургон',контейн:'Контейнер',автовоз:'Автовоз'};
+  for(const[k,v] of Object.entries(trucks)){if(t.includes(k)){aiCarrierData.truck=v;break;}}
+  const wm=t.match(/(\d+)\s*(тонн|тн\b|кг)/);
+  if(wm){let w=parseInt(wm[1]);if(wm[2].includes('тонн')||wm[2]==='тн')w*=1000;aiCarrierData.weightCap=w;}
+}
+
+function findMatchingLoads(){
+  const d=aiCarrierData;
+  let data=[...LOCAL,...INTL].filter(ld=>ld.status!=='taken');
+  if(d.from) data=data.filter(ld=>ld.from.toLowerCase().includes(d.from.toLowerCase().slice(0,4)));
+  if(d.to) data=data.filter(ld=>ld.to.toLowerCase().includes(d.to.toLowerCase().slice(0,4)));
+  if(d.weightCap) data=data.filter(ld=>ld.kg<=d.weightCap*1.1);
+  return data.slice(0,3);
+}
+
+function buildCarrierReply(){
+  const d=aiCarrierData;
+  const missing=[];
+  if(!d.from) missing.push('откуда едете');
+  if(!d.to) missing.push('куда');
+  if(!d.date) missing.push('когда');
+  if(!d.truck) missing.push('тип кузова');
+  
+  if(missing.length<=1){
+    const loads=findMatchingLoads();
+    if(loads.length>0){
+      return '✅ Нашёл '+loads.length+' груза по вашему маршруту! Смотрите ниже 👇';
+    }
+    return '🔍 По вашему маршруту сейчас нет грузов. Я оповещу вас как только появится подходящий!';
+  }
+  if(missing.length<=2) return 'Отлично! Уточните: '+missing.join(' и ')+'?';
+  return 'Понял! Ещё нужно: '+missing.slice(0,2).join(' и ')+'?';
+}
+
+function showMatchingLoads(){
+  const loads=findMatchingLoads();
+  if(!loads.length) return;
+  const msgs=document.getElementById('aiMessages');
+  loads.forEach(d=>{
+    const div=document.createElement('div');
+    div.className='ai-msg bot';
+    div.style.cssText='background:#fffbf0;border:1px solid #f7b731;border-radius:10px;cursor:pointer;padding:10px 12px;';
+    div.innerHTML='<div style="font-weight:700;font-size:13px">'+d.from+' → '+d.to+'</div><div style="font-size:12px;color:#888;margin-top:3px">'+d.kg.toLocaleString()+' кг · '+(d.cur||'₾')+d.price+' · '+d.co+'</div>';
+    div.onclick=()=>openCargo(d);
+    msgs.appendChild(div);
+  });
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+function parseShipper(text){
+  const t=text.toLowerCase();
+  const cities=['тбилиси','батуми','поти','кутаиси','рустави','стамбул','ереван','баку','москва','сочи','алматы'];
+  const found=cities.filter(c=>t.includes(c));
+  if(found[0]&&!aiLoadData.from) aiLoadData.from=found[0].charAt(0).toUpperCase()+found[0].slice(1);
+  if(found[1]&&!aiLoadData.to) aiLoadData.to=found[1].charAt(0).toUpperCase()+found[1].slice(1);
+  const wm=t.match(/(\d+)\s*(тонн|тн\b|кг|кило)/);
+  if(wm){let w=parseInt(wm[1]);if(wm[2].includes('тонн')||wm[2]==='тн')w*=1000;aiLoadData.weight=w;}
+  const pm=t.match(/(\d+)\s*(лари|₾|\$)/);
+  if(pm) aiLoadData.price=parseInt(pm[1]);
+  if(t.includes('нал')&&!t.includes('безнал')) aiLoadData.pay='Наличные';
+  else if(t.includes('безнал')) aiLoadData.pay='Безналичный';
+  if(t.includes('сегодня')) aiLoadData.date='Сегодня';
+  else if(t.includes('завтра')) aiLoadData.date='Завтра';
+  const trucks={тент:'Тент',рефриж:'Рефрижератор',борт:'Бортовой',термос:'Термос',фургон:'Фургон'};
+  for(const[k,v] of Object.entries(trucks)){if(t.includes(k)&&!aiLoadData.truck){aiLoadData.truck=v;break;}}
+  // Описание груза
+  const goods=['плитка','мебель','продукты','оборудование','стройматериал','ткань','текстиль','металл','зерно','химия','авто','машин'];
+  for(const g of goods){if(t.includes(g)&&!aiLoadData.desc){aiLoadData.desc=g.charAt(0).toUpperCase()+g.slice(1);break;}}
+}
+
+function buildShipperReply(){
+  const d=aiLoadData;
+  const missing=[];
+  if(!d.from) missing.push('откуда');
+  if(!d.to) missing.push('куда');
+  if(!d.weight) missing.push('вес (кг или тонн)');
+  if(!d.date) missing.push('дата загрузки');
+  if(missing.length===0) return '✅ Все данные есть! Нажмите кнопку ниже чтобы разместить груз на бирже.';
+  if(missing.length<=2) return 'Почти готово! Уточните: '+missing.join(' и ')+'?';
+  return 'Понял! Ещё нужно: '+missing.slice(0,2).join(' и ')+'?';
+}
+
+function updateTemplate(){
   const d=aiLoadData;
   const filled=[d.from,d.to,d.weight].filter(Boolean).length;
   if(filled>0){
@@ -39,91 +170,63 @@ function aiUpdateTemplate(){
   if(btn) btn.classList.toggle('ready',!!ready);
 }
 
-function parseLocal(text){
-  const t=text.toLowerCase();
-  const georgianCities=['тбилиси','батуми','поти','кутаиси','рустави','зугдиди','гори','телави'];
-  const intlCities=['стамбул','ереван','баку','москва','сочи','алматы','ташкент','дубай','анкара'];
-  const allCities=[...georgianCities,...intlCities];
-  
-  const found=allCities.filter(c=>t.includes(c));
-  if(found.length>=1&&!aiLoadData.from) aiLoadData.from=found[0].charAt(0).toUpperCase()+found[0].slice(1);
-  if(found.length>=2&&!aiLoadData.to) aiLoadData.to=found[1].charAt(0).toUpperCase()+found[1].slice(1);
-  
-  const wm=t.match(/(\d+)\s*(тонн|тн\b|кг|кило)/);
-  if(wm){let w=parseInt(wm[1]);if(wm[2].includes('тонн')||wm[2]==='тн') w*=1000;aiLoadData.weight=w;}
-  
-  const pm=t.match(/(\d+)\s*(лари|₾)/);
-  if(pm) aiLoadData.price=parseInt(pm[1]);
-  
-  if(t.includes('нал')&&!t.includes('безнал')) aiLoadData.pay='Наличные';
-  else if(t.includes('безнал')) aiLoadData.pay='Безналичный';
-  
-  if(t.includes('сегодня')) aiLoadData.date='Сегодня';
-  else if(t.includes('завтра')) aiLoadData.date='Завтра';
-  else if(t.includes('пятниц')) aiLoadData.date='Пятница';
-  else if(t.includes('понедел')) aiLoadData.date='Понедельник';
-  
-  const truckTypes={тент:'Тент',рефриж:'Рефрижератор',борт:'Бортовой',термос:'Термос',фургон:'Фургон',контейн:'Контейнер',автовоз:'Автовоз'};
-  for(const[k,v] of Object.entries(truckTypes)){if(t.includes(k)&&!aiLoadData.truck){aiLoadData.truck=v;break;}}
-  
-  const dm=t.match(/(\w+)\s+груз|везт[ии]\s+(\w+)|(\w+)\s+товар/);
-  if(dm&&!aiLoadData.desc) aiLoadData.desc=(dm[1]||dm[2]||dm[3]).charAt(0).toUpperCase()+(dm[1]||dm[2]||dm[3]).slice(1);
-}
-
-function buildReply(){
-  const d=aiLoadData;
-  const missing=[];
-  if(!d.from) missing.push('откуда везём');
-  if(!d.to) missing.push('куда');
-  if(!d.weight) missing.push('вес груза (кг или тонн)');
-  if(!d.date) missing.push('дата загрузки');
-  if(missing.length===0) return '✅ Отлично! Все данные есть. Нажмите "Разместить груз"!';
-  if(missing.length<=2) return 'Почти готово! Уточните: '+missing.join(' и ')+'?';
-  return 'Понял! Теперь скажите: '+missing.slice(0,2).join(' и ')+'?';
-}
-
 async function aiSend(){
   const input=document.getElementById('aiInput');
   if(!input) return;
   const text=input.value.trim();
   if(!text) return;
-  input.value='';
-  input.style.height='auto';
+  input.value='';input.style.height='auto';
   aiAddMsg(text,'user');
-  
-  const typing=aiAddMsg('...','typing');
-  
-  // Сначала парсим локально
-  parseLocal(text);
-  
-  // Пробуем через API
-  try{
-    const prompt='Извлеки данные о грузе из текста: "'+text+'". Верни JSON: {"from":"город или null","to":"город или null","desc":"груз или null","weight":число_или_null,"date":"дата или null","truck":"тип_кузова или null","price":число_или_null,"pay":"оплата или null"}. Только JSON.';
-    const resp=await fetch('https://api-production-f3ea.up.railway.app/api/ai/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({message:prompt,lang:'ru'})
-    });
-    if(resp.ok){
-      const data=await resp.json();
-      const m=(data.reply||'').match(/\{[\s\S]*\}/);
-      if(m){
-        const parsed=JSON.parse(m[0]);
-        if(parsed.from) aiLoadData.from=parsed.from;
-        if(parsed.to) aiLoadData.to=parsed.to;
-        if(parsed.desc) aiLoadData.desc=parsed.desc;
-        if(parsed.weight) aiLoadData.weight=parsed.weight;
-        if(parsed.date) aiLoadData.date=parsed.date;
-        if(parsed.truck) aiLoadData.truck=parsed.truck;
-        if(parsed.price) aiLoadData.price=parsed.price;
-        if(parsed.pay) aiLoadData.pay=parsed.pay;
-      }
+
+  // Определяем роль если ещё не знаем
+  if(!aiRole&&aiStep!=='greeting'){
+    const detected=detectRole(text);
+    if(detected){
+      aiRole=detected;
+      aiStep=detected==='carrier'?'carrier_flow':'shipper_flow';
+      if(detected==='shipper') document.getElementById('aiTemplate').style.display='block';
     }
-  }catch(e){}
-  
+  }
+
+  const typing=aiAddMsg('...','typing');
+  await new Promise(r=>setTimeout(r,600));
   if(typing) typing.remove();
-  aiUpdateTemplate();
-  aiAddMsg(buildReply(),'bot');
+
+  if(aiStep==='greeting'||!aiRole){
+    // Пробуем определить роль из первого сообщения
+    const detected=detectRole(text);
+    if(detected){
+      aiRole=detected;
+      aiStep=detected==='carrier'?'carrier_flow':'shipper_flow';
+      if(detected==='shipper'){
+        document.getElementById('aiTemplate').style.display='block';
+        parseShipper(text);
+        updateTemplate();
+        aiAddMsg(buildShipperReply(),'bot');
+      } else {
+        parseCarrier(text);
+        const reply=buildCarrierReply();
+        aiAddMsg(reply,'bot');
+        if(findMatchingLoads().length>0) showMatchingLoads();
+      }
+    } else {
+      aiStep='ask_role';
+      aiAddMsg('Привет! Чтобы помочь вам — скажите, вы водитель или грузовладелец?','bot');
+      aiAddRoleButtons();
+    }
+    return;
+  }
+
+  if(aiStep==='carrier_flow'){
+    parseCarrier(text);
+    const reply=buildCarrierReply();
+    aiAddMsg(reply,'bot');
+    if(findMatchingLoads().length>0&&(aiCarrierData.from&&aiCarrierData.to)) showMatchingLoads();
+  } else {
+    parseShipper(text);
+    updateTemplate();
+    aiAddMsg(buildShipperReply(),'bot');
+  }
 }
 
 function aiPostLoad(){
@@ -136,24 +239,24 @@ function aiPostLoad(){
     if(d.weight){const el=document.getElementById('pWeight');if(el)el.value=d.weight;}
     if(d.price){const el=document.getElementById('pPrice');if(el)el.value=d.price;}
     if(d.desc){const el=document.getElementById('pDesc');if(el)el.value=d.desc;}
-    if(d.truck){
-      const sel=document.getElementById('pTruck');
-      if(sel){for(let i=0;i<sel.options.length;i++){if(sel.options[i].text.toLowerCase().includes(d.truck.toLowerCase())){sel.selectedIndex=i;break;}}}
-    }
   },400);
   aiAddMsg('Форму заполнил! Проверьте данные и нажмите "Разместить груз".','bot');
 }
 
 function aiStartVoice(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){aiAddMsg('Голосовой ввод не поддерживается. Используйте Chrome.','bot');return;}
+  if(!SR){aiAddMsg('Голосовой ввод: используйте Chrome браузер.','bot');return;}
   const rec=new SR();
   rec.lang='ru-RU';
   const mic=document.querySelector('.ai-mic');
-  rec.onstart=()=>{if(mic)mic.textContent='🔴';aiAddMsg('Слушаю...','bot');};
-  rec.onresult=(e)=>{const t=e.results[0][0].transcript;const inp=document.getElementById('aiInput');if(inp)inp.value=t;aiSend();};
+  rec.onstart=()=>{if(mic)mic.textContent='🔴';};
+  rec.onresult=(e)=>{
+    const t=e.results[0][0].transcript;
+    const inp=document.getElementById('aiInput');
+    if(inp)inp.value=t;
+    aiSend();
+  };
   rec.onend=()=>{if(mic)mic.textContent='🎤';};
-  rec.onerror=()=>{if(mic)mic.textContent='🎤';aiAddMsg('Не удалось распознать речь.','bot');};
   rec.start();
 }
 

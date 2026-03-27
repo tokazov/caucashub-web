@@ -171,6 +171,9 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   .post-btn span { display:none; }
 }
 /* AI DISPATCHER */
+.ai-role-btns{display:flex;flex-direction:column;gap:6px;margin:4px 0;}
+.ai-role-btn{background:#f0f2f5;border:1.5px solid #e0e0e0;border-radius:10px;padding:10px 14px;font-size:13px;cursor:pointer;text-align:left;transition:all .15s;}
+.ai-role-btn:hover{background:#fffbf0;border-color:#f7b731;}
 .ai-fab{position:fixed;bottom:80px;right:20px;width:56px;height:56px;background:linear-gradient(135deg,#1a1a2e,#3498db);border-radius:50%;border:none;cursor:pointer;z-index:500;box-shadow:0 4px 20px rgba(52,152,219,.5);display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform .2s;}
 .ai-fab:hover{transform:scale(1.1);}
 .ai-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#2ecc71;border-radius:50%;animation:pulse 2s infinite;border:2px solid #fff;}
@@ -1500,17 +1503,18 @@ if(document.readyState==='loading'){
 </div>
 
 <!-- AI DISPATCHER FAB -->
-<button class="ai-fab" onclick="toggleAI()" title="Твой AI Диспетчер">
-  🤖<div class="ai-badge"></div>
+<button class="ai-fab" onclick="toggleAI()" title="Твой AI Диспетчер" style="font-size:0;background:linear-gradient(135deg,#1a1a2e,#2980b9)">
+  <img src="https://api.dicebear.com/7.x/bottts/svg?seed=caucashub&backgroundColor=transparent" width="36" height="36" style="border-radius:50%">
+  <div class="ai-badge"></div>
 </button>
 <div class="ai-chat" id="aiChat">
   <div class="ai-chat-header">
-    <div class="ai-avatar">🤖</div>
+    <div class="ai-avatar" style="background:transparent;overflow:hidden"><img src="https://api.dicebear.com/7.x/bottts/svg?seed=caucashub&backgroundColor=1a1a2e" width="34" height="34"></div>
     <div><div class="ai-name">Твой AI Диспетчер</div><div class="ai-status">● Онлайн 24/7</div></div>
     <button class="ai-close" onclick="toggleAI()">✕</button>
   </div>
   <div class="ai-messages" id="aiMessages">
-    <div class="ai-msg bot">Привет! Расскажите о грузе — я всё заполню сам. Можно голосом 🎤 или текстом.</div>
+    <div class="ai-msg bot">👋 Привет! Я ваш AI диспетчер CaucasHub.<br>Вы <b>водитель</b> или <b>грузовладелец</b>?</div>
   </div>
   <div class="ai-template" id="aiTemplate" style="display:none">
     <div class="ai-template-title">📋 Данные груза:</div>
