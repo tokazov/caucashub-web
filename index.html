@@ -1090,11 +1090,9 @@ function filterLoads(){
   if(fromVal){
     const fromQ=fromVal.split(',')[0].trim().toLowerCase();
     if(scope==='intl'){
-      // Ищем по флагу страны (из COUNTRY_FLAGS) или названию
-      const fromFlag=Object.entries(COUNTRY_FLAGS).find(([k,v])=>fromQ.includes(v)||COUNTRY_NAMES[k]?.toLowerCase().includes(fromQ));
-      const fromEmoji=fromFlag?fromFlag[1]:fromQ;
-      data=data.filter(d=>d.from.includes(fromEmoji)||d.to.includes(fromEmoji)||
-        d.from.toLowerCase().includes(fromQ)||d.to.toLowerCase().includes(fromQ));
+      const fromCode=findCountryCode(fromQ);
+      if(fromCode) data=filterByCountryCode(data,fromCode,'from');
+      else data=data.filter(d=>d.from.toLowerCase().includes(fromQ)||d.to.toLowerCase().includes(fromQ));
     } else {
       data=data.filter(d=>d.from.toLowerCase().includes(fromQ));
     }
@@ -1103,10 +1101,9 @@ function filterLoads(){
   if(toVal){
     const toQ=toVal.split(',')[0].trim().toLowerCase();
     if(scope==='intl'){
-      const toFlag=Object.entries(COUNTRY_FLAGS).find(([k,v])=>toQ.includes(v)||COUNTRY_NAMES[k]?.toLowerCase().includes(toQ));
-      const toEmoji=toFlag?toFlag[1]:toQ;
-      data=data.filter(d=>d.to.includes(toEmoji)||d.from.includes(toEmoji)||
-        d.to.toLowerCase().includes(toQ)||d.from.toLowerCase().includes(toQ));
+      const toCode=findCountryCode(toQ);
+      if(toCode) data=filterByCountryCode(data,toCode,'to');
+      else data=data.filter(d=>d.to.toLowerCase().includes(toQ)||d.from.toLowerCase().includes(toQ));
     } else {
       data=data.filter(d=>d.to.toLowerCase().includes(toQ));
     }
