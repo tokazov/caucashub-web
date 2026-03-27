@@ -930,15 +930,31 @@ function doPostLoad(){
 
 // ── FILTER ─────────────────────────────────────────────
 function filterLoads(){
-  const from=document.getElementById('fFrom').value;
-  const to=document.getElementById('fTo').value;
+  const fromVal=document.getElementById('fFrom').value.toLowerCase();
+  const toVal=document.getElementById('fTo').value.toLowerCase();
   const type=document.getElementById('fType').value;
   let data=scope==='local'?[...LOCAL]:[...INTL];
-  if(from) data=data.filter(d=>d.from.includes(from));
-  if(to) data=data.filter(d=>d.to.includes(to));
+  // Ищем по первому слову (город) — игнорируем полный адрес
+  if(fromVal){
+    const fromCity=fromVal.split(',')[0].trim();
+    data=data.filter(d=>d.from.toLowerCase().includes(fromCity));
+  }
+  if(toVal){
+    const toCity=toVal.split(',')[0].trim();
+    data=data.filter(d=>d.to.toLowerCase().includes(toCity));
+  }
   if(type&&type!=='🚛 Кузов') data=data.filter(d=>d.typeLabel.includes(type.slice(0,4)));
   renderLoads(data);
   document.getElementById('fcount').textContent=data.length+' грузов';
+
+  // Показываем карту если выбраны оба города
+  if(fromVal&&toVal){
+    const fromCity=fromVal.split(',')[0].trim();
+    const toCity=toVal.split(',')[0].trim();
+    const cf=CITIES.find(c=>c.name.toLowerCase().includes(fromCity))||selectedFrom;
+    const ct=CITIES.find(c=>c.name.toLowerCase().includes(toCity))||selectedTo;
+    if(cf&&ct){ selectedFrom=cf; selectedTo=ct; showRouteMap(); }
+  }
 }
 
 // ── SECTIONS ──────────────────────────────────────────
