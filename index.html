@@ -273,6 +273,21 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   </select>
   <input type="date" class="fsel" id="fDate" style="cursor:pointer;color:#333" onchange="filterByDate(this.value)">
   <select class="fsel" id="fType"><option value="">🚛 Кузов</option><option>Тент</option><option>Рефрижератор</option><option>Рефтент</option><option>Мегатент</option><option>Бортовой</option><option>Термос</option><option>Фургон (до 3.5т)</option><option>Контейнер</option><option>Автовоз</option><option>Эвакуатор</option><option>Цистерна</option><option>Зерновоз</option><option>Самосвал</option></select>
+  <select class="fsel" id="fWeight" onchange="filterLoads()">
+    <option value="">⚖️ Тоннаж</option>
+    <option value="0-1000">До 1 т</option>
+    <option value="1000-5000">1–5 т</option>
+    <option value="5000-10000">5–10 т</option>
+    <option value="10000-20000">10–20 т</option>
+    <option value="20000-99999">20+ т (фура)</option>
+  </select>
+  <select class="fsel" id="fPrice" onchange="filterLoads()">
+    <option value="">💰 Стоимость</option>
+    <option value="0-300">До ₾300 / 00</option>
+    <option value="300-700">₾300–700 / 00–250</option>
+    <option value="700-1500">₾700–1500 / 50–500</option>
+    <option value="1500-99999">₾1500+ / 00+</option>
+  </select>
   <button class="fbtn" onclick="filterLoads()">Найти</button>
   <button class="post-btn" onclick="openPostLoad()">+ <span>Разместить груз</span></button>
   <div class="fcount" id="fcount">187 грузов</div>
@@ -1087,21 +1102,37 @@ function filterLoads(){
   const fromVal=document.getElementById('fFrom').value.toLowerCase();
   const toVal=document.getElementById('fTo').value.toLowerCase();
   const type=document.getElementById('fType').value;
+  const weightRange=document.getElementById('fWeight')?.value||'';
+  const priceRange=document.getElementById('fPrice')?.value||'';
   let data=scope==='local'?[...LOCAL]:[...INTL];
-  // Ищем по первому слову (город) — игнорируем полный адрес
+
+  // Город откуда
   if(fromVal){
     const fromCity=fromVal.split(',')[0].trim();
     data=data.filter(d=>d.from.toLowerCase().includes(fromCity));
   }
+  // Город куда
   if(toVal){
     const toCity=toVal.split(',')[0].trim();
     data=data.filter(d=>d.to.toLowerCase().includes(toCity));
   }
+  // Тип кузова
   if(type&&type!=='🚛 Кузов') data=data.filter(d=>d.typeLabel.includes(type.slice(0,4)));
+  // Тоннаж
+  if(weightRange){
+    const [wMin,wMax]=weightRange.split('-').map(Number);
+    data=data.filter(d=>d.kg>=wMin&&d.kg<=wMax);
+  }
+  // Стоимость
+  if(priceRange){
+    const [pMin,pMax]=priceRange.split('-').map(Number);
+    data=data.filter(d=>d.price>=pMin&&d.price<=pMax);
+  }
+
   renderLoads(data);
   document.getElementById('fcount').textContent=data.length+' грузов';
 
-  // Показываем карту если выбраны оба города
+  // Карта если оба города выбраны
   if(fromVal&&toVal){
     const fromCity=fromVal.split(',')[0].trim();
     const toCity=toVal.split(',')[0].trim();
