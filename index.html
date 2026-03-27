@@ -1225,29 +1225,7 @@ function showUserState(){
 }
 
 // Переопределяем doRespond чтобы добавлять в _orders
-const _origRespond=doRespond;
-function doRespond(){
-  if(!user){closeModal('cargoOverlay');openAuth('login');return;}
-  const btn=document.getElementById('btnRespond');
-  btn.textContent='Отправляем...';btn.disabled=true;
-  setTimeout(()=>{
-    document.getElementById('respondSuccess').style.display='block';
-    btn.textContent='✅ Заявка отправлена';
-    const title=document.getElementById('mTitle').textContent;
-    const price=parseInt(document.getElementById('mPrice').textContent.replace(/\D/g,''))||0;
-    const id=Date.now();
-    _orders.unshift({id,title,price,status:'pending',created:Date.now()});
-    _renderOrders();
-    pushNotif('📤 Отклик отправлен',`Ваш отклик на "${title}" ждёт одобрения.`,[]);
-    // Симуляция: через 5 сек приходит уведомление от грузовладельца
-    setTimeout(()=>pushNotif('📦 Новый отклик на ваш груз',`Перевозчик "${user.name}" откликнулся на "${title}".`,[
-      {l:'✅ Принять',c:'ni-accept',fn:`_acceptOrder(${id})`},
-      {l:'❌ Отклонить',c:'ni-reject',fn:`_orders=_orders.filter(x=>x.id!==${id});_renderOrders()`}
-    ]),5000);
-    // Напоминание через 24ч (в тесте 3 мин)
-    setTimeout(()=>{const o=_orders.find(x=>x.id===id);if(o&&o.status==='accepted')pushNotif('⏰ Напоминание',`Груз "${title}" в пути. Доставили?`,[{l:'✅ Доставлен',c:'ni-done',fn:`_delivered(${id})`}]);},180000);
-  },1000);
-}
+// doRespond расширена выше
 
 // showSection расширен через оригинал выше
 
