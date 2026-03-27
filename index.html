@@ -1130,10 +1130,13 @@ const COUNTRY_NAMES={'GE':'Грузия','TR':'Турция','AM':'Армени�
 function filterByCountry(code){
   let data=[...INTL];
   if(code){
+    const flag=COUNTRY_FLAGS[code]||'';
+    const name=(COUNTRY_NAMES[code]||'').toLowerCase();
     data=data.filter(d=>{
-      // Ищем флаг страны в поле to
-      const flag=COUNTRY_FLAGS[code];
-      return d.to.includes(flag)||d.from.includes(flag)||d.to.toUpperCase().includes(code);
+      const toL=d.to.toLowerCase();
+      const fromL=d.from.toLowerCase();
+      return d.to.includes(flag)||d.from.includes(flag)||
+             toL.includes(name)||fromL.includes(name);
     });
   }
   renderLoads(data);
