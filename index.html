@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CaucasHub.ge — Биржа грузов Кавказа</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f0f2f5; color:#1a1a2e; }
@@ -112,6 +114,25 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 /* SUCCESS */
 .success-msg { background:#e8f5e9; border:1px solid #2ecc71; border-radius:8px; padding:12px 16px; font-size:13px; color:#2e7d32; margin-bottom:14px; display:none; }
 
+/* CITY SEARCH */
+.city-input-wrap { position:relative; flex:1; min-width:130px; }
+.city-input { width:100%; border:1.5px solid #e0e0e0; border-radius:8px; padding:7px 10px; font-size:13px; color:#333; background:#fff; outline:none; }
+.city-input:focus { border-color:#f7b731; }
+.city-dropdown { display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1.5px solid #f7b731; border-radius:8px; z-index:500; max-height:200px; overflow-y:auto; box-shadow:0 4px 16px rgba(0,0,0,.12); margin-top:2px; }
+.city-dropdown.open { display:block; }
+.city-option { padding:8px 12px; font-size:13px; cursor:pointer; border-bottom:1px solid #f5f5f5; }
+.city-option:hover { background:#fffbf0; }
+.city-option .region { font-size:10px; color:#aaa; }
+
+/* MAP */
+.map-wrap { display:none; background:#fff; border-bottom:1px solid #eee; }
+.map-wrap.open { display:block; }
+#routeMap { height:260px; }
+.map-info { padding:10px 16px; display:flex; align-items:center; justify-content:space-between; }
+.map-route-label { font-size:14px; font-weight:700; }
+.map-dist { font-size:12px; color:#888; background:#f0f2f5; padding:4px 10px; border-radius:6px; }
+.map-close { background:none; border:none; color:#aaa; cursor:pointer; font-size:18px; }
+
 /* BOTTOM NAV */
 .bnav { display:none; position:fixed; bottom:0; left:0; right:0; background:#1a1a2e; padding:8px 0; z-index:100; }
 .bitem { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; color:#555; font-size:10px; cursor:pointer; padding:3px 0; background:none; border:none; }
@@ -174,13 +195,29 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 
 <!-- FILTERS -->
 <div class="filters">
-  <select class="fsel" id="fFrom"><option value="">📍 Откуда</option><option>Тбилиси</option><option>Батуми</option><option>Поти</option><option>Кутаиси</option><option>Рустави</option></select>
-  <select class="fsel" id="fTo"><option value="">🏁 Куда</option><option>Тбилиси</option><option>Батуми</option><option>Поти</option><option>Ереван</option><option>Стамбул</option><option>Баку</option><option>Москва</option></select>
+  <div class="city-input-wrap">
+    <input class="city-input" id="fFrom" placeholder="📍 Откуда" autocomplete="off" oninput="filterCity('from',this.value)" onfocus="openDrop('from')" onblur="setTimeout(()=>closeDrop('from'),200)">
+    <div class="city-dropdown" id="dropFrom"></div>
+  </div>
+  <div class="city-input-wrap">
+    <input class="city-input" id="fTo" placeholder="🏁 Куда" autocomplete="off" oninput="filterCity('to',this.value)" onfocus="openDrop('to')" onblur="setTimeout(()=>closeDrop('to'),200)">
+    <div class="city-dropdown" id="dropTo"></div>
+  </div>
   <select class="fsel"><option>📅 Дата</option><option>Сегодня</option><option>Завтра</option><option>На неделе</option></select>
   <select class="fsel" id="fType"><option>🚛 Кузов</option><option>Тент</option><option>Рефрижератор</option><option>Бортовой</option><option>Термос</option><option>Газель</option></select>
   <button class="fbtn" onclick="filterLoads()">Найти</button>
   <button class="post-btn" onclick="openPostLoad()">+ <span>Разместить груз</span></button>
   <div class="fcount" id="fcount">187 грузов</div>
+</div>
+
+<!-- MAP -->
+<div class="map-wrap" id="mapWrap">
+  <div class="map-info">
+    <div class="map-route-label" id="mapRouteLabel">Выберите маршрут</div>
+    <div class="map-dist" id="mapDist"></div>
+    <button class="map-close" onclick="closeMap()">✕</button>
+  </div>
+  <div id="routeMap"></div>
 </div>
 
 <!-- ═══ SECTION: LOADS ═══ -->
@@ -417,6 +454,125 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 </div>
 
 <script>
+// ── CITIES ───────────────────────────────────────────
+const CITIES = [
+  // Грузия
+  {name:'Тбилиси', lat:41.6938, lng:44.8015, region:'Грузия'},
+  {name:'Батуми', lat:41.6168, lng:41.6367, region:'Грузия'},
+  {name:'Кутаиси', lat:42.2679, lng:42.7181, region:'Грузия'},
+  {name:'Рустави', lat:41.5500, lng:45.0000, region:'Грузия'},
+  {name:'Поти', lat:42.1500, lng:41.6667, region:'Грузия'},
+  {name:'Зугдиди', lat:42.5082, lng:41.8709, region:'Грузия'},
+  {name:'Гори', lat:41.9850, lng:44.1114, region:'Грузия'},
+  {name:'Сенаки', lat:42.2667, lng:42.0667, region:'Грузия'},
+  {name:'Самтредиа', lat:42.1500, lng:42.3500, region:'Грузия'},
+  {name:'Хашури', lat:41.9908, lng:43.5975, region:'Грузия'},
+  {name:'Ткибули', lat:42.3500, lng:42.9833, region:'Грузия'},
+  {name:'Марнеули', lat:41.5000, lng:44.8000, region:'Грузия'},
+  {name:'Телави', lat:41.9200, lng:45.4800, region:'Грузия'},
+  {name:'Сигнахи', lat:41.6167, lng:45.9167, region:'Грузия'},
+  {name:'Мцхета', lat:41.8450, lng:44.7200, region:'Грузия'},
+  {name:'Боржоми', lat:41.8333, lng:43.4000, region:'Грузия'},
+  {name:'Кобулети', lat:41.8243, lng:41.7742, region:'Грузия'},
+  {name:'Озургети', lat:41.9213, lng:42.0019, region:'Грузия'},
+  {name:'Ахалцихе', lat:41.6397, lng:42.9844, region:'Грузия'},
+  {name:'Амбролаури', lat:42.5167, lng:43.1500, region:'Грузия'},
+  {name:'Ланчхути', lat:41.9753, lng:42.2003, region:'Грузия'},
+  {name:'Чохатаури', lat:41.9833, lng:42.2833, region:'Грузия'},
+  {name:'Цхалтубо', lat:42.3167, lng:42.6000, region:'Грузия'},
+  {name:'Сачхере', lat:42.3500, lng:43.4000, region:'Грузия'},
+  {name:'Хони', lat:42.2833, lng:42.8833, region:'Грузия'},
+  {name:'Карели', lat:41.8500, lng:44.1333, region:'Грузия'},
+  {name:'Каспи', lat:41.9333, lng:44.4167, region:'Грузия'},
+  {name:'Дманиси', lat:41.3333, lng:44.1667, region:'Грузия'},
+  {name:'Гардабани', lat:41.4619, lng:45.1167, region:'Грузия'},
+  {name:'Лагодехи', lat:41.8244, lng:46.2733, region:'Грузия'},
+  {name:'Дедоплисцкаро', lat:41.4667, lng:46.1000, region:'Грузия'},
+  {name:'Цнори', lat:41.6500, lng:45.6167, region:'Грузия'},
+  {name:'Кварели', lat:41.9667, lng:45.8167, region:'Грузия'},
+  {name:'Степанцминда', lat:42.6575, lng:44.4125, region:'Грузия'},
+  {name:'Местиа', lat:43.0464, lng:42.7228, region:'Грузия'},
+  // Международные
+  {name:'Ереван', lat:40.1872, lng:44.5152, region:'Армения 🇦🇲'},
+  {name:'Гюмри', lat:40.7894, lng:43.8475, region:'Армения 🇦🇲'},
+  {name:'Баку', lat:40.4093, lng:49.8671, region:'Азербайджан 🇦🇿'},
+  {name:'Гянджа', lat:40.6828, lng:46.3606, region:'Азербайджан 🇦🇿'},
+  {name:'Стамбул', lat:41.0082, lng:28.9784, region:'Турция 🇹🇷'},
+  {name:'Трабзон', lat:41.0015, lng:39.7178, region:'Турция 🇹🇷'},
+  {name:'Анкара', lat:39.9334, lng:32.8597, region:'Турция 🇹🇷'},
+  {name:'Москва', lat:55.7558, lng:37.6176, region:'Россия 🇷🇺'},
+  {name:'Санкт-Петербург', lat:59.9343, lng:30.3351, region:'Россия 🇷🇺'},
+  {name:'Сочи', lat:43.5992, lng:39.7257, region:'Россия 🇷🇺'},
+];
+
+let selectedFrom=null, selectedTo=null, map=null, routeLine=null, markers=[];
+
+function filterCity(dir, val){
+  const q=val.trim().toLowerCase();
+  const id=dir==='from'?'dropFrom':'dropTo';
+  const drop=document.getElementById(id);
+  if(q.length<1){drop.classList.remove('open');return;}
+  const filtered=CITIES.filter(c=>c.name.toLowerCase().includes(q)).slice(0,8);
+  drop.innerHTML=filtered.map(c=>`<div class="city-option" onmousedown="selectCity('${dir}','${c.name}')">${c.name} <span class="region">${c.region}</span></div>`).join('');
+  drop.classList.add('open');
+}
+function openDrop(dir){
+  const val=document.getElementById(dir==='from'?'fFrom':'fTo').value;
+  if(val) filterCity(dir,val);
+}
+function closeDrop(dir){ document.getElementById(dir==='from'?'dropFrom':'dropTo').classList.remove('open'); }
+function selectCity(dir, name){
+  const city=CITIES.find(c=>c.name===name);
+  if(dir==='from'){
+    selectedFrom=city;
+    document.getElementById('fFrom').value=name;
+    document.getElementById('dropFrom').classList.remove('open');
+  } else {
+    selectedTo=city;
+    document.getElementById('fTo').value=name;
+    document.getElementById('dropTo').classList.remove('open');
+  }
+  if(selectedFrom&&selectedTo) showRouteMap();
+}
+
+// ── MAP ───────────────────────────────────────────────
+function showRouteMap(){
+  const wrap=document.getElementById('mapWrap');
+  wrap.classList.add('open');
+  const f=selectedFrom, t=selectedTo;
+  const dist=Math.round(Math.sqrt(Math.pow((f.lat-t.lat)*111,2)+Math.pow((f.lng-t.lng)*111*Math.cos(f.lat*Math.PI/180),2)));
+  document.getElementById('mapRouteLabel').textContent=`${f.name} → ${t.name}`;
+  document.getElementById('mapDist').textContent=`~${dist} км`;
+
+  if(!map){
+    map=L.map('routeMap',{zoomControl:true,scrollWheelZoom:false});
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:18}).addTo(map);
+  }
+  // Убираем старые маркеры
+  markers.forEach(m=>map.removeLayer(m));
+  markers=[];
+  if(routeLine) map.removeLayer(routeLine);
+
+  const iconFrom=L.divIcon({className:'',html:'<div style="background:#2ecc71;color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.3);font-weight:700">A</div>',iconSize:[30,30],iconAnchor:[15,15]});
+  const iconTo=L.divIcon({className:'',html:'<div style="background:#e74c3c;color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.3);font-weight:700">B</div>',iconSize:[30,30],iconAnchor:[15,15]});
+
+  const mFrom=L.marker([f.lat,f.lng],{icon:iconFrom}).bindPopup(`<b>${f.name}</b><br>${f.region}`).addTo(map);
+  const mTo=L.marker([t.lat,t.lng],{icon:iconTo}).bindPopup(`<b>${t.name}</b><br>${t.region}`).addTo(map);
+  markers=[mFrom,mTo];
+
+  routeLine=L.polyline([[f.lat,f.lng],[t.lat,t.lng]],{color:'#f7b731',weight:3,dashArray:'8 6',opacity:.9}).addTo(map);
+
+  const bounds=L.latLngBounds([[f.lat,f.lng],[t.lat,t.lng]]);
+  map.fitBounds(bounds,{padding:[40,40]});
+  setTimeout(()=>map.invalidateSize(),100);
+}
+function closeMap(){
+  document.getElementById('mapWrap').classList.remove('open');
+  selectedFrom=null; selectedTo=null;
+  document.getElementById('fFrom').value='';
+  document.getElementById('fTo').value='';
+}
+
 // ── DATA ────────────────────────────────────────────
 const LOCAL = [
   {id:1,from:'Тбилиси',to:'Батуми',kg:5000,type:'tent',typeLabel:'Тент',typeClr:'#f3e5f5',typeClrT:'#6a1b9a',price:280,date:'today',urgent:false,scope:'local',desc:'Стройматериалы (плитка). 12 паллет. Документы готовы. Аккуратная загрузка.',co:'Экспресс-Груз',rat:'4.9',trips:142,pay:'Нал, сразу',from2:'Тбилиси, склад Дидубе',to2:'Батуми, порт',km:'~312 км',badge:'new'},
