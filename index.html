@@ -114,6 +114,20 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 /* SUCCESS */
 .success-msg { background:#e8f5e9; border:1px solid #2ecc71; border-radius:8px; padding:12px 16px; font-size:13px; color:#2e7d32; margin-bottom:14px; display:none; }
 
+/* ADDRESS AUTOCOMPLETE */
+.addr-wrap { position:relative; }
+.addr-input { width:100%; border:1.5px solid #e0e0e0; border-radius:8px; padding:10px 12px 10px 32px; font-size:14px; outline:none; transition:border-color .2s; }
+.addr-input:focus { border-color:#f7b731; }
+.addr-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:14px; pointer-events:none; }
+.addr-drop { display:none; position:absolute; top:100%; left:0; right:0; background:#fff; border:1.5px solid #f7b731; border-radius:8px; z-index:600; max-height:220px; overflow-y:auto; box-shadow:0 4px 16px rgba(0,0,0,.12); margin-top:2px; }
+.addr-drop.open { display:block; }
+.addr-item { padding:10px 12px; font-size:13px; cursor:pointer; border-bottom:1px solid #f5f5f5; line-height:1.3; }
+.addr-item:hover { background:#fffbf0; }
+.addr-item .addr-main { font-weight:600; color:#1a1a2e; }
+.addr-item .addr-sub { font-size:11px; color:#aaa; margin-top:1px; }
+.addr-loading { padding:10px 12px; font-size:13px; color:#aaa; }
+.addr-coords { font-size:10px; color:#2ecc71; margin-top:3px; display:none; }
+
 /* CITY SEARCH */
 .city-input-wrap { position:relative; flex:1; min-width:130px; }
 .city-input { width:100%; border:1.5px solid #e0e0e0; border-radius:8px; padding:7px 10px; font-size:13px; color:#333; background:#fff; outline:none; }
@@ -333,18 +347,26 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <div class="modal-title">Разместить груз</div>
     <div class="modal-sub">Заполните данные — перевозчики увидят ваш груз сразу</div>
     <div class="success-msg" id="postSuccess">✅ Груз размещён! Перевозчики уже видят ваше объявление.</div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Откуда</label>
-        <select class="form-select" id="pFrom">
-          <option>Тбилиси</option><option>Батуми</option><option>Поти</option><option>Кутаиси</option><option>Рустави</option><option>Другой</option>
-        </select>
+    <div class="form-group">
+      <label>📍 Точный адрес отправки</label>
+      <div class="addr-wrap">
+        <span class="addr-icon">📍</span>
+        <input class="addr-input" id="pFromAddr" placeholder="Введите адрес, склад, район..." autocomplete="off"
+          oninput="addrSearch('pFrom',this.value)"
+          onblur="setTimeout(()=>closeAddrDrop('pFrom'),200)">
+        <div class="addr-drop" id="dropPFrom"></div>
+        <div class="addr-coords" id="coordsPFrom"></div>
       </div>
-      <div class="form-group">
-        <label>Куда</label>
-        <select class="form-select" id="pTo">
-          <option>Батуми</option><option>Тбилиси</option><option>Поти</option><option>Ереван</option><option>Стамбул</option><option>Баку</option><option>Москва</option><option>Другой</option>
-        </select>
+    </div>
+    <div class="form-group">
+      <label>🏁 Точный адрес доставки</label>
+      <div class="addr-wrap">
+        <span class="addr-icon">🏁</span>
+        <input class="addr-input" id="pToAddr" placeholder="Введите адрес, склад, район..." autocomplete="off"
+          oninput="addrSearch('pTo',this.value)"
+          onblur="setTimeout(()=>closeAddrDrop('pTo'),200)">
+        <div class="addr-drop" id="dropPTo"></div>
+        <div class="addr-coords" id="coordsPTo"></div>
       </div>
     </div>
     <div class="form-row">
@@ -454,6 +476,63 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 </div>
 
 <script>
+// ── ADDRESS AUTOCOMPLETE (Nominatim) ─────────────────
+let addrTimers={};
+let addrSelected={pFrom:null, pTo:null};
+
+function addrSearch(field, val){
+  clearTimeout(addrTimers[field]);
+  const dropId='dropP'+field.slice(1,2).toUpperCase()+field.slice(2);
+  const drop=document.getElementById('drop'+field.slice(0,1).toUpperCase()+field.slice(1).replace('p','P'));
+  const dropEl=document.getElementById('dropP'+(field==='pFrom'?'From':'To'));
+  if(!dropEl) return;
+  if(val.trim().length<2){dropEl.classList.remove('open');return;}
+  dropEl.innerHTML='<div class="addr-loading">🔍 Ищем адрес...</div>';
+  dropEl.classList.add('open');
+  addrTimers[field]=setTimeout(()=>{
+    const q=encodeURIComponent(val+', Georgia');
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=6&addressdetails=1&q=${q}`,{headers:{'Accept-Language':'ru'}})
+      .then(r=>r.json())
+      .then(results=>{
+        if(!results.length){
+          dropEl.innerHTML='<div class="addr-loading">Ничего не найдено. Попробуйте другой запрос.</div>';
+          return;
+        }
+        dropEl.innerHTML=results.map((r,i)=>{
+          const main=r.display_name.split(',')[0];
+          const sub=r.display_name.split(',').slice(1,3).join(',').trim();
+          return `<div class="addr-item" onmousedown="selectAddr('${field}','${r.display_name.replace(/'/g,'`')}',${r.lat},${r.lon})"><div class="addr-main">${main}</div><div class="addr-sub">${sub}</div></div>`;
+        }).join('');
+      })
+      .catch(()=>{
+        dropEl.innerHTML='<div class="addr-loading">Ошибка соединения</div>';
+      });
+  },400);
+}
+
+function selectAddr(field, addr, lat, lng){
+  const inputId=field+'Addr';
+  const dropId='dropP'+(field==='pFrom'?'From':'To');
+  const coordId='coordsP'+(field==='pFrom'?'From':'To');
+  document.getElementById(inputId).value=addr.replace(/`/g,"'");
+  document.getElementById(dropId).classList.remove('open');
+  const coordEl=document.getElementById(coordId);
+  coordEl.textContent=`✅ Координаты: ${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)}`;
+  coordEl.style.display='block';
+  addrSelected[field]={addr:addr.replace(/`/g,"'"),lat:parseFloat(lat),lng:parseFloat(lng)};
+
+  // Если оба адреса выбраны — показываем мини-карту
+  if(addrSelected.pFrom&&addrSelected.pTo){
+    selectedFrom=addrSelected.pFrom;
+    selectedTo=addrSelected.pTo;
+  }
+}
+function closeAddrDrop(field){
+  const dropId='dropP'+(field==='pFrom'?'From':'To');
+  const el=document.getElementById(dropId);
+  if(el) el.classList.remove('open');
+}
+
 // ── CITIES ───────────────────────────────────────────
 const CITIES = [
   // Грузия
@@ -812,8 +891,11 @@ function openPostLoad(){
   document.getElementById('postOverlay').classList.add('on');
 }
 function doPostLoad(){
-  const from=document.getElementById('pFrom').value;
-  const to=document.getElementById('pTo').value;
+  const fromAddr=document.getElementById('pFromAddr').value||'Адрес не указан';
+  const toAddr=document.getElementById('pToAddr').value||'Адрес не указан';
+  // Город — первое слово из адреса
+  const from=addrSelected.pFrom?fromAddr.split(',')[0]:fromAddr.split(',')[0]||'Тбилиси';
+  const to=addrSelected.pTo?toAddr.split(',')[0]:toAddr.split(',')[0]||'Батуми';
   const kg=parseInt(document.getElementById('pWeight').value)||5000;
   const price=parseInt(document.getElementById('pPrice').value)||300;
   const truck=document.getElementById('pTruck').value;
@@ -822,7 +904,7 @@ function doPostLoad(){
   const urgent=document.getElementById('pUrgent').checked;
   const typeMap={'Тент':{typeClr:'#f3e5f5',typeClrT:'#6a1b9a'},'Рефрижератор':{typeClr:'#e3f2fd',typeClrT:'#1565c0'},'Бортовой':{typeClr:'#e8f5e9',typeClrT:'#2e7d32'},'Термос':{typeClr:'#fff3e0',typeClrT:'#bf360c'},'Газель':{typeClr:'#fce4ec',typeClrT:'#880e4f'},'Контейнер':{typeClr:'#f0f2f5',typeClrT:'#555'}};
   const tc=typeMap[truck]||typeMap['Тент'];
-  const newLoad={id:Date.now(),from,to,kg,type:truck.toLowerCase(),typeLabel:truck,...tc,price,date:'today',urgent,scope:scope==='intl'?'intl':'local',desc,co:user.name,rat:'5.0',trips:0,pay,from2:`${from}, ваш адрес`,to2:`${to}, адрес получателя`,km:'~уточните',badge:urgent?'urgent':'new'};
+  const newLoad={id:Date.now(),from,to,kg,type:truck.toLowerCase(),typeLabel:truck,...tc,price,date:'today',urgent,scope:scope==='intl'?'intl':'local',desc,co:user.name,rat:'5.0',trips:0,pay,from2:fromAddr,to2:toAddr,km:'~уточните',badge:urgent?'urgent':'new'};
   LOCAL.unshift(newLoad);
   window.allLoads=[...LOCAL,...INTL];
   document.getElementById('postSuccess').style.display='block';
