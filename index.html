@@ -1090,9 +1090,11 @@ function filterLoads(){
   if(fromVal){
     const fromQ=fromVal.split(',')[0].trim().toLowerCase();
     if(scope==='intl'){
-      // Ищем по названию страны в поле from или to
-      data=data.filter(d=>d.from.toLowerCase().includes(fromQ)||d.to.toLowerCase().includes(fromQ)||
-        (d.from2&&d.from2.toLowerCase().includes(fromQ)));
+      // Ищем по флагу страны (из COUNTRY_FLAGS) или названию
+      const fromFlag=Object.entries(COUNTRY_FLAGS).find(([k,v])=>fromQ.includes(v)||COUNTRY_NAMES[k]?.toLowerCase().includes(fromQ));
+      const fromEmoji=fromFlag?fromFlag[1]:fromQ;
+      data=data.filter(d=>d.from.includes(fromEmoji)||d.to.includes(fromEmoji)||
+        d.from.toLowerCase().includes(fromQ)||d.to.toLowerCase().includes(fromQ));
     } else {
       data=data.filter(d=>d.from.toLowerCase().includes(fromQ));
     }
@@ -1101,8 +1103,10 @@ function filterLoads(){
   if(toVal){
     const toQ=toVal.split(',')[0].trim().toLowerCase();
     if(scope==='intl'){
-      data=data.filter(d=>d.to.toLowerCase().includes(toQ)||d.from.toLowerCase().includes(toQ)||
-        (d.to2&&d.to2.toLowerCase().includes(toQ)));
+      const toFlag=Object.entries(COUNTRY_FLAGS).find(([k,v])=>toQ.includes(v)||COUNTRY_NAMES[k]?.toLowerCase().includes(toQ));
+      const toEmoji=toFlag?toFlag[1]:toQ;
+      data=data.filter(d=>d.to.includes(toEmoji)||d.from.includes(toEmoji)||
+        d.to.toLowerCase().includes(toQ)||d.from.toLowerCase().includes(toQ));
     } else {
       data=data.filter(d=>d.to.toLowerCase().includes(toQ));
     }
