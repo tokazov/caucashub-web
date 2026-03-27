@@ -166,6 +166,33 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   .fsel { font-size:12px; padding:6px 8px; }
   .post-btn span { display:none; }
 }
+/* NOTIFICATIONS */
+.notif-btn{position:relative;background:transparent;border:none;cursor:pointer;padding:4px 6px;display:none}
+.notif-icon{font-size:20px}
+.notif-badge{position:absolute;top:0;right:0;background:#e74c3c;color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center}
+.notif-badge.has{display:flex}
+.notif-panel{display:none;position:fixed;top:60px;right:16px;width:320px;background:#fff;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.15);z-index:300;max-height:440px;overflow-y:auto}
+.notif-panel.open{display:block}
+.notif-header{padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center}
+.notif-title{font-weight:700;font-size:14px}
+.notif-mark{font-size:12px;color:#3498db;cursor:pointer;background:none;border:none}
+.notif-item{padding:12px 16px;border-bottom:1px solid #f5f5f5;cursor:pointer}
+.notif-item.unread{border-left:3px solid #f7b731;background:#fffdf5}
+.ni-title{font-weight:600;font-size:13px;margin-bottom:2px}
+.ni-body{font-size:12px;color:#666;line-height:1.4}
+.ni-time{font-size:11px;color:#aaa;margin-top:4px}
+.ni-actions{display:flex;gap:6px;margin-top:8px}
+.ni-accept{background:#2ecc71;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+.ni-reject{background:#f0f2f5;color:#555;border:none;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer}
+.ni-done{background:#f7b731;color:#1a1a2e;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
+.notif-empty{padding:24px;text-align:center;color:#aaa;font-size:13px}
+/* STATUS */
+.sbadge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700}
+.s-pending{background:#fff3e0;color:#f39c12}
+.s-accepted{background:#e8f5e9;color:#2e7d32}
+.s-transit{background:#e3f2fd;color:#1565c0}
+.s-done{background:#f0f4ff;color:#5c35d6}
+.s-rated{background:#f5f5f5;color:#888}
 </style>
 </head>
 <body>
@@ -181,10 +208,23 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <button class="lang-btn" onclick="setLang('ge',this)">GE</button>
       <button class="lang-btn" onclick="setLang('en',this)">EN</button>
     </div>
+    <button class="notif-btn" id="notifBtn" onclick="toggleNotifs()">
+      <span class="notif-icon">🔔</span>
+      <span class="notif-badge" id="notifBadge"></span>
+    </button>
     <button class="btn-login" id="btnLogin" onclick="openAuth('login')">Войти</button>
     <button class="btn-reg" id="btnReg" onclick="openAuth('register')">Регистрация</button>
     <div class="user-avatar" id="userAvatar" style="display:none" onclick="openProfile()">ТК</div>
   </div>
+</div>
+
+<!-- NOTIF PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-header">
+    <span class="notif-title">🔔 Уведомления</span>
+    <button class="notif-mark" onclick="clearNotifs()">Прочитать все</button>
+  </div>
+  <div id="notifList"><div class="notif-empty">Нет уведомлений</div></div>
 </div>
 
 <!-- SCOPE -->
@@ -992,6 +1032,114 @@ function setLang(l,btn){
 // ── MODALS ────────────────────────────────────────────
 function closeModal(id){ document.getElementById(id).classList.remove('on'); }
 function closeOverlay(id,e){ if(e.target===document.getElementById(id)) closeModal(id); }
+
+// ── NOTIFICATIONS ─────────────────────────────────────
+let _notifs=[], _orders=[];
+const _STATUS={pending:{l:'⏳ Ожидание',c:'s-pending'},accepted:{l:'✅ Принят',c:'s-accepted'},transit:{l:'🚛 В пути',c:'s-transit'},done:{l:'✔️ Завершён',c:'s-done'},rated:{l:'⭐ Оценён',c:'s-rated'}};
+
+function pushNotif(title,body,actions){
+  const n={id:Date.now()+(Math.random()*99|0),title,body,actions:actions||[],unread:true,time:new Date()};
+  _notifs.unshift(n);
+  _renderNotifs();
+  _updateBadge();
+}
+function _renderNotifs(){
+  const el=document.getElementById('notifList');
+  if(!el)return;
+  if(!_notifs.length){el.innerHTML='<div class="notif-empty">Нет уведомлений</div>';return;}
+  el.innerHTML=_notifs.map(n=>{
+    const t=n.time.toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'});
+    const a=n.actions.map(x=>`<button class="${x.c}" onclick="${x.fn}">${x.l}</button>`).join('');
+    return `<div class="notif-item${n.unread?' unread':''}" onclick="_markRead(${n.id})">
+      <div class="ni-title">${n.title}</div>
+      <div class="ni-body">${n.body}</div>
+      ${a?`<div class="ni-actions">${a}</div>`:''}
+      <div class="ni-time">${t}</div>
+    </div>`;
+  }).join('');
+}
+function _markRead(id){const n=_notifs.find(x=>x.id===id);if(n)n.unread=false;_renderNotifs();_updateBadge();}
+function clearNotifs(){_notifs.forEach(n=>n.unread=false);_renderNotifs();_updateBadge();}
+function _updateBadge(){
+  const c=_notifs.filter(n=>n.unread).length;
+  const b=document.getElementById('notifBadge');
+  if(b){b.textContent=c||'';b.classList.toggle('has',c>0);}
+}
+function toggleNotifs(){
+  const p=document.getElementById('notifPanel');
+  if(p){p.classList.toggle('open');if(p.classList.contains('open'))clearNotifs();}
+}
+document.addEventListener('click',function(e){
+  const p=document.getElementById('notifPanel'),b=document.getElementById('notifBtn');
+  if(p&&b&&!p.contains(e.target)&&!b.contains(e.target))p.classList.remove('open');
+});
+
+// Статусы заявок
+function _renderOrders(){
+  const empty=document.getElementById('ordersEmpty'),list=document.getElementById('ordersList');
+  if(!_orders.length){if(empty)empty.style.display='block';if(list)list.style.display='none';return;}
+  if(empty)empty.style.display='none';
+  if(!list)return;
+  list.style.display='block';
+  list.innerHTML=_orders.map(o=>{
+    const s=_STATUS[o.status]||_STATUS.pending;
+    let act='';
+    if(o.status==='accepted') act=`<button class="ni-done" onclick="_delivered(${o.id})" style="margin-top:8px">🚛 Груз доставлен</button>`;
+    if(o.status==='done') act=`<button onclick="_rate(${o.id})" style="margin-top:8px;background:#f0f2f5;border:none;padding:5px 14px;border-radius:6px;font-size:13px;cursor:pointer">⭐ Оставить отзыв</button>`;
+    const ts=new Date(o.created).toLocaleString('ru',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    const bc=o.status==='transit'?'#3498db':o.status==='done'?'#2ecc71':'#f7b731';
+    return `<div style="padding:14px 16px;background:#fff;border-bottom:1px solid #f2f2f2;border-left:3px solid ${bc}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div style="font-weight:700;font-size:15px">${o.title}</div>
+        <span class="sbadge ${s.c}">${s.l}</span>
+      </div>
+      <div style="font-size:13px;color:#888">💰 $${o.price} · ${ts}</div>${act}
+    </div>`;
+  }).join('');
+}
+function _acceptOrder(id){const o=_orders.find(x=>x.id===id);if(!o)return;o.status='accepted';_renderOrders();pushNotif('✅ Принято!',`Груз "${o.title}" принят.`,[{l:'🚛 Доставлен',c:'ni-done',fn:`_delivered(${id})`}]);}
+function _delivered(id){const o=_orders.find(x=>x.id===id);if(!o)return;o.status='done';_renderOrders();pushNotif('🎉 Доставлен!',`"${o.title}" доставлен. Оставьте отзыв.`,[{l:'⭐ Оценить',c:'ni-done',fn:`_rate(${id})`}]);}
+function _rate(id){const o=_orders.find(x=>x.id===id);if(!o)return;const r=prompt(`Оцените "${o.title}" (1-5):`,'5');if(r&&+r>=1&&+r<=5){o.status='rated';_renderOrders();pushNotif('⭐ Спасибо!',`Оценка ${r}/5 сохранена.`,[]);}}
+
+// Переопределяем showUserState чтобы показывать колокольчик
+const _origShowUser=showUserState;
+function showUserState(){
+  _origShowUser();
+  const nb=document.getElementById('notifBtn');
+  if(nb)nb.style.display='';
+}
+
+// Переопределяем doRespond чтобы добавлять в _orders
+const _origRespond=doRespond;
+function doRespond(){
+  if(!user){closeModal('cargoOverlay');openAuth('login');return;}
+  const btn=document.getElementById('btnRespond');
+  btn.textContent='Отправляем...';btn.disabled=true;
+  setTimeout(()=>{
+    document.getElementById('respondSuccess').style.display='block';
+    btn.textContent='✅ Заявка отправлена';
+    const title=document.getElementById('mTitle').textContent;
+    const price=parseInt(document.getElementById('mPrice').textContent.replace(/\D/g,''))||0;
+    const id=Date.now();
+    _orders.unshift({id,title,price,status:'pending',created:Date.now()});
+    _renderOrders();
+    pushNotif('📤 Отклик отправлен',`Ваш отклик на "${title}" ждёт одобрения.`,[]);
+    // Симуляция: через 5 сек приходит уведомление от грузовладельца
+    setTimeout(()=>pushNotif('📦 Новый отклик на ваш груз',`Перевозчик "${user.name}" откликнулся на "${title}".`,[
+      {l:'✅ Принять',c:'ni-accept',fn:`_acceptOrder(${id})`},
+      {l:'❌ Отклонить',c:'ni-reject',fn:`_orders=_orders.filter(x=>x.id!==${id});_renderOrders()`}
+    ]),5000);
+    // Напоминание через 24ч (в тесте 3 мин)
+    setTimeout(()=>{const o=_orders.find(x=>x.id===id);if(o&&o.status==='accepted')pushNotif('⏰ Напоминание',`Груз "${title}" в пути. Доставили?`,[{l:'✅ Доставлен',c:'ni-done',fn:`_delivered(${id})`}]);},180000);
+  },1000);
+}
+
+// Переопределяем showSection для Заказов
+const _origShowSection=showSection;
+function showSection(name,el){
+  _origShowSection(name,el);
+  if(name==='orders') _renderOrders();
+}
 
 // ── INIT ──────────────────────────────────────────────
 renderLoads(LOCAL);
