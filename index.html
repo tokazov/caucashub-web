@@ -218,15 +218,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   </div>
 </div>
 
-<!-- NOTIF PANEL -->
-<div class="notif-panel" id="notifPanel">
-  <div class="notif-header">
-    <span class="notif-title">🔔 Уведомления</span>
-    <button class="notif-mark" onclick="clearNotifs()">Прочитать все</button>
-  </div>
-  <div id="notifList"><div class="notif-empty">Нет уведомлений</div></div>
-</div>
-
 <!-- SCOPE -->
 <div class="scope-bar">
   <div class="scope-tab active" onclick="setScope('local',this)" id="sLocal">🇬🇪 Локальные</div>
@@ -1264,5 +1255,14 @@ function showSection(name,el){
 // ── INIT ──────────────────────────────────────────────
 renderLoads(LOCAL);
 </script>
+<!-- NOTIF PANEL -->
+<div class="notif-panel" id="notifPanel">
+  <div class="notif-header">
+    <span class="notif-title">🔔 Уведомления</span>
+    <button class="notif-mark" onclick="clearNotifs()">Прочитать все</button>
+  </div>
+  <div id="notifList"><div class="notif-empty">Нет уведомлений</div></div>
+</div>
+
 </body>
 </html>
