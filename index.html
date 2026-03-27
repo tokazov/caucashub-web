@@ -735,22 +735,74 @@ const CITIES = [
 
 let selectedFrom=null, selectedTo=null, map=null, routeLine=null, markers=[];
 
+let _cityTimer={};
 function filterCity(dir, val){
   const q=val.trim().toLowerCase();
-  const id=dir==='from'?'dropFrom':'dropTo';
-  const drop=document.getElementById(id);
+  const dropId=dir==='from'?'dropFrom':'dropTo';
+  const drop=document.getElementById(dropId);
   if(q.length<1){drop.classList.remove('open');return;}
-  const filtered=CITIES.filter(c=>c.name.toLowerCase().includes(q)).slice(0,8);
-  drop.innerHTML=filtered.map(c=>`<div class="city-option" onmousedown="selectCity('${dir}','${c.name}')">${c.name} <span class="region">${c.region}</span></div>`).join('');
+  
+  // Сначала ищем в локальном списке
+  const local=CITIES.filter(c=>c.name.toLowerCase().includes(q)).slice(0,5);
+  let html=local.map(c=>`<div class="city-option" onmousedown="selectCity('${dir}','${c.name}',${c.lat},${c.lng})">${c.name} <span class="region">${c.region}</span></div>`).join('');
+  
+  // Для международных — добавляем поиск через Nominatim
+  if(scope==='intl' && q.length>=2){
+    if(html) html+='<div style="height:1px;background:#f0f0f0;margin:4px 0"></div>';
+    html+='<div class="addr-loading">🔍 Ищем города по всему миру...</div>';
+    drop.innerHTML=html;
+    drop.classList.add('open');
+    clearTimeout(_cityTimer[dir]);
+    _cityTimer[dir]=setTimeout(()=>{
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&featuretype=city&q=${encodeURIComponent(val)}&accept-language=ru`)
+        .then(r=>r.json())
+        .then(results=>{
+          const world=results.filter(r=>r.type==='city'||r.class==='place').slice(0,5);
+          const worldHtml=world.map(r=>{
+            const name=r.display_name.split(',')[0];
+            const country=r.display_name.split(',').slice(-1)[0].trim();
+            return `<div class="city-option" onmousedown="selectCity('${dir}','${name}',${r.lat},${r.lon})">
+              ${name} <span class="region">${country}</span>
+            </div>`;
+          }).join('');
+          const local2=CITIES.filter(c=>c.name.toLowerCase().includes(q)).slice(0,5);
+          const localHtml=local2.map(c=>`<div class="city-option" onmousedown="selectCity('${dir}','${c.name}',${c.lat},${c.lng})">${c.name} <span class="region">${c.region}</span></div>`).join('');
+          drop.innerHTML=localHtml+(localHtml&&worldHtml?'<div style="height:1px;background:#f0f0f0;margin:4px 0"></div>':'')+worldHtml||'<div class="addr-loading">Город не найден. Введите вручную.</div>';
+        })
+        .catch(()=>{
+          const local2=CITIES.filter(c=>c.name.toLowerCase().includes(q));
+          drop.innerHTML=local2.map(c=>`<div class="city-option" onmousedown="selectCity('${dir}','${c.name}',${c.lat},${c.lng})">${c.name} <span class="region">${c.region}</span></div>`).join('')||'<div class="addr-loading">Введите город вручную</div>';
+        });
+    },500);
+    return;
+  }
+  
+  // Если нет в списке — даём ввести вручную
+  if(!local.length){
+    html='<div class="city-option" onmousedown="selectCityManual(''+dir+'',''+val+'')" style="color:#888">📝 Использовать: '+val+' (любой город)</div>';
+  }
+  drop.innerHTML=html;
   drop.classList.add('open');
+}
+
+function selectCityManual(dir, name){
+  if(dir==='from'){
+    selectedFrom={name,lat:null,lng:null,region:'Введено вручную'};
+    document.getElementById('fFrom').value=name;
+    document.getElementById('dropFrom').classList.remove('open');
+  } else {
+    selectedTo={name,lat:null,lng:null,region:'Введено вручную'};
+    document.getElementById('fTo').value=name;
+    document.getElementById('dropTo').classList.remove('open');
+  }
 }
 function openDrop(dir){
   const val=document.getElementById(dir==='from'?'fFrom':'fTo').value;
   if(val) filterCity(dir,val);
 }
 function closeDrop(dir){ document.getElementById(dir==='from'?'dropFrom':'dropTo').classList.remove('open'); }
-function selectCity(dir, name){
-  const city=CITIES.find(c=>c.name===name);
+function selectCity(dir, name, lat, lng){
+  const city=CITIES.find(c=>c.name===name)||{name,lat:parseFloat(lat)||null,lng:parseFloat(lng)||null,region:''};
   if(dir==='from'){
     selectedFrom=city;
     document.getElementById('fFrom').value=name;
@@ -760,7 +812,7 @@ function selectCity(dir, name){
     document.getElementById('fTo').value=name;
     document.getElementById('dropTo').classList.remove('open');
   }
-  if(selectedFrom&&selectedTo) showRouteMap();
+  if(selectedFrom&&selectedTo&&selectedFrom.lat&&selectedTo.lat) showRouteMap();
 }
 
 // ── YANDEX MAP ────────────────────────────────────────
