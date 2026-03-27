@@ -285,7 +285,12 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <div class="city-dropdown" id="dropTo"></div>
   </div>
 
-  <input type="date" class="fsel" id="fDate" style="cursor:pointer;color:#333" onchange="filterByDate(this.value)">
+  <select class="fsel" id="fDate" onchange="filterByDate(this.value)">
+    <option value="">📅 Дата</option>
+    <option value="today">Сегодня</option>
+    <option value="tomorrow">Завтра</option>
+    <option value="week">На неделе</option>
+  </select>
   <select class="fsel" id="fType"><option value="">🚛 Кузов</option><option>Тент</option><option>Рефрижератор</option><option>Рефтент</option><option>Мегатент</option><option>Бортовой</option><option>Термос</option><option>Фургон (до 3.5т)</option><option>Контейнер</option><option>Автовоз</option><option>Эвакуатор</option><option>Цистерна</option><option>Зерновоз</option><option>Самосвал</option></select>
   <select class="fsel" id="fWeight" onchange="filterLoads()">
     <option value="">⚖️ Тоннаж</option>
@@ -1273,17 +1278,12 @@ function updateFormForIntl(){
 }
 
 // ── DATE FILTER ────────────────────────────────────────
-function filterByDate(dateStr){
-  if(!dateStr){filterLoads();return;}
-  const sel=new Date(dateStr);
-  const today=new Date();today.setHours(0,0,0,0);
-  const tomorrow=new Date(today);tomorrow.setDate(tomorrow.getDate()+1);
+function filterByDate(val){
+  if(!val){filterLoads();return;}
   let data=scope==='local'?[...LOCAL]:[...INTL];
-  data=data.filter(d=>{
-    if(d.date==='today') return sel.getTime()===today.getTime();
-    if(d.date==='tomorrow') return sel.getTime()===tomorrow.getTime();
-    return true; // для конкретных дат
-  });
+  if(val==='today') data=data.filter(d=>d.date==='today');
+  else if(val==='tomorrow') data=data.filter(d=>d.date==='tomorrow');
+  else if(val==='week') data=data.filter(d=>d.date==='today'||d.date==='tomorrow'||d.date);
   renderLoads(data);
   document.getElementById('fcount').textContent=data.length+' грузов';
 }
