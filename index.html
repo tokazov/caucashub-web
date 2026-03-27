@@ -49,8 +49,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .post-btn:hover { background:#27ae60; }
 
 /* TABLE */
-.thead { display:grid; gap:8px; grid-template-columns:minmax(180px,2fr) 80px 100px 90px 80px 80px; padding:8px 14px; background:#e8eaf0; font-size:11px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid #d0d4df; }
-.row { display:grid; gap:8px; grid-template-columns:minmax(180px,2fr) 80px 100px 90px 80px 80px; padding:11px 14px; background:#fff; border-bottom:1px solid #f2f2f2; cursor:pointer; align-items:center; border-left:3px solid transparent; transition:background .12s; }
+.thead { display:grid; gap:0; grid-template-columns:minmax(180px,2fr) 80px 100px 90px 80px 80px; padding:8px 14px; background:#e8eaf0; font-size:11px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:.4px; border-bottom:1px solid #d0d4df; }
+.row { display:grid; gap:0; grid-template-columns:minmax(180px,2fr) 80px 100px 90px 80px 80px; padding:11px 14px; background:#fff; border-bottom:1px solid #f2f2f2; cursor:pointer; align-items:center; border-left:3px solid transparent; transition:background .12s; }
 .row:hover { background:#fffbf0; }
 .row.urgent { border-left-color:#e74c3c; }
 .row.fresh { border-left-color:#2ecc71; }
@@ -66,6 +66,10 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .badge-intl { background:#3498db; color:#fff; }
 .btn-resp { background:#f7b731; color:#1a1a2e; border:none; padding:7px 4px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer; width:100%; text-align:center; }
 .btn-resp:hover { background:#e6a820; }
+.row > div, .thead > div { padding-left:10px; border-left:1px solid #f0f0f0; }
+.row > div:first-child, .thead > div:first-child { padding-left:0; border-left:none; }
+.thead > div { border-left:1px solid #d8dae0; }
+.thead > div:first-child { border-left:none; }
 .load-more { text-align:center; padding:16px; background:#fff; }
 .load-more button { background:#f0f2f5; border:none; padding:10px 24px; border-radius:8px; font-size:13px; color:#555; cursor:pointer; }
 
