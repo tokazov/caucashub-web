@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://api-maps.yandex.ru/2.1/?apikey=aef19e33-8ea1-4039-8353-2f0df688664a&lang=ru_RU" type="text/javascript"></script>
 <title>CaucasHub.ge — Биржа грузов Кавказа</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f0f2f5; color:#1a1a2e; }
@@ -490,23 +491,26 @@ function addrSearch(field, val){
   dropEl.innerHTML='<div class="addr-loading">🔍 Ищем адрес...</div>';
   dropEl.classList.add('open');
   addrTimers[field]=setTimeout(()=>{
-    const q=encodeURIComponent(val+', Georgia');
-    fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=6&addressdetails=1&q=${q}`,{headers:{'Accept-Language':'ru'}})
-      .then(r=>r.json())
-      .then(results=>{
-        if(!results.length){
-          dropEl.innerHTML='<div class="addr-loading">Ничего не найдено. Попробуйте другой запрос.</div>';
+    ymaps.ready(()=>{
+      ymaps.geocode(val+', Грузия',{results:6,lang:'ru_RU'}).then(res=>{
+        const objs=res.geoObjects;
+        if(!objs.getLength()){
+          dropEl.innerHTML='<div class="addr-loading">Ничего не найдено</div>';
           return;
         }
-        dropEl.innerHTML=results.map((r,i)=>{
-          const main=r.display_name.split(',')[0];
-          const sub=r.display_name.split(',').slice(1,3).join(',').trim();
-          return `<div class="addr-item" onmousedown="selectAddr('${field}','${r.display_name.replace(/'/g,'`')}',${r.lat},${r.lon})"><div class="addr-main">${main}</div><div class="addr-sub">${sub}</div></div>`;
-        }).join('');
-      })
-      .catch(()=>{
-        dropEl.innerHTML='<div class="addr-loading">Ошибка соединения</div>';
+        let html='';
+        objs.each(obj=>{
+          const fullAddr=obj.getAddressLine();
+          const name=obj.properties.get('name')||fullAddr.split(',')[0];
+          const sub=fullAddr.split(',').slice(1,3).join(',').trim();
+          const coords=obj.geometry.getCoordinates();
+          html+=`<div class="addr-item" onmousedown="selectAddr('${field}','${fullAddr.replace(/'/g,'`')}',${coords[0]},${coords[1]})"><div class="addr-main">${name}</div><div class="addr-sub">${sub}</div></div>`;
+        });
+        dropEl.innerHTML=html;
+      }).catch(()=>{
+        dropEl.innerHTML='<div class="addr-loading">Ошибка геокодера</div>';
       });
+    });
   },400);
 }
 
@@ -614,68 +618,70 @@ function selectCity(dir, name){
   if(selectedFrom&&selectedTo) showRouteMap();
 }
 
-// ── MAP ───────────────────────────────────────────────
+// ── YANDEX MAP ────────────────────────────────────────
+let ymap=null, ymapRoute=null;
+
 function showRouteMap(){
   const wrap=document.getElementById('mapWrap');
   wrap.classList.add('open');
   const f=selectedFrom, t=selectedTo;
-  const dist=Math.round(Math.sqrt(Math.pow((f.lat-t.lat)*111,2)+Math.pow((f.lng-t.lng)*111*Math.cos(f.lat*Math.PI/180),2)));
-  document.getElementById('mapRouteLabel').textContent=`${f.name} → ${t.name}`;
-  document.getElementById('mapDist').textContent=`~${dist} км`; // будет обновлено после OSRM
-
-  if(!map){
-    map=L.map('routeMap',{zoomControl:true,scrollWheelZoom:false});
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM',maxZoom:18}).addTo(map);
-  }
-  // Убираем старые маркеры
-  markers.forEach(m=>map.removeLayer(m));
-  markers=[];
-  if(routeLine) map.removeLayer(routeLine);
-
-  const iconFrom=L.divIcon({className:'',html:'<div style="background:#2ecc71;color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.3);font-weight:700">A</div>',iconSize:[30,30],iconAnchor:[15,15]});
-  const iconTo=L.divIcon({className:'',html:'<div style="background:#e74c3c;color:#fff;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 6px rgba(0,0,0,.3);font-weight:700">B</div>',iconSize:[30,30],iconAnchor:[15,15]});
-
-  const mFrom=L.marker([f.lat,f.lng],{icon:iconFrom}).bindPopup(`<b>${f.name}</b><br>${f.region}`).addTo(map);
-  const mTo=L.marker([t.lat,t.lng],{icon:iconTo}).bindPopup(`<b>${t.name}</b><br>${t.region}`).addTo(map);
-  markers=[mFrom,mTo];
-
-  // Запрашиваем реальный маршрут по дорогам через OSRM
+  document.getElementById('mapRouteLabel').textContent=`${f.name||f.addr} → ${t.name||t.addr}`;
   document.getElementById('mapDist').textContent='⏳ Строим маршрут...';
-  fetch(`https://router.project-osrm.org/route/v1/driving/${f.lng},${f.lat};${t.lng},${t.lat}?overview=full&geometries=geojson`)
-    .then(r=>r.json())
-    .then(data=>{
-      if(data.routes&&data.routes[0]){
-        const route=data.routes[0];
-        const realDist=Math.round(route.distance/1000);
-        const realTime=Math.round(route.duration/3600*10)/10;
-        document.getElementById('mapDist').textContent=`${realDist} км · ~${realTime} ч`;
-        const coords=route.geometry.coordinates.map(c=>[c[1],c[0]]);
-        routeLine=L.polyline(coords,{color:'#f7b731',weight:5,opacity:.9}).addTo(map);
-        const bounds=L.latLngBounds(coords);
-        map.fitBounds(bounds,{padding:[40,40]});
-      } else {
-        // fallback — прямая линия
-        routeLine=L.polyline([[f.lat,f.lng],[t.lat,t.lng]],{color:'#f7b731',weight:3,dashArray:'8 6',opacity:.9}).addTo(map);
-        const bounds=L.latLngBounds([[f.lat,f.lng],[t.lat,t.lng]]);
-        map.fitBounds(bounds,{padding:[40,40]});
-        document.getElementById('mapDist').textContent=`~${dist} км`;
-      }
-    })
-    .catch(()=>{
-      // fallback без интернета
-      routeLine=L.polyline([[f.lat,f.lng],[t.lat,t.lng]],{color:'#f7b731',weight:3,dashArray:'8 6',opacity:.9}).addTo(map);
-      const bounds=L.latLngBounds([[f.lat,f.lng],[t.lat,t.lng]]);
-      map.fitBounds(bounds,{padding:[40,40]});
-      document.getElementById('mapDist').textContent=`~${dist} км`;
-    });
 
-  setTimeout(()=>map.invalidateSize(),100);
+  ymaps.ready(()=>{
+    if(!ymap){
+      ymap=new ymaps.Map('routeMap',{
+        center:[f.lat,f.lng], zoom:7,
+        controls:['zoomControl','typeSelector']
+      });
+    } else {
+      ymap.geoObjects.removeAll();
+    }
+
+    // Маркер А (откуда) — зелёный
+    const pmA=new ymaps.Placemark([f.lat,f.lng],{balloonContent:`<b>${f.name||f.addr}</b>`},{
+      preset:'islands#greenDotIconWithCaption',
+      iconCaption:'A'
+    });
+    // Маркер B (куда) — красный
+    const pmB=new ymaps.Placemark([t.lat,t.lng],{balloonContent:`<b>${t.name||t.addr}</b>`},{
+      preset:'islands#redDotIconWithCaption',
+      iconCaption:'B'
+    });
+    ymap.geoObjects.add(pmA).add(pmB);
+
+    // Маршрут по дорогам
+    ymaps.route([
+      [f.lat,f.lng],
+      [t.lat,t.lng]
+    ],{
+      mapStateAutoApply:true,
+      routingMode:'auto'
+    }).then(route=>{
+      route.getPaths().each(path=>{
+        path.getSegments().each(seg=>{
+          seg.options.set({strokeColor:'f7b731',strokeWidth:5,opacity:.9});
+        });
+      });
+      ymap.geoObjects.add(route);
+      const dist=Math.round(route.getLength()/1000);
+      const time=Math.round(route.getTime()/3600*10)/10;
+      document.getElementById('mapDist').textContent=`${dist} км · ~${time} ч`;
+      ymap.setBounds(route.getBounds(),{checkZoomRange:true,zoomMargin:40});
+    }).catch(()=>{
+      const dist=Math.round(Math.sqrt(Math.pow((f.lat-t.lat)*111,2)+Math.pow((f.lng-t.lng)*111*Math.cos(f.lat*Math.PI/180),2)));
+      document.getElementById('mapDist').textContent=`~${dist} км`;
+      ymap.setCenter([(f.lat+t.lat)/2,(f.lng+t.lng)/2],6);
+    });
+  });
 }
+
 function closeMap(){
   document.getElementById('mapWrap').classList.remove('open');
   selectedFrom=null; selectedTo=null;
   document.getElementById('fFrom').value='';
   document.getElementById('fTo').value='';
+  if(ymap){ ymap.geoObjects.removeAll(); }
 }
 
 // ── DATA ────────────────────────────────────────────
