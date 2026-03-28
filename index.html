@@ -813,7 +813,15 @@ function selectAddr(field, addr, lat, lng){
   const coordEl=document.getElementById(coordId);
   coordEl.textContent=`✅ Координаты: ${parseFloat(lat).toFixed(4)}, ${parseFloat(lng).toFixed(4)}`;
   coordEl.style.display='block';
-  addrSelected[field]={addr:addr.replace(/`/g,"'"),lat:parseFloat(lat),lng:parseFloat(lng)};
+  // Извлекаем название города из адреса (последний значимый компонент до запятой)
+  const parts=addr.replace(/`/g,"'").split(',').map(s=>s.trim());
+  // Ищем известные города Грузии в адресе
+  const knownCities=['Тбилиси','Батуми','Кутаиси','Рустави','Зугдиди','Гори','Поти','Мцхета','Сенаки','Боржоми','Ахалцихе','Телави','Сигнахи','Хашури','Кобулети','Озургети','Марнеули','Самтредиа','Ткибули'];
+  let cityName=parts[0];
+  for(const p of parts){
+    if(knownCities.some(c=>p.includes(c))){cityName=p;break;}
+  }
+  addrSelected[field]={addr:addr.replace(/`/g,"'"),city:cityName,lat:parseFloat(lat),lng:parseFloat(lng)};
 
   // Если оба адреса выбраны — показываем мини-карту
   if(addrSelected.pFrom&&addrSelected.pTo){
@@ -1403,8 +1411,8 @@ function doPostLoad(){
   const fromAddr=document.getElementById('pFromAddr').value||'Адрес не указан';
   const toAddr=document.getElementById('pToAddr').value||'Адрес не указан';
   // Город — первое слово из адреса
-  const from=addrSelected.pFrom?fromAddr.split(',')[0]:fromAddr.split(',')[0]||'Тбилиси';
-  const to=addrSelected.pTo?toAddr.split(',')[0]:toAddr.split(',')[0]||'Батуми';
+  const from=addrSelected.pFrom?.city||fromAddr.split(',')[0]||'Тбилиси';
+  const to=addrSelected.pTo?.city||toAddr.split(',')[0]||'Батуми';
   const kg=parseInt(document.getElementById('pWeight').value)||5000;
   const price=parseInt(document.getElementById('pPrice').value)||300;
   const truck=document.getElementById('pTruck').value;
