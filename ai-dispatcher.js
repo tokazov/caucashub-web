@@ -11,11 +11,19 @@ function toggleAI(){
   const chat=document.getElementById('aiChat');
   const fab=document.querySelector('.ai-fab');
   if(!chat) return;
-  chat.classList.toggle('open',aiOpen);
-  if(aiOpen && fab){
-    positionChat(chat, fab);
+  if(aiOpen){
+    chat.classList.add('open');
+    if(fab) positionChat(chat, fab);
+    setTimeout(()=>document.getElementById('aiInput')?.focus(),100);
+  } else {
+    chat.classList.remove('open');
   }
-  if(aiOpen) setTimeout(()=>document.getElementById('aiInput')?.focus(),100);
+}
+
+function closeAI(){
+  aiOpen=false;
+  const chat=document.getElementById('aiChat');
+  if(chat) chat.classList.remove('open');
 }
 
 function positionChat(chat, fab){
