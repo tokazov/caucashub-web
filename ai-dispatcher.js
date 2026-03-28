@@ -8,8 +8,35 @@ let aiStep='greeting'; // greeting | ask_role | carrier_flow | shipper_flow
 function toggleAI(){
   aiOpen=!aiOpen;
   const chat=document.getElementById('aiChat');
-  if(chat) chat.classList.toggle('open',aiOpen);
+  const fab=document.querySelector('.ai-fab');
+  if(!chat) return;
+  chat.classList.toggle('open',aiOpen);
+  if(aiOpen && fab){
+    positionChat(chat, fab);
+  }
   if(aiOpen) setTimeout(()=>document.getElementById('aiInput')?.focus(),100);
+}
+
+function positionChat(chat, fab){
+  const r=fab.getBoundingClientRect();
+  const chatW=320;
+  const chatH=Math.min(500, window.innerHeight*0.7);
+  const margin=10;
+
+  // По горизонтали: предпочтительно левее кнопки
+  let left=r.left - chatW - margin;
+  if(left < margin) left=r.right + margin; // если не влазит слева — справа
+  if(left + chatW > window.innerWidth - margin) left=window.innerWidth - chatW - margin;
+
+  // По вертикали: выровнять низ чата по низу кнопки
+  let top=r.bottom - chatH;
+  if(top < margin) top=margin;
+  if(top + chatH > window.innerHeight - margin) top=window.innerHeight - chatH - margin;
+
+  chat.style.left=left+'px';
+  chat.style.top=top+'px';
+  chat.style.right='auto';
+  chat.style.bottom='auto';
 }
 
 function aiAddMsg(text,type){
@@ -304,6 +331,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     const nx=Math.max(0,Math.min(window.innerWidth-60,origX+dx));
     const ny=Math.max(0,Math.min(window.innerHeight-60,origY+dy));
     fab.style.left=nx+'px'; fab.style.top=ny+'px';
+    // двигаем чат вместе с кнопкой если открыт
+    const chat=document.getElementById('aiChat');
+    if(chat&&chat.classList.contains('open')) positionChat(chat,fab);
   });
 
   document.addEventListener('mouseup', e=>{
@@ -335,6 +365,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     const nx=Math.max(0,Math.min(window.innerWidth-60,origX+dx));
     const ny=Math.max(0,Math.min(window.innerHeight-60,origY+dy));
     fab.style.left=nx+'px'; fab.style.top=ny+'px';
+    const chat=document.getElementById('aiChat');
+    if(chat&&chat.classList.contains('open')) positionChat(chat,fab);
     if(moved) e.preventDefault();
   },{passive:false});
 
