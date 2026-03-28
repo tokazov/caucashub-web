@@ -1441,45 +1441,28 @@ function doPostLoad(){
   },1200);
 }
 
+// Массив своих грузов (отдельно от откликов)
+let _myLoads = [];
+
 function addMyLoad(load){
-  const empty=document.getElementById('ordersEmpty');
-  const list=document.getElementById('ordersList');
-  if(!list) return;
-  if(empty) empty.style.display='none';
-  list.style.display='block';
-  const item=document.createElement('div');
-  item.id='myload-'+load.id;
-  item.style='padding:14px 16px;background:#fff;border-bottom:1px solid #f2f2f2;display:flex;justify-content:space-between;align-items:center;gap:8px';
-  item.innerHTML=`
-    <div style="flex:1">
-      <div style="font-weight:700">${load.from} → ${load.to}</div>
-      <div style="font-size:12px;color:#888;margin-top:2px">${load.kg.toLocaleString()} кг · ${load.cur}${load.price} · ${load.date}</div>
-    </div>
-    <span style="background:#fff3e0;color:#f39c12;padding:4px 10px;border-radius:12px;font-size:12px;white-space:nowrap">Мой груз</span>
-    <button onclick="deleteMyLoad(${load.id})" style="background:#fee;border:none;color:#e74c3c;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;white-space:nowrap">✕ Удалить</button>
-  `;
-  list.prepend(item);
+  // Добавляем в массив
+  _myLoads.unshift(load);
+  // Перерисовываем секцию заказов
+  _renderOrders();
 }
 
 function deleteMyLoad(id){
   if(!confirm('Удалить груз из биржи?')) return;
-  // Удаляем из массива
   const idx=LOCAL.findIndex(l=>l.id===id);
   if(idx>-1) LOCAL.splice(idx,1);
   window.allLoads=[...LOCAL,...INTL];
-  // Убираем из DOM
-  document.getElementById('myload-'+id)?.remove();
-  // Перерисовываем список
+  _myLoads=_myLoads.filter(l=>l.id!==id);
   renderLoads(scope==='local'?LOCAL:INTL);
   document.getElementById('fcount').textContent=LOCAL.length+' грузов';
-  // Если заказов не осталось
-  const list=document.getElementById('ordersList');
-  if(list && list.children.length===0){
-    list.style.display='none';
-    const empty=document.getElementById('ordersEmpty');
-    if(empty) empty.style.display='block';
-  }
+  _renderOrders();
 }
+
+
 
 // ── FILTER ─────────────────────────────────────────────
 function filterLoads(){
@@ -1712,11 +1695,24 @@ document.addEventListener('click',function(e){
 // Статусы заявок
 function _renderOrders(){
   const empty=document.getElementById('ordersEmpty'),list=document.getElementById('ordersList');
-  if(!_orders.length){if(empty)empty.style.display='block';if(list)list.style.display='none';return;}
+  const hasContent=_orders.length||_myLoads.length;
+  if(!hasContent){if(empty)empty.style.display='block';if(list)list.style.display='none';return;}
   if(empty)empty.style.display='none';
   if(!list)return;
   list.style.display='block';
-  list.innerHTML=_orders.map(o=>{
+
+  // Мои размещённые грузы
+  const myLoadsHtml=_myLoads.map(l=>`
+    <div id="myload-${l.id}" style="padding:14px 16px;background:#fff;border-bottom:1px solid #f2f2f2;border-left:3px solid #2ecc71;display:flex;justify-content:space-between;align-items:center;gap:8px">
+      <div style="flex:1">
+        <div style="font-weight:700">${l.from} → ${l.to}</div>
+        <div style="font-size:12px;color:#888;margin-top:2px">${l.kg.toLocaleString()} кг · ${l.cur||'₾'}${l.price} · ${l.date}</div>
+      </div>
+      <span style="background:#e8f5e9;color:#2e7d32;padding:4px 10px;border-radius:12px;font-size:12px;white-space:nowrap">📦 Мой груз</span>
+      <button onclick="deleteMyLoad(${l.id})" style="background:#fee;border:none;color:#e74c3c;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;white-space:nowrap">✕</button>
+    </div>`).join('');
+
+  list.innerHTML=myLoadsHtml+_orders.map(o=>{
     const s=_STATUS[o.status]||_STATUS.pending;
     let act='';
     if(o.status==='accepted') act=`<button class="ni-done" onclick="_delivered(${o.id})" style="margin-top:8px">🚛 Груз доставлен</button>`;
