@@ -4,6 +4,7 @@ let aiRole=null; // 'carrier' | 'shipper' | null
 let aiLoadData={from:null,to:null,desc:null,weight:null,date:null,truck:null,price:null,pay:null};
 let aiCarrierData={from:null,to:null,date:null,truck:null,weightCap:null};
 let aiStep='greeting'; // greeting | ask_role | carrier_flow | shipper_flow
+let aiPendingText=null; // первое сообщение до определения роли
 
 function toggleAI(){
   aiOpen=!aiOpen;
@@ -72,23 +73,47 @@ function aiAddRoleButtons(){
 
 function setRole(role){
   aiRole=role;
-  // Убираем кнопки выбора роли
   document.querySelectorAll('.ai-role-btns').forEach(el=>el.remove());
-  
+
   if(role==='carrier'){
     aiStep='carrier_flow';
-    aiAddMsg('Отлично! Расскажите о маршруте — откуда и куда едете, когда и какой у вас кузов?','bot');
+    // Если было первое сообщение — парсим его сразу
+    if(aiPendingText){
+      parseCarrier(aiPendingText);
+      aiPendingText=null;
+      const reply=buildCarrierReply();
+      // Если уже есть маршрут — сразу ищем грузы
+      if(aiCarrierData.from&&aiCarrierData.to){
+        const loads=findMatchingLoads();
+        if(loads.length>0){
+          aiAddMsg('✅ Нашёл '+loads.length+' груза по маршруту '+aiCarrierData.from+' → '+aiCarrierData.to+'!','bot');
+          showMatchingLoads();
+          return;
+        }
+      }
+      aiAddMsg(reply,'bot');
+    } else {
+      aiAddMsg('Отлично! Расскажите о маршруте — откуда и куда едете, когда и какой у вас кузов?','bot');
+    }
   } else {
     aiStep='shipper_flow';
-    aiAddMsg('Хорошо! Расскажите о грузе — можно свободным текстом или голосом. Например: "5 тонн плитки из Тбилиси в Батуми завтра за 700 лари"','bot');
     document.getElementById('aiTemplate').style.display='block';
+    // Если было первое сообщение — парсим его сразу
+    if(aiPendingText){
+      parseShipper(aiPendingText);
+      aiPendingText=null;
+      updateTemplate();
+      aiAddMsg(buildShipperReply(),'bot');
+    } else {
+      aiAddMsg('Хорошо! Расскажите о грузе — можно свободным текстом. Например: "5 тонн плитки из Тбилиси в Батуми завтра за 700 лари"','bot');
+    }
   }
 }
 
 function detectRole(text){
   const t=text.toLowerCase();
-  const carrierWords=['водитель','везу','еду','перевозчик','машина','фура','мой кузов','свободен','ищу груз','нужен груз'];
-  const shipperWords=['нужно везти','отправить','доставить','груз','товар','плитка','мебель','продукты','сколько стоит везти'];
+  const carrierWords=['водитель','везу','еду','перевозчик','машина','фура','мой кузов','свободен','ищу груз','нужен груз','нужно груз','найди груз','есть ли груз'];
+  const shipperWords=['нужно везти','отправить','хочу отправить','доставить','ищу машину','нужна машина','ищу перевозчика','сколько стоит везти','разместить груз'];
   
   const isCarrier=carrierWords.some(w=>t.includes(w));
   const isShipper=shipperWords.some(w=>t.includes(w));
@@ -248,6 +273,7 @@ async function aiSend(){
       }
     } else {
       aiStep='ask_role';
+      aiPendingText=text; // запоминаем — применим после выбора роли
       aiAddMsg('Привет! Чтобы помочь вам — скажите, вы водитель или грузовладелец?','bot');
       aiAddRoleButtons();
     }
