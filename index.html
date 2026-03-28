@@ -1199,6 +1199,23 @@ function openCargo(d){
 // ── RESPOND ───────────────────────────────────────────
 function doRespond(){
   if(!user){ closeModal('cargoOverlay'); openAuth('login'); return; }
+
+  // Проверка профиля перевозчика
+  if(!user.role || user.role==='carrier'){
+    // Нужны данные об автомобиле и компании/ИП
+    const missingFields=[];
+    if(!user.truckType) missingFields.push('тип кузова');
+    if(!user.tonnage)   missingFields.push('грузоподъёмность');
+    if(!user.inn)       missingFields.push('ИНН / ID код компании');
+    if(!user.orgType||user.orgType==='')  missingFields.push('форма (ООО/ИП)');
+    if(missingFields.length){
+      alert('❌ Для отклика заполните профиль перевозчика:\n\n• '+missingFields.join('\n• ')+'\n\nПрофиль → Настройки аккаунта');
+      closeModal('cargoOverlay');
+      if(typeof openSettings==='function') openSettings();
+      return;
+    }
+  }
+
   if(!canRespond()){ openPaywall('respond'); return; }
   const btn=document.getElementById('btnRespond');
   btn.textContent='Отправляем...'; btn.disabled=true;
@@ -1622,17 +1639,34 @@ function openSettings(){
   if(user){
     document.getElementById('sName').value=user.name||'';
     document.getElementById('sEmail').value=user.email||'';
+    document.getElementById('sPhone').value=user.phone||'';
+    document.getElementById('sTelegram').value=user.telegram||'';
+    const sr=document.getElementById('sRole'); if(sr&&user.role) sr.value=user.role;
+    document.getElementById('sInn').value=user.inn||'';
+    const sot=document.getElementById('sOrgType'); if(sot&&user.orgType) sot.value=user.orgType;
+    const stt=document.getElementById('sTruckType'); if(stt&&user.truckType) stt.value=user.truckType;
+    document.getElementById('sTonnage').value=user.tonnage||'';
   }
+  // Показываем поля перевозчика только для carrier/both
+  const cf=document.getElementById('sCarrierFields');
+  const role=document.getElementById('sRole');
+  if(cf&&role) cf.style.display=(role.value==='shipper')?'none':'block';
+  if(role) role.onchange=()=>{ if(cf) cf.style.display=(role.value==='shipper')?'none':'block'; };
   document.getElementById('settingsOverlay').classList.add('on');
 }
 function saveSettings(){
   const name=document.getElementById('sName').value;
   const phone=document.getElementById('sPhone').value;
   const tg=document.getElementById('sTelegram').value;
+  const role=document.getElementById('sRole').value;
+  const inn=document.getElementById('sInn').value;
+  const orgType=document.getElementById('sOrgType').value;
+  const truckType=document.getElementById('sTruckType').value;
+  const tonnage=document.getElementById('sTonnage').value;
   if(user){
     user.name=name||user.name;
-    user.phone=phone;
-    user.telegram=tg;
+    user.phone=phone; user.telegram=tg; user.role=role;
+    user.inn=inn; user.orgType=orgType; user.truckType=truckType; user.tonnage=tonnage;
     _lsSet('ch_user',JSON.stringify(user));
     document.getElementById('userAvatar').textContent=user.name.slice(0,2).toUpperCase();
     document.getElementById('profileName').textContent=user.name;
@@ -1794,6 +1828,39 @@ if(document.readyState==='loading'){
       <label>Telegram (для уведомлений)</label>
       <input class="form-input" id="sTelegram" placeholder="@username">
     </div>
+
+    <!-- Поля для перевозчика -->
+    <div id="sCarrierFields">
+      <div class="divider"></div>
+      <div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:12px">🚛 Данные перевозчика</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>ИНН / ID код</label>
+          <input class="form-input" id="sInn" placeholder="123456789">
+        </div>
+        <div class="form-group">
+          <label>Форма</label>
+          <select class="form-select" id="sOrgType">
+            <option value="">— выберите —</option>
+            <option>ООО</option><option>ИП</option><option>АО</option><option>Частный перевозчик</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Тип кузова</label>
+          <select class="form-select" id="sTruckType">
+            <option value="">— выберите —</option>
+            <option>Тент</option><option>Рефрижератор</option><option>Бортовой</option><option>Фургон</option><option>Термос</option><option>Контейнер</option><option>Автовоз</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Грузоподъёмность (т)</label>
+          <input class="form-input" type="number" id="sTonnage" placeholder="20">
+        </div>
+      </div>
+    </div>
+
     <div class="divider"></div>
     <div style="font-size:13px;font-weight:600;margin-bottom:10px">🔔 Уведомления</div>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
