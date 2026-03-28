@@ -20,18 +20,28 @@ function toggleAI(){
 function positionChat(chat, fab){
   const r=fab.getBoundingClientRect();
   const chatW=320;
-  const chatH=Math.min(500, window.innerHeight*0.7);
   const margin=10;
+  const gap=10; // зазор между кнопкой и чатом
 
-  // По горизонтали: предпочтительно левее кнопки
-  let left=r.left - chatW - margin;
-  if(left < margin) left=r.right + margin; // если не влазит слева — справа
-  if(left + chatW > window.innerWidth - margin) left=window.innerWidth - chatW - margin;
+  // Реальная высота чата после рендера
+  chat.style.visibility='hidden';
+  chat.style.display='flex';
+  const chatH=Math.min(chat.offsetHeight||480, window.innerHeight*0.75);
+  chat.style.visibility='';
 
-  // По вертикали: выровнять низ чата по низу кнопки
-  let top=r.bottom - chatH;
-  if(top < margin) top=margin;
-  if(top + chatH > window.innerHeight - margin) top=window.innerHeight - chatH - margin;
+  // По горизонтали: центрируем чат по кнопке, не выходим за края
+  let left=r.left + r.width/2 - chatW/2;
+  left=Math.max(margin, Math.min(left, window.innerWidth - chatW - margin));
+
+  // По вертикали: предпочтительно ВЫШЕ кнопки
+  let top=r.top - chatH - gap;
+  if(top < margin){
+    // не влазит сверху — размещаем снизу
+    top=r.bottom + gap;
+  }
+  if(top + chatH > window.innerHeight - margin){
+    top=window.innerHeight - chatH - margin;
+  }
 
   chat.style.left=left+'px';
   chat.style.top=top+'px';
