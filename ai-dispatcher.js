@@ -36,7 +36,13 @@ function openAI() {
 function closeAI() {
   aiOpen = false;
   const chat = document.getElementById('aiChat');
-  if (chat) chat.classList.remove('open');
+  if (!chat) return;
+  chat.classList.remove('open');
+  // Убираем инлайн стили позиции чтобы CSS мог управлять display
+  chat.style.left = '';
+  chat.style.top = '';
+  chat.style.right = '';
+  chat.style.bottom = '';
 }
 
 // ── POSITION ──────────────────────────────────────────
@@ -46,10 +52,8 @@ function positionChat(chat, fab) {
   const margin = 10;
   const gap = 12;
 
-  chat.style.visibility = 'hidden';
-  chat.style.display = 'flex';
+  // Не трогаем display — им управляет CSS класс .open
   const chatH = Math.min(chat.offsetHeight || 480, window.innerHeight * 0.75);
-  chat.style.visibility = '';
 
   let left = r.left + r.width / 2 - chatW / 2;
   left = Math.max(margin, Math.min(left, window.innerWidth - chatW - margin));
