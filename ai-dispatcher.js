@@ -520,14 +520,17 @@ function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
       const nx=Math.max(0, Math.min(window.innerWidth-chat.offsetWidth,   origX+(cx-startX)));
       const ny=Math.max(0, Math.min(window.innerHeight-chat.offsetHeight, origY+(cy-startY)));
       chat.style.left=nx+'px'; chat.style.top=ny+'px';
-      // Кружок следует за чатом — прилипает к правому нижнему углу
+      // Кружок следует за чатом — прилипает под правый нижний угол
       const fab=document.querySelector('.ai-fab');
       if(fab){
-        const fabSize=56, gap=10;
+        const fabSize=56, gap=8;
+        const cw=chat.getBoundingClientRect().width||320;
+        const ch=chat.getBoundingClientRect().height||400;
+        const fx=nx+cw-fabSize;
+        const fy=ny+ch+gap;
         fab.style.right='auto'; fab.style.bottom='auto';
-        fab.style.left=(nx+chat.offsetWidth-fabSize-gap)+'px';
-        fab.style.top=(ny+chat.offsetHeight+gap)+'px';
-        // Сохраняем позицию
+        fab.style.left=Math.max(0,Math.min(window.innerWidth-fabSize,fx))+'px';
+        fab.style.top=Math.max(0,Math.min(window.innerHeight-fabSize,fy))+'px';
         localStorage.setItem('fabPos',JSON.stringify({x:parseFloat(fab.style.left),y:parseFloat(fab.style.top)}));
       }
     }
