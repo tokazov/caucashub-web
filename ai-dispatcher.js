@@ -19,9 +19,26 @@ function openAI() {
   const chat = document.getElementById('aiChat');
   const fab  = document.querySelector('.ai-fab');
   if (!chat) return;
+
+  if (window.innerWidth <= 600) {
+    // Мобиле — компактное окно над кнопкой FAB
+    const fabR = fab ? fab.getBoundingClientRect() : null;
+    chat.style.position = 'fixed';
+    chat.style.width = (window.innerWidth - 32) + 'px';
+    chat.style.left = '16px';
+    chat.style.right = '16px';
+    chat.style.bottom = fabR ? (window.innerHeight - fabR.top + 8) + 'px' : '80px';
+    chat.style.top = 'auto';
+    chat.style.maxHeight = '55vh';
+    chat.style.borderRadius = '16px';
+  } else {
+    // Десктоп — рядом с кнопкой
+    chat.style.width = '320px';
+    chat.style.maxHeight = '500px';
+    if (fab) positionChat(chat, fab);
+  }
+
   chat.classList.add('open');
-  // На десктопе — позиционируем рядом с кнопкой
-  if (fab && window.innerWidth > 600) positionChat(chat, fab);
   setTimeout(() => document.getElementById('aiInput')?.focus(), 100);
 
   // Приветствие только если история пустая
@@ -38,11 +55,8 @@ function closeAI() {
   const chat = document.getElementById('aiChat');
   if (!chat) return;
   chat.classList.remove('open');
-  // Убираем инлайн стили позиции чтобы CSS мог управлять display
-  chat.style.left = '';
-  chat.style.top = '';
-  chat.style.right = '';
-  chat.style.bottom = '';
+  // Сбрасываем все инлайн стили
+  chat.removeAttribute('style');
 }
 
 // ── POSITION ──────────────────────────────────────────
