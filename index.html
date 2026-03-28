@@ -1386,21 +1386,40 @@ function backToStep1(){
     document.getElementById(id).classList.remove('selected');
   });
 }
-function doLogin(){
+async function doLogin(){
   const email=document.getElementById('loginEmail').value;
   const pass=document.getElementById('loginPass').value;
   if(!email||!pass){alert('Заполните email и пароль');return;}
+
+  const btn=document.querySelector('#formLogin .btn-primary');
+  if(btn){btn.textContent='Входим...';btn.disabled=true;}
+
+  // Пробуем API
+  let userData={name:email.split('@')[0],email};
+  if(typeof CaucasAPI!=='undefined'){
+    const r=await CaucasAPI.login({email,password:pass});
+    if(r.ok){
+      userData={...userData,userId:r.user_id,role:r.role,token:r.token};
+    } else {
+      if(btn){btn.textContent='Войти в аккаунт';btn.disabled=false;}
+      // Если сервер недоступен — разрешаем локальный вход
+      if(r.status===0){ userData.offline=true; }
+      else { alert(typeof r.error==='string'?r.error:'Неверный email или пароль'); return; }
+    }
+  }
+
+  user=userData;
+  _lsSet('ch_user',JSON.stringify(user));
+  document.getElementById('loginSuccess').style.display='block';
   setTimeout(()=>{
-    user={name:email.split('@')[0],email};
-    _lsSet('ch_user',JSON.stringify(user));
-    document.getElementById('loginSuccess').style.display='block';
-    setTimeout(()=>{
-      closeModal('authOverlay');
-      showUserState();
-    },400);
-  },600);
+    closeModal('authOverlay');
+    showUserState();
+    if(typeof syncLoadsFromServer==='function') syncLoadsFromServer();
+  },400);
+  if(btn){btn.textContent='Войти в аккаунт';btn.disabled=false;}
 }
-function doRegister(){
+
+async function doRegister(){
   const role=document.getElementById('regRole').value;
   if(!role){alert('Выберите тип аккаунта');return;}
   const name=document.getElementById('regName').value;
@@ -1413,15 +1432,36 @@ function doRegister(){
   const city=document.getElementById('regCity')?.value||'';
   const truckType=document.getElementById('regTruckType')?.value||'';
   const tonnage=document.getElementById('regTonnage')?.value||'';
+
+  const btn=document.querySelector('#formRegister .btn-primary');
+  if(btn){btn.textContent='Создаём...';btn.disabled=true;}
+
+  let userData={name,email,phone,role,inn,orgType,city,truckType,tonnage};
+
+  if(typeof CaucasAPI!=='undefined'){
+    const r=await CaucasAPI.register({email,password:pass,name,phone,role});
+    if(r.ok){
+      userData={...userData,userId:r.user_id,token:r.token};
+    } else {
+      if(btn){btn.textContent='Создать аккаунт';btn.disabled=false;}
+      if(r.status===0){ userData.offline=true; }
+      else {
+        const errMsg=Array.isArray(r.error)?r.error.map(e=>e.msg).join(', '):r.error;
+        alert(errMsg||'Ошибка регистрации');
+        return;
+      }
+    }
+  }
+
+  user=userData;
+  _lsSet('ch_user',JSON.stringify(user));
+  document.getElementById('regSuccess').style.display='block';
   setTimeout(()=>{
-    user={name,email,phone,role,inn,orgType,city,truckType,tonnage};
-    _lsSet('ch_user',JSON.stringify(user));
-    document.getElementById('regSuccess').style.display='block';
-    setTimeout(()=>{
-      closeModal('authOverlay');
-      showUserState();
-    },400);
-  },600);
+    closeModal('authOverlay');
+    showUserState();
+    if(typeof syncLoadsFromServer==='function') syncLoadsFromServer();
+  },400);
+  if(btn){btn.textContent='Создать аккаунт';btn.disabled=false;}
 }
 function showUserState(){
   document.getElementById('btnLogin').style.display='none';
@@ -1491,14 +1531,27 @@ function doPostLoad(){
   function toDisplay(s){if(!s)return null;const[y,m,d]=s.split('-');return `${d}.${m}.${y.slice(2)}`;}
   const loadDate=toDisplay(rawDate)||'28.03.26';
   const loadDate2=rawDate2?toDisplay(rawDate2):null;
-  // Валюта: локальные → ₾, международные → $
   const cur = scope==='intl' ? '$' : '₾';
   const newLoad={id:Date.now(),from,to,kg,type:truck.toLowerCase(),typeLabel:truck,...tc,price,cur,date:loadDate,date2:loadDate2,urgent,scope:scope==='intl'?'intl':'local',desc,co:user.name,rat:'5.0',trips:0,pay,from2:fromAddr,to2:toAddr,km:'~уточните',badge:urgent?'urgent':'new',ownerId:user.email};
+
   LOCAL.unshift(newLoad);
   window.allLoads=[...LOCAL,...INTL];
-  // Добавляем в "Мои заказы"
   addMyLoad(newLoad);
   document.getElementById('postSuccess').style.display='block';
+
+  // Сохраняем на сервере асинхронно
+  if(typeof CaucasAPI!=='undefined' && user?.token){
+    CaucasAPI.createLoad(newLoad).then(r=>{
+      if(r.ok && r.load?.serverId){
+        // Обновляем serverId в массивах
+        newLoad.serverId=r.load.serverId;
+        const mi=_myLoads.findIndex(l=>l.id===newLoad.id);
+        if(mi>-1) _myLoads[mi].serverId=r.load.serverId;
+        persistMyLoads();
+      }
+    }).catch(()=>{});
+  }
+
   setTimeout(()=>{
     closeModal('postOverlay');
     renderLoads(scope==='local'?LOCAL:INTL);
@@ -1521,6 +1574,11 @@ function addMyLoad(load){
 
 function deleteMyLoad(id){
   if(!confirm('Удалить груз из биржи?')) return;
+  const load=_myLoads.find(l=>l.id===id);
+  // Удаляем с сервера если есть serverId
+  if(load?.serverId && typeof CaucasAPI!=='undefined' && user?.token){
+    CaucasAPI.deleteLoad(load.serverId).catch(()=>{});
+  }
   const idx=LOCAL.findIndex(l=>l.id===id);
   if(idx>-1) LOCAL.splice(idx,1);
   window.allLoads=[...LOCAL,...INTL];
@@ -1921,7 +1979,15 @@ try{
   const _saved=_lsGet('ch_user');
   if(_saved&&_saved!=='null'){
     user=JSON.parse(_saved);
-    if(user&&user.name) showUserState();
+    if(user&&user.name){
+      showUserState();
+      // Восстанавливаем JWT токен
+      if(user.token && typeof setToken!=='undefined') setToken(user.token);
+      // Синхронизируем грузы с сервером
+      setTimeout(()=>{
+        if(typeof syncLoadsFromServer==='function') syncLoadsFromServer();
+      }, 500);
+    }
   }
 }catch(e){try{_lsDel('ch_user');}catch(e2){}}
 // Устанавливаем min дату для календаря
@@ -2102,6 +2168,7 @@ if(document.readyState==='loading'){
   <div id="notifList"><div class="notif-empty">Нет уведомлений</div></div>
 </div>
 
+<script src="api.js"></script>
 <script src="ai-dispatcher.js"></script>
 </body>
 </html>
