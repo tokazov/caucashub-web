@@ -648,6 +648,50 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   </div>
 </div>
 
+<!-- ═══ MODAL: PAYWALL ═══ -->
+<div class="overlay" id="paywallOverlay" onclick="closeOverlay('paywallOverlay',event)">
+  <div class="modal" style="max-width:480px">
+    <button class="close-btn" onclick="closeModal('paywallOverlay')">✕</button>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:36px;margin-bottom:8px">🔒</div>
+      <div id="paywallTitle" style="font-size:18px;font-weight:800;color:#1a1a2e">Откройте доступ</div>
+      <div id="paywallSub" style="font-size:13px;color:#888;margin-top:6px"></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+      <!-- Стандарт -->
+      <div style="border:2px solid #3498db;border-radius:12px;padding:16px;position:relative">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-weight:800;font-size:15px;color:#3498db">Стандарт</div>
+            <div style="font-size:12px;color:#666;margin-top:4px">✅ Видите контакты грузовладельца<br>✅ 50 откликов в месяц<br>✅ Верификация компании</div>
+          </div>
+          <div style="text-align:right;white-space:nowrap">
+            <div style="font-size:22px;font-weight:800;color:#1a1a2e">₾35</div>
+            <div style="font-size:11px;color:#aaa">/мес</div>
+          </div>
+        </div>
+        <button onclick="choosePlan('standard')" style="margin-top:12px;width:100%;background:#3498db;color:#fff;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer">Выбрать Стандарт</button>
+      </div>
+      <!-- Про -->
+      <div style="border:2px solid #f7b731;border-radius:12px;padding:16px;position:relative">
+        <div style="position:absolute;top:-10px;left:16px;background:#f7b731;color:#1a1a2e;font-size:10px;font-weight:800;padding:2px 10px;border-radius:10px">ЛУЧШИЙ ВЫБОР</div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-weight:800;font-size:15px;color:#e6a820">Про</div>
+            <div style="font-size:12px;color:#666;margin-top:4px">✅ Всё из Стандарта<br>✅ Безлимитные отклики<br>✅ Приоритет в выдаче<br>✅ Срочные грузы первым<br>✅ AI диспетчер без лимитов</div>
+          </div>
+          <div style="text-align:right;white-space:nowrap">
+            <div style="font-size:22px;font-weight:800;color:#1a1a2e">₾80</div>
+            <div style="font-size:11px;color:#aaa">/мес</div>
+          </div>
+        </div>
+        <button onclick="choosePlan('pro')" style="margin-top:12px;width:100%;background:#f7b731;color:#1a1a2e;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer">Выбрать Про</button>
+      </div>
+    </div>
+    <div style="text-align:center;font-size:12px;color:#aaa">Первые 6 месяцев — бесплатно для всех 🎁<br>Подписка включится позже</div>
+  </div>
+</div>
+
 <!-- ═══ MODAL: CARGO DETAIL ═══ -->
 <div class="overlay" id="cargoOverlay" onclick="closeOverlay('cargoOverlay',event)" style="align-items:flex-end">
   <div class="modal-bottom">
@@ -691,6 +735,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <div style="width:64px;height:64px;background:#f7b731;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#1a1a2e;font-weight:900;font-size:24px;margin:0 auto 10px" id="profileAva">ТК</div>
       <div style="font-weight:700;font-size:18px" id="profileName">Тимур Токазов</div>
       <div style="font-size:13px;color:#888" id="profileRole">Перевозчик · ⭐ 4.9 · 47 рейсов</div>
+      <div style="margin-top:8px" id="profilePlanBadge"></div>
     </div>
     <div class="divider"></div>
     <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
@@ -995,6 +1040,30 @@ const TRUCKS = [
   {id:4,from:'Кутаиси',to:'Любое',kg:15000,type:'Бортовой',date:'Сегодня',co:'КутТранс',rat:'4.6',trips:43,plate:'GE-321-DE'},
 ];
 
+// ══════════════════════════════════════════════════════
+// ПОДПИСКИ — переключить в true когда наберём базу
+const SUBSCRIPTIONS_ENABLED = false;
+// ══════════════════════════════════════════════════════
+
+// Планы подписок
+const PLANS = {
+  free:     { name:'Бесплатно',  price:0,   color:'#888',    contacts:0,  responds:0,  priority:false, urgent:false },
+  standard: { name:'Стандарт',   price:35,  color:'#3498db', contacts:50, responds:50, priority:false, urgent:false },
+  pro:      { name:'Про',        price:80,  color:'#f7b731', contacts:-1, responds:-1, priority:true,  urgent:true  },
+};
+
+// Проверка доступа (пока SUBSCRIPTIONS_ENABLED=false — всё разрешено)
+function canSeeContact(){ return !SUBSCRIPTIONS_ENABLED || userHasPlan('standard'); }
+function canRespond(){    return !SUBSCRIPTIONS_ENABLED || userHasPlan('standard'); }
+function canSeeUrgent(){  return !SUBSCRIPTIONS_ENABLED || userHasPlan('pro'); }
+function userHasPlan(min){
+  if(!user) return false;
+  const order=['free','standard','pro'];
+  const userIdx=order.indexOf(user.plan||'free');
+  const minIdx=order.indexOf(min);
+  return userIdx>=minIdx;
+}
+
 let scope='local', lang='ru', user=null, cargoData=[...LOCAL];
 
 // ── DATE RANGE SYNC ───────────────────────────────────
@@ -1117,12 +1186,12 @@ function openCargo(d){
 // ── RESPOND ───────────────────────────────────────────
 function doRespond(){
   if(!user){ closeModal('cargoOverlay'); openAuth('login'); return; }
+  if(!canRespond()){ openPaywall('respond'); return; }
   const btn=document.getElementById('btnRespond');
   btn.textContent='Отправляем...'; btn.disabled=true;
   setTimeout(()=>{
     document.getElementById('respondSuccess').style.display='block';
     btn.textContent='✅ Заявка отправлена';
-    // добавляем в мои заказы
     addToOrders();
   },1000);
 }
@@ -1139,13 +1208,50 @@ function addToOrders(){
     list.prepend(item);
   }
 }
-function showPhone(){
-  if(user){
-    alert('📞 Контакт перевозчика\n\n+995 555 *** ***\n\nКонтакт открывается после принятия заявки.');
-  } else {
-    closeModal('cargoOverlay');
-    openAuth('login');
+// ── PAYWALL ───────────────────────────────────────────
+function openPaywall(reason){
+  const titles={
+    contact:'Чтобы видеть контакты — нужна подписка',
+    respond:'Чтобы откликаться на грузы — нужна подписка',
+    urgent:'Срочные грузы доступны на тарифе Про',
+  };
+  const subs={
+    contact:'Откройте телефон и email грузовладельца',
+    respond:'Отправляйте заявки перевозчикам напрямую',
+    urgent:'Получайте срочные грузы первым',
+  };
+  document.getElementById('paywallTitle').textContent=titles[reason]||'Откройте доступ';
+  document.getElementById('paywallSub').textContent=subs[reason]||'';
+  document.getElementById('paywallOverlay').classList.add('on');
+}
+function choosePlan(plan){
+  // Пока подписки выключены — просто говорим что скоро
+  if(!SUBSCRIPTIONS_ENABLED){
+    closeModal('paywallOverlay');
+    alert('🎁 Отличный выбор!\n\nПодписки откроются когда мы наберём базу перевозчиков.\nПока всё бесплатно — пользуйтесь!');
+    return;
   }
+  // TODO: подключить оплату (Cryptomus / карта)
+  alert('Оплата: '+plan);
+}
+
+// ── SUBSCRIPTION BADGE ────────────────────────────────
+function getPlanBadge(){
+  if(!SUBSCRIPTIONS_ENABLED) return '<span style="background:#2ecc71;color:#fff;font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700">Бесплатный период</span>';
+  const plan=user?.plan||'free';
+  const colors={free:'#888',standard:'#3498db',pro:'#f7b731'};
+  const names={free:'Бесплатно',standard:'Стандарт',pro:'Про'};
+  return `<span style="background:${colors[plan]};color:#fff;font-size:10px;padding:2px 8px;border-radius:8px;font-weight:700">${names[plan]}</span>`;
+}
+
+function showPhone(){
+  if(!user){ closeModal('cargoOverlay'); openAuth('login'); return; }
+  if(!canSeeContact()){ openPaywall('contact'); return; }
+  // реальный контакт — берётся из данных груза
+  const d=window.allLoads.find(x=>x.id===currentCargoId);
+  const phone=d?.phone||'+995 555 123 456';
+  const email=d?.email||'cargo@company.ge';
+  alert(`📞 Контакт грузовладельца\n\n${phone}\n${email}`);
 }
 
 // ── AUTH ──────────────────────────────────────────────
@@ -1247,6 +1353,8 @@ function showUserState(){
   document.getElementById('userAvatar').style.display='flex';
   document.getElementById('userAvatar').textContent=user.name.slice(0,2).toUpperCase();
   document.getElementById('profileName').textContent=user.name;
+  const pb=document.getElementById('profilePlanBadge');
+  if(pb) pb.innerHTML=getPlanBadge();
   // показываем заказы
   document.getElementById('ordersEmpty').innerHTML='<div class="icon">📋</div><div style="font-size:18px;font-weight:700;color:#555;margin-bottom:8px">Нет активных заказов</div><div style="font-size:14px">Откликайтесь на грузы — они появятся здесь</div>';
   const nb=document.getElementById('notifBtn');if(nb)nb.style.display='';
