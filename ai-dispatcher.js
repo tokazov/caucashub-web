@@ -526,7 +526,7 @@ function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
         const fabSize=56, gap=8;
         const cw=chat.getBoundingClientRect().width||320;
         const ch=chat.getBoundingClientRect().height||400;
-        const fx=nx+cw-fabSize;
+        const fx=nx+cw/2-fabSize/2;
         const fy=ny+ch+gap;
         fab.style.right='auto'; fab.style.bottom='auto';
         fab.style.left=Math.max(0,Math.min(window.innerWidth-fabSize,fx))+'px';
