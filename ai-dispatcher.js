@@ -496,6 +496,47 @@ function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
   }, true);
 })();
 
+// ── DRAGGABLE CHAT HEADER ─────────────────────────────
+(function(){
+  function initChatDrag(){
+    const header = document.querySelector('.ai-chat-header');
+    const chat   = document.getElementById('aiChat');
+    if(!header || !chat) return;
+
+    let dragging=false, startX, startY, origX, origY;
+
+    function startDrag(cx, cy){
+      if(window.innerWidth<=600) return; // на мобиле не двигаем
+      dragging=true;
+      startX=cx; startY=cy;
+      const r=chat.getBoundingClientRect();
+      origX=r.left; origY=r.top;
+      chat.style.transition='none';
+      chat.style.left=origX+'px'; chat.style.top=origY+'px';
+      chat.style.right='auto'; chat.style.bottom='auto';
+    }
+    function moveDrag(cx, cy){
+      if(!dragging) return;
+      const nx=Math.max(0, Math.min(window.innerWidth-chat.offsetWidth,   origX+(cx-startX)));
+      const ny=Math.max(0, Math.min(window.innerHeight-chat.offsetHeight, origY+(cy-startY)));
+      chat.style.left=nx+'px'; chat.style.top=ny+'px';
+    }
+    function endDrag(){ dragging=false; chat.style.transition=''; }
+
+    header.style.cursor='move';
+    header.addEventListener('mousedown',  e=>{ startDrag(e.clientX,e.clientY); e.preventDefault(); });
+    document.addEventListener('mousemove', e=>moveDrag(e.clientX,e.clientY));
+    document.addEventListener('mouseup',   ()=>endDrag());
+
+    header.addEventListener('touchstart', e=>{ const t=e.touches[0]; startDrag(t.clientX,t.clientY); },{passive:true});
+    document.addEventListener('touchmove', e=>{ if(!dragging)return; const t=e.touches[0]; moveDrag(t.clientX,t.clientY); e.preventDefault(); },{passive:false});
+    document.addEventListener('touchend',  ()=>endDrag());
+  }
+  // Ждём рендера
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', initChatDrag);
+  else initChatDrag();
+})();
+
 // ── INIT ──────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const inp = document.getElementById('aiInput');
