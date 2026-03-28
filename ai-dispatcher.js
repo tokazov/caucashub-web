@@ -27,7 +27,7 @@ function openAI() {
   // Приветствие только если история пустая
   if (aiHistory.length === 0) {
     setTimeout(() => {
-      addBotMsg('Привет! Я Алекс, диспетчер CaucasHub 👋\nВы водитель или грузовладелец?');
+      addBotMsg('Привет! Я Мари, диспетчер CaucasHub 👋\nВы водитель или грузовладелец?');
       addRoleBtns();
     }, 200);
   }
