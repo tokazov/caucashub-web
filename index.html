@@ -197,7 +197,11 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .ai-msg{max-width:82%;padding:9px 11px;border-radius:12px;font-size:13px;line-height:1.4;}
 .ai-msg.bot{background:#f0f2f5;color:#1a1a2e;align-self:flex-start;border-radius:4px 12px 12px 12px;}
 .ai-msg.user{background:#1a1a2e;color:#fff;align-self:flex-end;border-radius:12px 4px 12px 12px;}
-.ai-msg.typing{background:#f0f2f5;color:#aaa;align-self:flex-start;}
+.ai-msg.typing{background:#f0f2f5;color:#aaa;align-self:flex-start;padding:10px 14px;}
+.ai-msg.typing .dot{width:7px;height:7px;border-radius:50%;background:#aaa;display:inline-block;margin:0 2px;animation:typingDot 1.2s infinite ease-in-out;}
+.ai-msg.typing .dot:nth-child(2){animation-delay:.2s;}
+.ai-msg.typing .dot:nth-child(3){animation-delay:.4s;}
+@keyframes typingDot{0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1}}
 .ai-template{background:#fffbf0;border:1.5px solid #f7b731;border-radius:10px;padding:10px;margin:6px 10px;font-size:12px;}
 .ai-template-title{font-weight:700;font-size:13px;margin-bottom:6px;}
 .ai-field{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid #f0e8d0;}
@@ -1804,11 +1808,11 @@ if(document.readyState==='loading'){
 <div class="ai-chat" id="aiChat">
   <div class="ai-chat-header">
     <div class="ai-avatar" style="background:transparent;overflow:hidden;width:40px;height:40px;border-radius:50%"><img src="dispatcher.jpg" width="40" height="40" style="object-fit:cover;object-position:center top;border-radius:50%"></div>
-    <div><div class="ai-name">Твой AI Диспетчер</div><div class="ai-status">● Онлайн 24/7</div></div>
+    <div style="flex:1"><div class="ai-name">Алекс — AI Диспетчер</div><div class="ai-status">● Онлайн 24/7</div></div>
+    <button onclick="aiReset()" style="background:none;border:none;color:#aaa;font-size:11px;cursor:pointer;padding:4px 8px;border-radius:6px;margin-right:4px;" title="Начать заново">↺</button>
     <button class="ai-close" onclick="closeAI()">✕</button>
   </div>
   <div class="ai-messages" id="aiMessages">
-    <div class="ai-msg bot">👋 Привет! Я ваш AI диспетчер CaucasHub.<br>Вы <b>водитель</b> или <b>грузовладелец</b>?</div>
   </div>
   <div class="ai-template" id="aiTemplate" style="display:none">
     <div class="ai-template-title">📋 Данные груза:</div>
