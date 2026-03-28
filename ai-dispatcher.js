@@ -20,7 +20,8 @@ function openAI() {
   const fab  = document.querySelector('.ai-fab');
   if (!chat) return;
   chat.classList.add('open');
-  if (fab) positionChat(chat, fab);
+  // На десктопе — позиционируем рядом с кнопкой
+  if (fab && window.innerWidth > 600) positionChat(chat, fab);
   setTimeout(() => document.getElementById('aiInput')?.focus(), 100);
 
   // Приветствие только если история пустая
@@ -373,8 +374,10 @@ function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
     const nx = Math.max(0, Math.min(window.innerWidth  - 60, origX + dx));
     const ny = Math.max(0, Math.min(window.innerHeight - 60, origY + dy));
     fab.style.left = nx + 'px'; fab.style.top = ny + 'px';
-    const chat = document.getElementById('aiChat');
-    if (chat && chat.classList.contains('open')) positionChat(chat, fab);
+    if (window.innerWidth > 600) {
+      const chat = document.getElementById('aiChat');
+      if (chat && chat.classList.contains('open')) positionChat(chat, fab);
+    }
   });
 
   document.addEventListener('mouseup', e => {
@@ -405,8 +408,10 @@ function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
     const nx = Math.max(0, Math.min(window.innerWidth  - 60, origX + dx));
     const ny = Math.max(0, Math.min(window.innerHeight - 60, origY + dy));
     fab.style.left = nx + 'px'; fab.style.top = ny + 'px';
-    const chat = document.getElementById('aiChat');
-    if (chat && chat.classList.contains('open')) positionChat(chat, fab);
+    if (window.innerWidth > 600) {
+      const chat = document.getElementById('aiChat');
+      if (chat && chat.classList.contains('open')) positionChat(chat, fab);
+    }
     if (moved) e.preventDefault();
   }, { passive: false });
 
