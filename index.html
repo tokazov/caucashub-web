@@ -186,13 +186,13 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .ai-fab{position:fixed;bottom:80px;right:20px;width:56px;height:56px;background:linear-gradient(135deg,#1a1a2e,#3498db);border-radius:50%;border:none;cursor:grab;z-index:500;box-shadow:0 4px 20px rgba(52,152,219,.5);display:flex;align-items:center;justify-content:center;font-size:24px;transition:transform .2s;touch-action:none;}
 .ai-fab:hover{transform:scale(1.1);}
 .ai-badge{position:absolute;top:-2px;right:-2px;width:14px;height:14px;background:#2ecc71;border-radius:50%;animation:pulse 2s infinite;border:2px solid #fff;}
-.ai-chat{display:none;position:fixed;width:320px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.2);z-index:499;flex-direction:column;max-height:500px;}
+.ai-chat{display:none;position:fixed;width:320px;background:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.2);z-index:501;flex-direction:column;max-height:500px;}
 .ai-chat.open{display:flex;}
 .ai-chat-header{background:linear-gradient(135deg,#1a1a2e,#2c3e6e);padding:12px 14px;border-radius:16px 16px 0 0;display:flex;align-items:center;gap:10px;}
 .ai-avatar{width:34px;height:34px;background:#f7b731;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
 .ai-name{color:#fff;font-weight:700;font-size:13px;}
 .ai-status{color:#2ecc71;font-size:11px;}
-.ai-close{margin-left:auto;background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;}
+.ai-close{margin-left:auto;background:none;border:none;color:#aaa;cursor:pointer;font-size:20px;z-index:502;position:relative;padding:8px;line-height:1;touch-action:manipulation;}
 .ai-messages{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:7px;}
 .ai-msg{max-width:82%;padding:9px 11px;border-radius:12px;font-size:13px;line-height:1.4;}
 .ai-msg.bot{background:#f0f2f5;color:#1a1a2e;align-self:flex-start;border-radius:4px 12px 12px 12px;}

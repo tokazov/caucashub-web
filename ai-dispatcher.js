@@ -134,15 +134,32 @@ function detectRole(text){
 function parseCarrier(text){
   const t=text.toLowerCase();
   const cities=['тбилиси','батуми','поти','кутаиси','рустави','стамбул','ереван','баку','москва','сочи','алматы','трабзон','анкара'];
-  const found=cities.filter(c=>t.includes(c));
-  if(found[0]&&!aiCarrierData.from) aiCarrierData.from=found[0].charAt(0).toUpperCase()+found[0].slice(1);
-  if(found[1]&&!aiCarrierData.to) aiCarrierData.to=found[1].charAt(0).toUpperCase()+found[1].slice(1);
+
+  // Ищем порядок городов в тексте с учётом предлогов из/в/до
+  const fromMatch=t.match(/из\s+([а-яё]+)/);
+  const toMatch=t.match(/(?:в|до)\s+([а-яё]+)/);
+  if(fromMatch){
+    const c=cities.find(c=>c.startsWith(fromMatch[1].slice(0,4)));
+    if(c&&!aiCarrierData.from) aiCarrierData.from=c.charAt(0).toUpperCase()+c.slice(1);
+  }
+  if(toMatch){
+    const c=cities.find(c=>c.startsWith(toMatch[1].slice(0,4)));
+    if(c&&!aiCarrierData.to) aiCarrierData.to=c.charAt(0).toUpperCase()+c.slice(1);
+  }
+  // Fallback: порядок упоминания
+  if(!aiCarrierData.from||!aiCarrierData.to){
+    const found=cities.filter(c=>t.includes(c));
+    if(found[0]&&!aiCarrierData.from) aiCarrierData.from=found[0].charAt(0).toUpperCase()+found[0].slice(1);
+    if(found[1]&&!aiCarrierData.to) aiCarrierData.to=found[1].charAt(0).toUpperCase()+found[1].slice(1);
+  }
+
   if(t.includes('сегодня')) aiCarrierData.date='Сегодня';
   else if(t.includes('завтра')) aiCarrierData.date='Завтра';
   const trucks={тент:'Тент',рефриж:'Рефрижератор',борт:'Бортовой',термос:'Термос',фургон:'Фургон',контейн:'Контейнер',автовоз:'Автовоз'};
   for(const[k,v] of Object.entries(trucks)){if(t.includes(k)){aiCarrierData.truck=v;break;}}
-  const wm=t.match(/(\d+)\s*(тонн|тн\b|кг)/);
-  if(wm){let w=parseInt(wm[1]);if(wm[2].includes('тонн')||wm[2]==='тн')w*=1000;aiCarrierData.weightCap=w;}
+  // Вес: "до 1.5 тонны", "максимум 2 тонны", "1500 кг"
+  const wm=t.match(/(\d+[.,]?\d*)\s*(тонн|тн\b|кг)/);
+  if(wm){let w=parseFloat(wm[1].replace(',','.'));if(wm[2].includes('тонн')||wm[2]==='тн')w*=1000;aiCarrierData.weightCap=Math.round(w);}
 }
 
 function findMatchingLoads(){
@@ -150,7 +167,8 @@ function findMatchingLoads(){
   let data=[...LOCAL,...INTL].filter(ld=>ld.status!=='taken');
   if(d.from) data=data.filter(ld=>ld.from.toLowerCase().includes(d.from.toLowerCase().slice(0,4)));
   if(d.to) data=data.filter(ld=>ld.to.toLowerCase().includes(d.to.toLowerCase().slice(0,4)));
-  if(d.weightCap) data=data.filter(ld=>ld.kg<=d.weightCap*1.1);
+  // фильтр по грузоподъёмности — груз не должен превышать возможности машины
+  if(d.weightCap) data=data.filter(ld=>ld.kg<=d.weightCap);
   return data.slice(0,3);
 }
 
@@ -191,9 +209,15 @@ function showMatchingLoads(){
 function parseShipper(text){
   const t=text.toLowerCase();
   const cities=['тбилиси','батуми','поти','кутаиси','рустави','стамбул','ереван','баку','москва','сочи','алматы'];
-  const found=cities.filter(c=>t.includes(c));
-  if(found[0]&&!aiLoadData.from) aiLoadData.from=found[0].charAt(0).toUpperCase()+found[0].slice(1);
-  if(found[1]&&!aiLoadData.to) aiLoadData.to=found[1].charAt(0).toUpperCase()+found[1].slice(1);
+  const fromMatch=t.match(/из\s+([а-яё]+)/);
+  const toMatch=t.match(/(?:в|до)\s+([а-яё]+)/);
+  if(fromMatch){const c=cities.find(c=>c.startsWith(fromMatch[1].slice(0,4)));if(c&&!aiLoadData.from)aiLoadData.from=c.charAt(0).toUpperCase()+c.slice(1);}
+  if(toMatch){const c=cities.find(c=>c.startsWith(toMatch[1].slice(0,4)));if(c&&!aiLoadData.to)aiLoadData.to=c.charAt(0).toUpperCase()+c.slice(1);}
+  if(!aiLoadData.from||!aiLoadData.to){
+    const found=cities.filter(c=>t.includes(c));
+    if(found[0]&&!aiLoadData.from) aiLoadData.from=found[0].charAt(0).toUpperCase()+found[0].slice(1);
+    if(found[1]&&!aiLoadData.to) aiLoadData.to=found[1].charAt(0).toUpperCase()+found[1].slice(1);
+  }
   const wm=t.match(/(\d+)\s*(тонн|тн\b|кг|кило)/);
   if(wm){let w=parseInt(wm[1]);if(wm[2].includes('тонн')||wm[2]==='тн')w*=1000;aiLoadData.weight=w;}
   const pm=t.match(/(\d+)\s*(лари|₾|\$)/);
