@@ -1261,11 +1261,43 @@ function addToOrders(){
   };
   if(typeof _orders !== 'undefined') { _orders.push(order); persistOrders(); }
 
+  // Добавляем отклик к грузу (виден грузовладельцу)
+  if(d && typeof _loadResponses !== 'undefined'){
+    if(!_loadResponses[d.id]) _loadResponses[d.id]=[];
+    _loadResponses[d.id].push({
+      id: Date.now(),
+      name: user?.name || 'Перевозчик',
+      truck: user?.truckType || 'Тент',
+      tonnage: user?.tonnage || '?',
+      rating: user?.rat || '5.0',
+      status: 'pending',
+      userId: user?.email
+    });
+  }
+
   // Обновляем счётчик откликов в профиле
   updateRespondCount();
 
   // Перерисовываем
   if(typeof _renderOrders === 'function') _renderOrders();
+}
+
+function acceptResponse(loadId, respId){
+  const resps = _loadResponses[loadId]||[];
+  resps.forEach(r=>{ r.status = r.id===respId ? 'accepted' : 'rejected'; });
+  _loadResponses[loadId] = resps;
+  // Убираем груз из списка (принят)
+  const load = _myLoads.find(l=>l.id===loadId);
+  if(load){ load.status='taken'; load.status_label='Принят'; }
+  _renderOrders();
+  pushNotif('✅ Принято!', `Перевозчик принят на маршрут ${load?.from||''} → ${load?.to||''}`,[]);
+}
+
+function rejectResponse(loadId, respId){
+  const resps = _loadResponses[loadId]||[];
+  const r = resps.find(x=>x.id===respId);
+  if(r) r.status='rejected';
+  _renderOrders();
 }
 
 function updateRespondCount(){
@@ -1559,6 +1591,8 @@ function doPostLoad(){
 
 // Массив своих грузов (отдельно от откликов)
 let _myLoads = [];
+// Отклики на мои грузы: {loadId: [{id, name, truck, tonnage, rating, status}]}
+let _loadResponses = {};
 
 // Сохранение данных
 function persistMyLoads(){ try{localStorage.setItem('ch_my_loads',JSON.stringify(_myLoads));}catch(e){} }
@@ -1924,7 +1958,30 @@ function _renderOrders(){
   list.style.display='block';
 
   // Мои размещённые грузы
-  const myLoadsHtml=_myLoads.map(l=>`
+  const myLoadsHtml=_myLoads.map(l=>{
+    // Отклики на этот груз
+    const responses = (_loadResponses[l.id]||[]);
+    const respHtml = responses.length ? `
+      <div style="margin-top:10px;border-top:1px solid #f0f0f0;padding-top:10px">
+        <div style="font-size:12px;font-weight:700;color:#555;margin-bottom:8px">👥 Отклики (${responses.length}):</div>
+        ${responses.map(r=>`
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#f8f9fa;border-radius:8px;margin-bottom:6px">
+            <div>
+              <div style="font-weight:600;font-size:13px">${r.name}</div>
+              <div style="font-size:11px;color:#888">${r.truck} · ${r.tonnage}т · ⭐${r.rating}</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              ${r.status==='pending'?`
+                <button onclick="acceptResponse(${l.id},${r.id})" style="background:#2ecc71;color:#fff;border:none;padding:5px 10px;border-radius:6px;font-size:12px;cursor:pointer">✓ Принять</button>
+                <button onclick="rejectResponse(${l.id},${r.id})" style="background:#fee;color:#e74c3c;border:1px solid #fcc;padding:5px 8px;border-radius:6px;font-size:12px;cursor:pointer">✕</button>
+              `:r.status==='accepted'?`<span style="color:#2ecc71;font-size:12px;font-weight:700">✅ Принят</span>`:
+               `<span style="color:#aaa;font-size:12px">Отклонён</span>`}
+            </div>
+          </div>
+        `).join('')}
+      </div>` : `<div style="font-size:12px;color:#aaa;margin-top:8px;text-align:center">Откликов пока нет</div>`;
+
+    return `
     <div id="myload-${l.id}" style="padding:14px 16px;background:#fff;border-bottom:1px solid #f2f2f2;border-left:3px solid #2ecc71">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <div style="flex:1">
@@ -1934,11 +1991,13 @@ function _renderOrders(){
         </div>
         <span style="background:#e8f5e9;color:#2e7d32;padding:4px 8px;border-radius:10px;font-size:11px;white-space:nowrap">📦 Мой груз</span>
       </div>
+      ${respHtml}
       <div style="display:flex;gap:8px;margin-top:10px">
         <button onclick="editMyLoad(${l.id})" style="flex:1;background:#f0f7ff;color:#1a6ec0;border:1px solid #bee3f8;border-radius:8px;padding:7px;cursor:pointer;font-size:13px;font-weight:600">✏️ Редактировать</button>
         <button onclick="deleteMyLoad(${l.id})" style="background:#fee;border:1px solid #fcc;color:#e74c3c;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px">✕ Удалить</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   const ordersHtml = _orders.map(o=>{
     const s=_STATUS[o.status]||_STATUS.pending;
