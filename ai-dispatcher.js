@@ -520,6 +520,16 @@ function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
       const nx=Math.max(0, Math.min(window.innerWidth-chat.offsetWidth,   origX+(cx-startX)));
       const ny=Math.max(0, Math.min(window.innerHeight-chat.offsetHeight, origY+(cy-startY)));
       chat.style.left=nx+'px'; chat.style.top=ny+'px';
+      // Кружок следует за чатом — прилипает к правому нижнему углу
+      const fab=document.querySelector('.ai-fab');
+      if(fab){
+        const fabSize=56, gap=10;
+        fab.style.right='auto'; fab.style.bottom='auto';
+        fab.style.left=(nx+chat.offsetWidth-fabSize-gap)+'px';
+        fab.style.top=(ny+chat.offsetHeight+gap)+'px';
+        // Сохраняем позицию
+        localStorage.setItem('fabPos',JSON.stringify({x:parseFloat(fab.style.left),y:parseFloat(fab.style.top)}));
+      }
     }
     function endDrag(){ dragging=false; chat.style.transition=''; }
 
