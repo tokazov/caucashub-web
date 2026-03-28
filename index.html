@@ -174,6 +174,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   .cargo-list { padding-bottom:64px; }
   .fsel { font-size:12px; padding:6px 8px; }
   .post-btn span { display:none; }
+  .fbtn, .post-btn { flex:1; }
 }
 /* AI DISPATCHER */
 .ai-role-btns{display:flex;flex-direction:column;gap:6px;margin:4px 0;}
@@ -314,8 +315,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   </select>
   <div class="fcount" id="fcount">187 грузов</div>
   <div style="width:100%;display:flex;gap:8px;margin-top:2px">
-    <button class="fbtn" onclick="filterLoads()" style="flex:1">Найти</button>
-    <button class="post-btn" onclick="openPostLoad()" style="flex:1">+ <span>Разместить</span></button>
+    <button class="fbtn" onclick="filterLoads()">Найти</button>
+    <button class="post-btn" onclick="openPostLoad()">+ <span>Разместить</span></button>
   </div>
 </div>
 
