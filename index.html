@@ -1390,10 +1390,13 @@ function openProfile(){
 function openPostLoad(){
   if(!user){openAuth('register');return;}
   document.getElementById('postSuccess').style.display='none';
-  // ставим сегодняшнюю дату
   const d=new Date(); const dd=String(d.getDate()).padStart(2,'0'); const mm=String(d.getMonth()+1).padStart(2,'0');
   document.getElementById('pDate').value=`${d.getFullYear()}-${mm}-${dd}`;
   document.getElementById('pDate2').value='';
+  // Правильная валюта при открытии
+  const cl=document.getElementById('priceCurLabel');
+  if(cl) cl.textContent=scope==='intl'?'Ставка ($)':'Ставка (₾)';
+  if(typeof updateFormForIntl==='function') updateFormForIntl();
   document.getElementById('postOverlay').classList.add('on');
 }
 function doPostLoad(){
@@ -1415,15 +1418,59 @@ function doPostLoad(){
   function toDisplay(s){if(!s)return null;const[y,m,d]=s.split('-');return `${d}.${m}.${y.slice(2)}`;}
   const loadDate=toDisplay(rawDate)||'28.03.26';
   const loadDate2=rawDate2?toDisplay(rawDate2):null;
-  const newLoad={id:Date.now(),from,to,kg,type:truck.toLowerCase(),typeLabel:truck,...tc,price,date:loadDate,date2:loadDate2,urgent,scope:scope==='intl'?'intl':'local',desc,co:user.name,rat:'5.0',trips:0,pay,from2:fromAddr,to2:toAddr,km:'~уточните',badge:urgent?'urgent':'new'};
+  // Валюта: локальные → ₾, международные → $
+  const cur = scope==='intl' ? '$' : '₾';
+  const newLoad={id:Date.now(),from,to,kg,type:truck.toLowerCase(),typeLabel:truck,...tc,price,cur,date:loadDate,date2:loadDate2,urgent,scope:scope==='intl'?'intl':'local',desc,co:user.name,rat:'5.0',trips:0,pay,from2:fromAddr,to2:toAddr,km:'~уточните',badge:urgent?'urgent':'new',ownerId:user.email};
   LOCAL.unshift(newLoad);
   window.allLoads=[...LOCAL,...INTL];
+  // Добавляем в "Мои заказы"
+  addMyLoad(newLoad);
   document.getElementById('postSuccess').style.display='block';
   setTimeout(()=>{
     closeModal('postOverlay');
     renderLoads(scope==='local'?LOCAL:INTL);
     document.getElementById('fcount').textContent=LOCAL.length+' грузов';
   },1200);
+}
+
+function addMyLoad(load){
+  const empty=document.getElementById('ordersEmpty');
+  const list=document.getElementById('ordersList');
+  if(!list) return;
+  if(empty) empty.style.display='none';
+  list.style.display='block';
+  const item=document.createElement('div');
+  item.id='myload-'+load.id;
+  item.style='padding:14px 16px;background:#fff;border-bottom:1px solid #f2f2f2;display:flex;justify-content:space-between;align-items:center;gap:8px';
+  item.innerHTML=`
+    <div style="flex:1">
+      <div style="font-weight:700">${load.from} → ${load.to}</div>
+      <div style="font-size:12px;color:#888;margin-top:2px">${load.kg.toLocaleString()} кг · ${load.cur}${load.price} · ${load.date}</div>
+    </div>
+    <span style="background:#fff3e0;color:#f39c12;padding:4px 10px;border-radius:12px;font-size:12px;white-space:nowrap">Мой груз</span>
+    <button onclick="deleteMyLoad(${load.id})" style="background:#fee;border:none;color:#e74c3c;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;white-space:nowrap">✕ Удалить</button>
+  `;
+  list.prepend(item);
+}
+
+function deleteMyLoad(id){
+  if(!confirm('Удалить груз из биржи?')) return;
+  // Удаляем из массива
+  const idx=LOCAL.findIndex(l=>l.id===id);
+  if(idx>-1) LOCAL.splice(idx,1);
+  window.allLoads=[...LOCAL,...INTL];
+  // Убираем из DOM
+  document.getElementById('myload-'+id)?.remove();
+  // Перерисовываем список
+  renderLoads(scope==='local'?LOCAL:INTL);
+  document.getElementById('fcount').textContent=LOCAL.length+' грузов';
+  // Если заказов не осталось
+  const list=document.getElementById('ordersList');
+  if(list && list.children.length===0){
+    list.style.display='none';
+    const empty=document.getElementById('ordersEmpty');
+    if(empty) empty.style.display='block';
+  }
 }
 
 // ── FILTER ─────────────────────────────────────────────
