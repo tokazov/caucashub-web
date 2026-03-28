@@ -163,11 +163,17 @@ async function sendToGemini(text) {
     const data = await resp.json();
     hideTyping();
 
+    // Если бэкенд вернул 404 или нет reply — уходим в офлайн логику
+    if (!resp.ok || !data.reply) {
+      handleOffline(text);
+      return;
+    }
+
     // Обновляем состояние
     if (data.state) aiState = { ...aiState, ...data.state };
 
     // Показываем ответ
-    addBotMsg(data.reply || 'Понял, продолжаем...');
+    addBotMsg(data.reply);
 
     // Показываем найденные грузы
     if (data.loads && data.loads.length > 0) {
