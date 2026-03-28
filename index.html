@@ -1178,7 +1178,10 @@ function openCargo(d){
   document.getElementById('mSub').textContent=`#${d.scope.toUpperCase()}-${String(d.id).padStart(5,'0')} · ${d.co} · Добавлен сегодня`;
   document.getElementById('mAva').textContent=d.co.slice(0,2).toUpperCase();
   document.getElementById('mComp').textContent=d.co;
-  document.getElementById('mStats').textContent=`★ ${d.rat} · ${d.trips} рейсов · Верифицирован ✅`;
+  // Считаем сколько откликов на этот груз
+  const respondCount = (typeof _orders!=='undefined' ? _orders.filter(o=>o.loadId===d.id).length : 0);
+  const respondTxt = respondCount > 0 ? ` · 👥 ${respondCount} отклик${respondCount===1?'':respondCount<5?'а':'ов'}` : '';
+  document.getElementById('mStats').textContent=`★ ${d.rat} · ${d.trips} рейсов · Верифицирован ✅${respondTxt}`;
   document.getElementById('mGrid').innerHTML=`
     <div><div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Откуда</div><div style="font-size:14px;font-weight:700">${d.from2}</div></div>
     <div><div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Куда</div><div style="font-size:14px;font-weight:700">${d.to2}</div></div>
@@ -1226,17 +1229,45 @@ function doRespond(){
   },1000);
 }
 function addToOrders(){
-  const list=document.getElementById('ordersList');
-  const empty=document.getElementById('ordersEmpty');
-  if(!list.innerHTML.includes('Нет активных')){
-    empty.style.display='none';
-    list.style.display='block';
-    const item=document.createElement('div');
-    item.style='padding:14px 16px;background:#fff;border-bottom:1px solid #f2f2f2;display:flex;justify-content:space-between;align-items:center';
-    const title=document.getElementById('mTitle').textContent;
-    item.innerHTML=`<div><div style="font-weight:700">${title}</div><div style="font-size:12px;color:#888;margin-top:2px">Отклик отправлен · ${new Date().toLocaleTimeString('ru')}</div></div><span class="badge" style="background:#fff3e0;color:#f39c12;padding:4px 10px;border-radius:12px;font-size:12px">В обработке</span>`;
-    list.prepend(item);
+  // Берём данные текущего груза
+  const d = window.allLoads?.find(l=>l.id===currentCargoId);
+  if(!d) return;
+
+  // Добавляем в _orders массив
+  const order = {
+    id: Date.now(),
+    loadId: d.id,
+    title: `${d.from} → ${d.to}`,
+    price: d.price,
+    cur: d.cur||'₾',
+    co: d.co,
+    status: 'pending',
+    created: Date.now()
+  };
+  if(typeof _orders !== 'undefined') _orders.push(order);
+
+  // Обновляем счётчик откликов в профиле
+  updateRespondCount();
+
+  // Перерисовываем
+  if(typeof _renderOrders === 'function') _renderOrders();
+}
+
+function updateRespondCount(){
+  const count = typeof _orders !== 'undefined' ? _orders.length : 0;
+  // Показываем в шапке профиля
+  const pr = document.getElementById('profileRole');
+  if(pr && user){
+    const role = user.role==='shipper' ? 'Грузовладелец' : 'Перевозчик';
+    pr.innerHTML = `${role} · ⭐ ${user.rat||'5.0'} · ${user.trips||0} рейсов${count>0?` · <span style="color:#f7b731;font-weight:700">${count} отклик${count===1?'':count<5?'а':'ов'}</span>`:''}`;
   }
+  // Бейдж на кнопке "Мои заказы"
+  const navTabs = document.querySelectorAll('.nav-tab');
+  navTabs.forEach(tab=>{
+    if(tab.textContent.includes('Заказы')){
+      if(count>0) tab.innerHTML=`📋 Мои заказы <span style="background:#e74c3c;color:#fff;border-radius:10px;font-size:10px;padding:1px 5px;margin-left:2px">${count}</span>`;
+    }
+  });
 }
 // ── PAYWALL ───────────────────────────────────────────
 function openPaywall(reason){
@@ -1746,21 +1777,24 @@ function _renderOrders(){
       <button onclick="deleteMyLoad(${l.id})" style="background:#fee;border:none;color:#e74c3c;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;white-space:nowrap">✕</button>
     </div>`).join('');
 
-  list.innerHTML=myLoadsHtml+_orders.map(o=>{
+  const ordersHtml = _orders.map(o=>{
     const s=_STATUS[o.status]||_STATUS.pending;
     let act='';
-    if(o.status==='accepted') act=`<button class="ni-done" onclick="_delivered(${o.id})" style="margin-top:8px">🚛 Груз доставлен</button>`;
+    if(o.status==='accepted') act=`<button class="ni-done" onclick="_delivered(${o.id})" style="margin-top:8px;background:#3498db;color:#fff;border:none;padding:6px 14px;border-radius:6px;font-size:13px;cursor:pointer">🚛 Груз доставлен</button>`;
     if(o.status==='done') act=`<button onclick="_rate(${o.id})" style="margin-top:8px;background:#f0f2f5;border:none;padding:5px 14px;border-radius:6px;font-size:13px;cursor:pointer">⭐ Оставить отзыв</button>`;
     const ts=new Date(o.created).toLocaleString('ru',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-    const bc=o.status==='transit'?'#3498db':o.status==='done'?'#2ecc71':'#f7b731';
+    const bc=o.status==='accepted'?'#3498db':o.status==='done'?'#2ecc71':o.status==='transit'?'#9b59b6':'#f7b731';
     return `<div style="padding:14px 16px;background:#fff;border-bottom:1px solid #f2f2f2;border-left:3px solid ${bc}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div style="font-weight:700;font-size:15px">${o.title}</div>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px">
+        <div style="font-weight:700;font-size:14px">🚛 ${o.title}</div>
         <span class="sbadge ${s.c}">${s.l}</span>
       </div>
-      <div style="font-size:13px;color:#888">💰 $${o.price} · ${ts}</div>${act}
+      <div style="font-size:12px;color:#888">${o.cur||'₾'}${o.price} · ${o.co||''} · ${ts}</div>
+      ${act}
     </div>`;
   }).join('');
+
+  list.innerHTML = myLoadsHtml + ordersHtml;
 }
 function _acceptOrder(id){const o=_orders.find(x=>x.id===id);if(!o)return;o.status='accepted';_renderOrders();pushNotif('✅ Принято!',`Груз "${o.title}" принят.`,[{l:'🚛 Доставлен',c:'ni-done',fn:`_delivered(${id})`}]);}
 function _delivered(id){const o=_orders.find(x=>x.id===id);if(!o)return;o.status='done';_renderOrders();pushNotif('🎉 Доставлен!',`"${o.title}" доставлен. Оставьте отзыв.`,[{l:'⭐ Оценить',c:'ni-done',fn:`_rate(${id})`}]);}
