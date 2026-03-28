@@ -1170,6 +1170,23 @@ function renderTrucks(){
 }
 
 // ── OPEN CARGO MODAL ─────────────────────────────────
+
+// Загружаем сохранённые грузы из localStorage
+(function loadPersistedLoads(){
+  try {
+    const saved = JSON.parse(localStorage.getItem('ch_my_loads')||'[]');
+    if(saved.length){
+      saved.forEach(l=>{ LOCAL.unshift(l); _myLoads.unshift(l); });
+    }
+  } catch(e){}
+  try {
+    const savedOrders = JSON.parse(localStorage.getItem('ch_orders')||'[]');
+    if(savedOrders.length && typeof _orders !== 'undefined') {
+      savedOrders.forEach(o=>_orders.push(o));
+    }
+  } catch(e){}
+})();
+
 window.allLoads=[...LOCAL,...INTL];
 let currentCargoId=null;
 function openCargo(d){
@@ -1244,7 +1261,7 @@ function addToOrders(){
     status: 'pending',
     created: Date.now()
   };
-  if(typeof _orders !== 'undefined') _orders.push(order);
+  if(typeof _orders !== 'undefined') { _orders.push(order); persistOrders(); }
 
   // Обновляем счётчик откликов в профиле
   updateRespondCount();
@@ -1492,10 +1509,13 @@ function doPostLoad(){
 // Массив своих грузов (отдельно от откликов)
 let _myLoads = [];
 
+// Сохранение данных
+function persistMyLoads(){ try{localStorage.setItem('ch_my_loads',JSON.stringify(_myLoads));}catch(e){} }
+function persistOrders(){ try{localStorage.setItem('ch_orders',JSON.stringify(_orders||[]));}catch(e){} }
+
 function addMyLoad(load){
-  // Добавляем в массив
   _myLoads.unshift(load);
-  // Перерисовываем секцию заказов
+  persistMyLoads();
   _renderOrders();
 }
 
@@ -1505,6 +1525,7 @@ function deleteMyLoad(id){
   if(idx>-1) LOCAL.splice(idx,1);
   window.allLoads=[...LOCAL,...INTL];
   _myLoads=_myLoads.filter(l=>l.id!==id);
+  persistMyLoads();
   renderLoads(scope==='local'?LOCAL:INTL);
   document.getElementById('fcount').textContent=LOCAL.length+' грузов';
   _renderOrders();
@@ -1573,6 +1594,7 @@ function saveEditedLoad(){
   }
 
   window.allLoads=[...LOCAL,...INTL];
+  persistMyLoads();
   _editingLoadId=null;
 
   // Восстанавливаем форму
