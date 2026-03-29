@@ -28,12 +28,15 @@ async function apiRequest(method, path, body=null){
 // ── AUTH ──────────────────────────────────────────────
 const CaucasAPI = {
 
-  async register({ email, password, name, phone, role, inn, orgType, truckType, tonnage }){
+  async register({ email, password, name, phone, role, inn, orgType, city, truckType, tonnage }){
     const r = await apiRequest('POST', '/api/auth/register', {
       email, password,
       company_name: name,
       phone: phone || '',
-      role: role || 'carrier'
+      role: role || 'carrier',
+      inn:      inn      || null,
+      org_type: orgType  || null,
+      city:     city     || null,
     });
     if(r.ok && r.data?.token){
       setToken(r.data.token);
