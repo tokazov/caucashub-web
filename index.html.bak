@@ -1,31 +1,9 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <script>
-    // Redirect HTTP to HTTPS and www to apex
-    (function(){
-      var h = location.hostname;
-      var proto = location.protocol;
-      var path = location.pathname + location.search;
-      if(h === 'localhost' || h === '127.0.0.1') return;
-      // www → apex
-      if(h === 'www.caucashub.ge'){
-        location.replace('https://caucashub.ge' + path);
-        return;
-      }
-      // http → https
-      if(proto === 'http:'){
-        location.replace('https://' + h + path);
-      }
-    })();
-  </script>
-
 <meta charset="UTF-8">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;900&family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://api-maps.yandex.ru/2.1/?apikey=aef19e33-8ea1-4039-8353-2f0df688664a&lang=ru_RU" type="text/javascript" async></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://api-maps.yandex.ru/2.1/?apikey=aef19e33-8ea1-4039-8353-2f0df688664a&lang=ru_RU" type="text/javascript"></script>
 <title>CaucasHub.ge — Биржа грузов Кавказа</title>
 
 
@@ -254,7 +232,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .notif-item{padding:12px 16px;border-bottom:1px solid #f5f5f5;cursor:pointer}
 .notif-item.unread{border-left:3px solid #f7b731;background:#fffdf5}
 .ni-title{font-weight:600;font-size:13px;margin-bottom:2px}
-.ni-body{font-family:'Noto Sans','Noto Sans Georgian',system-ui,-apple-system,sans-serif;font-size:12px;color:#666;line-height:1.4}
+.ni-body{font-size:12px;color:#666;line-height:1.4}
 .ni-time{font-size:11px;color:#aaa;margin-top:4px}
 .ni-actions{display:flex;gap:6px;margin-top:8px}
 .ni-accept{background:#2ecc71;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer}
@@ -291,7 +269,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     </button>
     <div id="authBtns" style="display:flex;flex-direction:column;gap:3px;align-items:flex-end">
       <button class="btn-login" id="btnLogin" onclick="openAuth('login')" style="font-size:11px;padding:4px 8px;border-radius:5px">Войти</button>
-      <button class="btn-reg" id="btnReg" onclick="openAuth('register')" style="font-size:11px;padding:4px 8px;border-radius:5px;background:#f7b731;color:#1a1a2e;border:none;font-weight:700;cursor:pointer">Регистрация</button>
+      <button class="btn-reg" id="btnReg" onclick="openAuth('register')" style="font-size:11px;padding:4px 8px;border-radius:5px">Войти/Рег</button>
     </div>
     <div class="user-avatar" id="userAvatar" style="display:none" onclick="openProfile()">ТК</div>
   </div>
@@ -339,10 +317,10 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   </select>
   <select class="fsel" id="fPrice" onchange="filterLoads()">
     <option value="">💰 Стоимость</option>
-    <option value="0-300">До ₾300 / $100</option>
-    <option value="300-700">₾300–700 / $100–250</option>
-    <option value="700-1500">₾700–1500 / $250–500</option>
-    <option value="1500-99999">₾1500+ / $500+</option>
+    <option value="0-300">До ₾300 / 00</option>
+    <option value="300-700">₾300–700 / 00–250</option>
+    <option value="700-1500">₾700–1500 / 50–500</option>
+    <option value="1500-99999">₾1500+ / 00+</option>
   </select>
   <div class="fcount" id="fcount">187 грузов</div>
   <div style="width:100%;display:flex;gap:8px;margin-top:2px">
@@ -378,77 +356,10 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 
 <!-- ═══ SECTION: TRUCKS ═══ -->
 <div class="section" id="sec-trucks">
-  <!-- Панель действий -->
-  <div style="padding:10px 16px;background:#fff;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center">
-    <span style="font-size:13px;color:#888" id="truckCount">Свободные машины</span>
-    <button onclick="openPostTruck()" style="background:#2ecc71;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">+ Добавить машину</button>
-  </div>
   <div style="display:grid;grid-template-columns:2fr 1.5fr 1fr 1.2fr 1fr 90px;padding:8px 16px;background:#e8eaf0;font-size:10px;color:#777;font-weight:700;text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid #d0d4df;">
     <div>МАШИНА / МАРШРУТ</div><div>КОМПАНИЯ</div><div>ТОННАЖ</div><div>КУЗОВ</div><div>ДАТА</div><div></div>
   </div>
   <div id="truckList"></div>
-</div>
-
-<!-- ═══ MODAL: POST TRUCK ═══ -->
-<div class="overlay" id="postTruckOverlay" onclick="closeOverlay('postTruckOverlay',event)">
-  <div class="modal">
-    <button class="overlay-close" onclick="closeModal('postTruckOverlay')">✕</button>
-    <div style="font-size:18px;font-weight:900;margin-bottom:16px;text-align:center">🚛 Добавить машину</div>
-    <div id="postTruckSuccess" class="success-msg">✅ Машина добавлена в список!</div>
-    <div class="form-group">
-      <label>Маршрут — Откуда</label>
-      <input class="form-input" id="tFrom" placeholder="Тбилиси">
-    </div>
-    <div class="form-group">
-      <label>Маршрут — Куда</label>
-      <input class="form-input" id="tTo" placeholder="Любое направление">
-    </div>
-    <div class="form-group">
-      <label>Тип кузова</label>
-      <select class="form-input" id="tType">
-        <option>Тент</option>
-        <option>Рефрижератор</option>
-        <option>Рефтент</option>
-        <option>Мегатент</option>
-        <option>Бортовой</option>
-        <option>Термос</option>
-        <option>Фургон (до 3.5т)</option>
-        <option>Контейнер</option>
-        <option>Автовоз</option>
-        <option>Эвакуатор</option>
-        <option>Цистерна</option>
-        <option>Зерновоз</option>
-        <option>Самосвал</option>
-      </select>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="form-group">
-        <label>Грузоподъёмность (кг)</label>
-        <input class="form-input" id="tKg" type="number" placeholder="20000">
-      </div>
-      <div class="form-group">
-        <label>Объём (м³)</label>
-        <input class="form-input" id="tVol" type="number" placeholder="82">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Номер машины</label>
-      <input class="form-input" id="tPlate" placeholder="GE-123-AB">
-    </div>
-    <div class="form-group">
-      <label>Когда готова</label>
-      <select class="form-input" id="tDate">
-        <option value="Сегодня">Сегодня</option>
-        <option value="Завтра">Завтра</option>
-        <option value="На неделе">На неделе</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Телефон для связи</label>
-      <input class="form-input" id="tPhone" placeholder="+995 555 ..." type="tel">
-    </div>
-    <button class="btn-primary" onclick="doPostTruck()">📤 Разместить машину</button>
-  </div>
 </div>
 
 <!-- ═══ SECTION: RATES ═══ -->
@@ -502,57 +413,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
         <label>Пароль</label>
         <input class="form-input" type="password" id="loginPass" placeholder="••••••••">
       </div>
-      <div style="text-align:right;margin-bottom:10px">
-        <a href="#" onclick="showForgotForm()" style="font-size:12px;color:#888;text-decoration:underline">Забыли пароль?</a>
-      </div>
-      <div id="loginErrorMsg" style="display:none;color:#e74c3c;font-size:13px;text-align:center;margin-bottom:10px;padding:8px;background:#fef0f0;border-radius:8px"></div>
       <button class="btn-primary" onclick="doLogin()">Войти в аккаунт</button>
       <div style="text-align:center;margin-top:12px;font-size:13px;color:#888">Нет аккаунта? <a href="#" onclick="switchAuth('register')" style="color:#f7b731;font-weight:700">Зарегистрироваться</a></div>
-    </div>
-
-    <!-- FORGOT PASSWORD -->
-    <div id="formForgot" style="display:none">
-      <div style="text-align:center;margin-bottom:16px">
-        <div style="font-size:18px;font-weight:900;margin-bottom:4px">🔑 Сброс пароля</div>
-        <div style="font-size:13px;color:#888">Введите ваш email — пришлём код</div>
-      </div>
-      <div id="forgotStep1">
-        <div class="form-group">
-          <label>Email</label>
-          <input class="form-input" type="email" id="forgotEmail" placeholder="your@email.com">
-        </div>
-        <div id="forgotError" style="color:#e74c3c;font-size:13px;text-align:center;display:none;margin-bottom:10px"></div>
-        <button class="btn-primary" onclick="doForgotStep1()">Получить код</button>
-      </div>
-      <div id="forgotStep2" style="display:none">
-        <div style="background:#fff7e6;border:1px solid #fde8a0;border-radius:10px;padding:12px;margin-bottom:14px;font-size:13px;text-align:center">
-          📧 Код отправлен на <strong id="forgotEmailShow"></strong>
-        </div>
-        <div class="form-group">
-          <label>Код подтверждения (6 цифр)</label>
-          <input class="form-input" type="text" id="forgotCode" placeholder="000000" maxlength="6" style="letter-spacing:6px;font-size:22px;text-align:center">
-        </div>
-        <div class="form-group">
-          <label>Новый пароль</label>
-          <input class="form-input" type="password" id="forgotNewPass" placeholder="Минимум 6 символов">
-        </div>
-        <div class="form-group">
-          <label>Повторите пароль</label>
-          <input class="form-input" type="password" id="forgotNewPass2" placeholder="Повторите пароль">
-        </div>
-        <div id="forgotError2" style="color:#e74c3c;font-size:13px;text-align:center;display:none;margin-bottom:10px"></div>
-        <button class="btn-primary" onclick="doForgotStep2()">Сменить пароль</button>
-        <div style="text-align:center;margin-top:10px"><a href="#" onclick="doForgotStep1()" style="font-size:12px;color:#888">Отправить код повторно</a></div>
-      </div>
-      <div id="forgotSuccess" style="display:none;text-align:center;padding:20px">
-        <div style="font-size:40px;margin-bottom:10px">✅</div>
-        <div style="font-size:16px;font-weight:700;margin-bottom:6px">Пароль изменён!</div>
-        <div style="font-size:13px;color:#888;margin-bottom:16px">Войдите с новым паролем</div>
-        <button class="btn-primary" onclick="switchAuth('login')">Войти</button>
-      </div>
-      <div style="text-align:center;margin-top:14px">
-        <a href="#" onclick="switchAuth('login')" style="font-size:13px;color:#888">← Назад ко входу</a>
-      </div>
     </div>
 
     <!-- REGISTER -->
@@ -649,7 +511,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
         </div>
 
         <input type="hidden" id="regRole">
-        <div id="regErrorMsg" style="display:none;color:#e74c3c;font-size:13px;text-align:center;margin-bottom:10px;padding:8px;background:#fef0f0;border-radius:8px"></div>
         <button class="btn-primary" onclick="doRegister()">Создать аккаунт</button>
       </div>
 
@@ -856,13 +717,13 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
         <div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px">Ставка</div>
         <div id="mPrice" style="font-size:28px;font-weight:900"></div>
       </div>
-      <div id="mKmBlock" style="text-align:right">
+      <div style="text-align:right">
         <div style="font-size:11px;color:#aaa">Расстояние</div>
         <div id="mKm" style="font-size:15px;font-weight:700"></div>
       </div>
     </div>
     <div class="success-msg" id="respondSuccess">✅ Заявка отправлена! Заказчик получит уведомление.</div>
-    <div id="respondActions" style="display:flex;gap:10px">
+    <div style="display:flex;gap:10px">
       <button id="btnRespond" style="flex:1;background:#f7b731;color:#1a1a2e;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer" onclick="doRespond()">Откликнуться на груз</button>
       <button style="background:#f0f2f5;border:none;padding:14px;border-radius:10px;font-size:18px;cursor:pointer;width:54px" onclick="showPhone()">📞</button>
     </div>
@@ -1215,7 +1076,6 @@ function userHasPlan(min){
 }
 
 let scope='local', lang='ru', user=null, cargoData=[...LOCAL];
-let currentUserId=null; // user_id из JWT
 
 // ── DATE RANGE SYNC ───────────────────────────────────
 function syncDateMin(){
@@ -1275,7 +1135,7 @@ function renderLoads(data){
       <div><span class="tag" style="background:${d.typeClr};color:${d.typeClrT}">${d.typeLabel}</span></div>
       <div class="price">${d.cur||"\$"}${d.price.toLocaleString()}</div>
       <div><div style="font-size:12px;font-weight:600;color:${dateClr}">${dateStr}</div></div>
-      <div>${(currentUserId && d.userId === currentUserId) ? `<div style="display:flex;gap:4px"><button style="background:#e8f5e9;color:#2e7d32;border:none;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;flex:1" onclick="event.stopPropagation();editMyLoad(${d.id})">✏️</button><button style="background:#fce4ec;color:#c62828;border:none;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer" onclick="event.stopPropagation();deleteMyLoad(${d.id})">🗑️</button></div>` : `<button class="btn-resp" style="margin-top:10px;display:block;width:100%" onclick="event.stopPropagation();openCargo({...window.allLoads.find(x=>x.id==${d.id})})">Отклик</button>`}</div>
+      <div><button class="btn-resp" style="margin-top:10px;display:block;width:100%" onclick="event.stopPropagation();openCargo({...window.allLoads.find(x=>x.id==${d.id})})">Отклик</button></div>
     `;
     list.appendChild(row);
   });
@@ -1286,85 +1146,25 @@ function renderLoads(data){
 }
 
 // ── RENDER TRUCKS ─────────────────────────────────────
-let _myTrucks = [];
-try { _myTrucks = JSON.parse(localStorage.getItem('ch_my_trucks')||'[]'); } catch(e){}
-
 function renderTrucks(){
   const list=document.getElementById('truckList');
   list.innerHTML='';
-  const allTrucks = [..._myTrucks, ...TRUCKS];
-  const countEl = document.getElementById('truckCount');
-  if(countEl) countEl.textContent = allTrucks.length + ' машин свободно';
-  allTrucks.forEach(t=>{
-    const isOwn = t.isOwn;
+  TRUCKS.forEach(t=>{
     const row=document.createElement('div');
     row.className='truck-row';
-    row.style.borderLeft = isOwn ? '3px solid #2ecc71' : '3px solid transparent';
-    const phone = t.phone ? t.phone : '+995 555 *** ***';
     row.innerHTML=`
       <div>
         <div class="route">${t.from} <span class="arrow">→</span> ${t.to}</div>
-        <div class="sub">${t.plate||'—'}</div>
+        <div class="sub">${t.plate}</div>
       </div>
-      <div>
-        <div style="font-size:13px;font-weight:600">${t.co}</div>
-        <div class="sub">★ ${t.rat}${t.trips ? ' · ' + t.trips + ' рейсов' : ''}</div>
-      </div>
-      <div style="font-size:13px">${(t.kg||0).toLocaleString()} кг</div>
+      <div><div style="font-size:13px;font-weight:600">${t.co}</div><div class="sub">★ ${t.rat} · ${t.trips} рейсов</div></div>
+      <div style="font-size:13px">${t.kg.toLocaleString()} кг</div>
       <div style="font-size:12px;color:#555">${t.type}</div>
       <div style="font-size:12px;color:#2ecc71;font-weight:600">${t.date}</div>
-      <div style="display:flex;gap:4px">
-        ${isOwn
-          ? `<button class="btn-resp" style="background:#fce4ec;color:#c62828;border:none;padding:5px 8px;border-radius:6px;font-size:11px;cursor:pointer" onclick="deleteMyTruck('${t.id}')">🗑️</button>`
-          : `<button class="btn-resp" onclick="callTruck('${t.co}','${t.plate}','${phone}')">Связаться</button>`
-        }
-      </div>
+      <div><button class="btn-resp" onclick="alert('📞 Связаться с перевозчиком\\n\\n${t.co}\\n${t.plate}\\n+995 555 *** ***')">Связаться</button></div>
     `;
     list.appendChild(row);
   });
-  if(allTrucks.length === 0){
-    list.innerHTML='<div style="text-align:center;padding:32px;color:#aaa">Нет машин. Добавьте первую!</div>';
-  }
-}
-
-function callTruck(co, plate, phone){
-  if(!user){ openAuth('login'); return; }
-  alert(`📞 Связаться с перевозчиком\n\n🚛 ${co}\n📋 ${plate}\n📞 ${phone}`);
-}
-
-function openPostTruck(){
-  if(!user){ openAuth('register'); return; }
-  document.getElementById('postTruckSuccess').style.display='none';
-  document.getElementById('postTruckOverlay').classList.add('on');
-}
-
-function doPostTruck(){
-  const from  = document.getElementById('tFrom').value.trim() || 'Тбилиси';
-  const to    = document.getElementById('tTo').value.trim() || 'Любое направление';
-  const type  = document.getElementById('tType').value;
-  const kg    = parseInt(document.getElementById('tKg').value) || 20000;
-  const plate = document.getElementById('tPlate').value.trim() || '—';
-  const date  = document.getElementById('tDate').value;
-  const phone = document.getElementById('tPhone').value.trim();
-
-  const truck = {
-    id: 't_' + Date.now(),
-    from, to, type, kg, plate, date, phone,
-    co: user.name || user.email?.split('@')[0] || 'Перевозчик',
-    rat: '5.0', trips: 0, isOwn: true,
-  };
-  _myTrucks.unshift(truck);
-  try { localStorage.setItem('ch_my_trucks', JSON.stringify(_myTrucks)); } catch(e){}
-  renderTrucks();
-  document.getElementById('postTruckSuccess').style.display='block';
-  setTimeout(()=>closeModal('postTruckOverlay'), 1200);
-}
-
-function deleteMyTruck(id){
-  if(!confirm('Удалить машину из списка?')) return;
-  _myTrucks = _myTrucks.filter(t => t.id !== id);
-  try { localStorage.setItem('ch_my_trucks', JSON.stringify(_myTrucks)); } catch(e){}
-  renderTrucks();
 }
 
 // ── OPEN CARGO MODAL ─────────────────────────────────
@@ -1390,15 +1190,13 @@ let currentCargoId=null;
 function openCargo(d){
   currentCargoId=d.id;
   document.getElementById('mTitle').textContent=`${d.from} → ${d.to}`;
-  const _loadCreated = d.created_at ? new Date(d.created_at).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'2-digit'}) : null;
-  const _addedStr = _loadCreated ? `Добавлен ${_loadCreated}` : 'Добавлен сегодня';
-  document.getElementById('mSub').textContent=`#${d.scope.toUpperCase()}-${String(d.id).padStart(5,'0')} · ${d.co} · ${_addedStr}`;
+  document.getElementById('mSub').textContent=`#${d.scope.toUpperCase()}-${String(d.id).padStart(5,'0')} · ${d.co} · Добавлен сегодня`;
   document.getElementById('mAva').textContent=d.co.slice(0,2).toUpperCase();
   document.getElementById('mComp').textContent=d.co;
   // Считаем сколько откликов на этот груз
   const respondCount = (typeof _orders!=='undefined' ? _orders.filter(o=>o.loadId===d.id).length : 0);
   const respondTxt = respondCount > 0 ? ` · 👥 ${respondCount} отклик${respondCount===1?'':respondCount<5?'а':'ов'}` : '';
-  document.getElementById('mStats').textContent=`★ ${d.rat}${d.trips ? " · " + d.trips + " рейсов" : ""} · Верифицирован ✅${respondTxt}`;
+  document.getElementById('mStats').textContent=`★ ${d.rat} · ${d.trips} рейсов · Верифицирован ✅${respondTxt}`;
   document.getElementById('mGrid').innerHTML=`
     <div><div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Откуда</div><div style="font-size:14px;font-weight:700">${d.from2}</div></div>
     <div><div style="font-size:10px;color:#aaa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Куда</div><div style="font-size:14px;font-weight:700">${d.to2}</div></div>
@@ -1409,24 +1207,10 @@ function openCargo(d){
   `;
   document.getElementById('mDesc').textContent=d.desc;
   document.getElementById('mPrice').textContent=`${d.cur||'\$'}${d.price.toLocaleString()}`;
-  const _kmVal = d.km && d.km !== '—' ? d.km : null;
-  const _kmBlock = document.getElementById('mKmBlock');
-  if(_kmBlock) _kmBlock.style.display = _kmVal ? '' : 'none';
-  document.getElementById('mKm').textContent = _kmVal || '';
+  document.getElementById('mKm').textContent=d.km;
   document.getElementById('respondSuccess').style.display='none';
-  // Кнопки: Мой груз → Edit+Delete, чужой → Откликнуться+Телефон
-  const _isOwn = currentUserId && d.userId === currentUserId;
-  const _actRow = document.getElementById('respondActions');
-  if(_actRow){
-    if(_isOwn){
-      _actRow.innerHTML = `<button onclick="editMyLoad(${d.id})" style="flex:1;background:#1a1a2e;color:#fff;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer">✏️ Редактировать</button><button onclick="closeModal('cargoOverlay');deleteMyLoad(${d.id})" style="background:#e74c3c;color:#fff;border:none;padding:14px;border-radius:10px;font-size:18px;cursor:pointer;min-width:54px">🗑️</button>`;
-    } else {
-      _actRow.innerHTML = `<button id="btnRespond" style="flex:1;background:#f7b731;color:#1a1a2e;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer" onclick="doRespond()">Откликнуться на груз</button><button onclick="alert('📞 Контакт доступен после регистрации')" style="background:#f0f2f5;border:none;padding:14px;border-radius:10px;font-size:18px;cursor:pointer;min-width:54px">📞</button>`;
-    }
-  } else {
-    const btn = document.getElementById('btnRespond');
-    if(btn){ btn.disabled=false; btn.textContent='Откликнуться на груз'; }
-  }
+  document.getElementById('btnRespond').disabled=false;
+  document.getElementById('btnRespond').textContent='Откликнуться на груз';
   document.getElementById('cargoOverlay').classList.add('on');
 }
 
@@ -1500,30 +1284,8 @@ function addToOrders(){
 
 function acceptResponse(loadId, respId){
   const resps = _loadResponses[loadId]||[];
-  const accepted = resps.find(r=>r.id===respId);
   resps.forEach(r=>{ r.status = r.id===respId ? 'accepted' : 'rejected'; });
   _loadResponses[loadId] = resps;
-  // Создаём сделку на сервере если есть токен и carrierId
-  if(getToken() && accepted && accepted.userId){
-    const load = _myLoads.find(l=>l.id===loadId);
-    fetch('https://api-production-f3ea.up.railway.app/api/deals/', {
-      method:'POST',
-      headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json'},
-      body: JSON.stringify({
-        load_id:      loadId,
-        carrier_id:   accepted.userId,
-        response_id:  null,
-        agreed_price: load ? (load.price||0) : 0,
-        currency:     load ? (load.cur==='₾'?'GEL':'USD') : 'GEL',
-      })
-    }).then(r=>r.ok?r.json():null).then(d=>{
-      if(d && d.id){
-        _deals.unshift({...d, from_city:load?.from, to_city:load?.to});
-        _renderOrders();
-        pushNotif('🤝 Сделка создана!', `Акт № ${d.act_number}. Перевозчик уведомлён.`,[]);
-      }
-    }).catch(()=>{});
-  }
   // Убираем груз из списка (принят)
   const load = _myLoads.find(l=>l.id===loadId);
   if(load){ load.status='taken'; load.status_label='Принят'; }
@@ -1608,93 +1370,9 @@ function openAuth(tab){
 function switchAuth(tab){
   document.getElementById('formLogin').style.display=tab==='login'?'block':'none';
   document.getElementById('formRegister').style.display=tab==='register'?'block':'none';
-  document.getElementById('formForgot').style.display=tab==='forgot'?'block':'none';
   document.getElementById('tabLogin').classList.toggle('active',tab==='login');
   document.getElementById('tabRegister').classList.toggle('active',tab==='register');
   if(tab==='register') backToStep1();
-}
-
-function showForgotForm(){
-  document.getElementById('formLogin').style.display='none';
-  document.getElementById('formRegister').style.display='none';
-  document.getElementById('formForgot').style.display='block';
-  document.getElementById('forgotStep1').style.display='block';
-  document.getElementById('forgotStep2').style.display='none';
-  document.getElementById('forgotSuccess').style.display='none';
-  document.getElementById('forgotError').style.display='none';
-  // Подставляем email если уже введён
-  const email=document.getElementById('loginEmail').value;
-  if(email) document.getElementById('forgotEmail').value=email;
-}
-
-let _forgotEmail='';
-async function doForgotStep1(){
-  const email=document.getElementById('forgotEmail').value.trim();
-  const errEl=document.getElementById('forgotError');
-  if(!email){errEl.textContent='Введите email';errEl.style.display='block';return;}
-  errEl.style.display='none';
-  const btn=event.target||document.querySelector('#forgotStep1 .btn-primary');
-  if(btn){btn.textContent='Отправляем...';btn.disabled=true;}
-  try{
-    const r=await fetch('https://api-production-f3ea.up.railway.app/api/auth/forgot-password',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email})
-    });
-    const d=await r.json();
-    if(btn){btn.textContent='Получить код';btn.disabled=false;}
-    _forgotEmail=email;
-    document.getElementById('forgotEmailShow').textContent=email;
-    document.getElementById('forgotStep1').style.display='none';
-    document.getElementById('forgotStep2').style.display='block';
-    // DEV: показываем код прямо на экране пока нет email
-    if(d.dev_code){
-      const codeInput=document.getElementById('forgotCode');
-      codeInput.value=d.dev_code;
-      codeInput.style.background='#fffbf0';
-      document.getElementById('forgotError2').textContent='';
-      // Показываем подсказку
-      const hint=document.createElement('div');
-      hint.style='font-size:11px;color:#f7b731;text-align:center;margin-top:6px';
-      hint.textContent='🔧 Код заполнен автоматически (DEV режим)';
-      codeInput.after(hint);
-    }
-  }catch(e){
-    if(btn){btn.textContent='Получить код';btn.disabled=false;}
-    errEl.textContent='Ошибка соединения';errEl.style.display='block';
-  }
-}
-
-async function doForgotStep2(){
-  const code=document.getElementById('forgotCode').value.trim();
-  const pass1=document.getElementById('forgotNewPass').value;
-  const pass2=document.getElementById('forgotNewPass2').value;
-  const errEl=document.getElementById('forgotError2');
-  if(!code||code.length!==6){errEl.textContent='Введите 6-значный код';errEl.style.display='block';return;}
-  if(!pass1||pass1.length<6){errEl.textContent='Пароль минимум 6 символов';errEl.style.display='block';return;}
-  if(pass1!==pass2){errEl.textContent='Пароли не совпадают';errEl.style.display='block';return;}
-  errEl.style.display='none';
-  const btn=event.target;
-  if(btn){btn.textContent='Меняем...';btn.disabled=true;}
-  try{
-    const r=await fetch('https://api-production-f3ea.up.railway.app/api/auth/reset-password',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email:_forgotEmail,code,new_password:pass1})
-    });
-    const d=await r.json();
-    if(btn){btn.textContent='Сменить пароль';btn.disabled=false;}
-    if(r.ok&&d.ok){
-      document.getElementById('forgotStep2').style.display='none';
-      document.getElementById('forgotSuccess').style.display='block';
-      // Подставляем email в форму входа
-      document.getElementById('loginEmail').value=_forgotEmail;
-      document.getElementById('loginPass').value='';
-    } else {
-      errEl.textContent=d.detail||'Неверный код';errEl.style.display='block';
-    }
-  }catch(e){
-    if(btn){btn.textContent='Сменить пароль';btn.disabled=false;}
-    errEl.textContent='Ошибка соединения';errEl.style.display='block';
-  }
 }
 
 function selectRegType(type){
@@ -1752,20 +1430,11 @@ async function doLogin(){
     const r=await CaucasAPI.login({email,password:pass});
     if(r.ok){
       userData={...userData,userId:r.user_id,role:r.role,token:r.token};
-      currentUserId=r.user_id; // обновляем сразу
     } else {
       if(btn){btn.textContent='Войти в аккаунт';btn.disabled=false;}
-      const loginErr=document.getElementById('loginErrorMsg');
-      if(r.status===0){
-        if(loginErr){loginErr.textContent='⚠️ Нет связи с сервером. Проверьте интернет.';loginErr.style.display='block';}
-        else{alert('Нет связи с сервером.');}
-        return;
-      } else {
-        const msg=typeof r.error==='string'?r.error:'Неверный email или пароль';
-        if(loginErr){loginErr.textContent='❌ '+msg;loginErr.style.display='block';}
-        else{alert(msg);}
-        return;
-      }
+      // Если сервер недоступен — разрешаем локальный вход
+      if(r.status===0){ userData.offline=true; }
+      else { alert(typeof r.error==='string'?r.error:'Неверный email или пароль'); return; }
     }
   }
 
@@ -1776,7 +1445,6 @@ async function doLogin(){
     closeModal('authOverlay');
     showUserState();
     if(typeof syncLoadsFromServer==='function') syncLoadsFromServer();
-    if(typeof loadDeals==='function') loadDeals();
   },400);
   if(btn){btn.textContent='Войти в аккаунт';btn.disabled=false;}
 }
@@ -1804,20 +1472,12 @@ async function doRegister(){
     const r=await CaucasAPI.register({email,password:pass,name,phone,role});
     if(r.ok){
       userData={...userData,userId:r.user_id,token:r.token};
-      currentUserId=r.user_id; // обновляем сразу
     } else {
       if(btn){btn.textContent='Создать аккаунт';btn.disabled=false;}
-      if(r.status===0){
-        // Нет связи с сервером — показываем понятную ошибку
-        const errEl=document.getElementById('regErrorMsg');
-        if(errEl){ errEl.textContent='⚠️ Нет связи с сервером. Проверьте интернет и попробуйте снова.'; errEl.style.display='block'; }
-        else { alert('Нет связи с сервером. Проверьте интернет.'); }
-        return;
-      } else {
-        const errMsg=Array.isArray(r.error)?r.error.map(e=>e.msg).join(', '):(r.error||'Ошибка регистрации');
-        const errEl=document.getElementById('regErrorMsg');
-        if(errEl){ errEl.textContent='❌ '+errMsg; errEl.style.display='block'; }
-        else { alert(errMsg); }
+      if(r.status===0){ userData.offline=true; }
+      else {
+        const errMsg=Array.isArray(r.error)?r.error.map(e=>e.msg).join(', '):r.error;
+        alert(errMsg||'Ошибка регистрации');
         return;
       }
     }
@@ -1902,7 +1562,7 @@ function doPostLoad(){
   const loadDate=toDisplay(rawDate)||'28.03.26';
   const loadDate2=rawDate2?toDisplay(rawDate2):null;
   const cur = scope==='intl' ? '$' : '₾';
-  const newLoad={id:Date.now(),from,to,kg,type:truck.toLowerCase(),typeLabel:truck,...tc,price,cur,date:loadDate,date2:loadDate2,urgent,scope:scope==='intl'?'intl':'local',desc,co:user.name,rat:'5.0',trips:0,pay,from2:fromAddr,to2:toAddr,km:'~уточните',badge:urgent?'urgent':'new',ownerId:user.email,userId:currentUserId};
+  const newLoad={id:Date.now(),from,to,kg,type:truck.toLowerCase(),typeLabel:truck,...tc,price,cur,date:loadDate,date2:loadDate2,urgent,scope:scope==='intl'?'intl':'local',desc,co:user.name,rat:'5.0',trips:0,pay,from2:fromAddr,to2:toAddr,km:'~уточните',badge:urgent?'urgent':'new',ownerId:user.email};
 
   LOCAL.unshift(newLoad);
   window.allLoads=[...LOCAL,...INTL];
@@ -1913,16 +1573,11 @@ function doPostLoad(){
   if(typeof CaucasAPI!=='undefined' && user?.token){
     CaucasAPI.createLoad(newLoad).then(r=>{
       if(r.ok && r.load?.serverId){
-        // Обновляем serverId и userId в массивах
-        newLoad.serverId = r.load.serverId;
-        newLoad.userId   = currentUserId;
+        // Обновляем serverId в массивах
+        newLoad.serverId=r.load.serverId;
         const mi=_myLoads.findIndex(l=>l.id===newLoad.id);
-        if(mi>-1){ _myLoads[mi].serverId=r.load.serverId; _myLoads[mi].userId=currentUserId; }
-        const li=LOCAL.findIndex(l=>l.id===newLoad.id);
-        if(li>-1){ LOCAL[li].userId=currentUserId; }
-        window.allLoads=[...LOCAL,...INTL];
+        if(mi>-1) _myLoads[mi].serverId=r.load.serverId;
         persistMyLoads();
-        renderLoads(scope==='local'?LOCAL:INTL);
       }
     }).catch(()=>{});
   }
@@ -1936,114 +1591,6 @@ function doPostLoad(){
 
 // Массив своих грузов (отдельно от откликов)
 let _myLoads = [];
-let _deals   = []; // сделки из API
-
-// ── Статусы сделок ─────────────────────────────────────────────────
-const DEAL_STATUS = {
-  confirmed:  { label:'✅ Подтверждена',  color:'#2ecc71', border:'#2ecc71' },
-  loading:    { label:'📦 Загрузка',      color:'#3498db', border:'#3498db' },
-  in_transit: { label:'🚛 В пути',        color:'#9b59b6', border:'#9b59b6' },
-  delivered:  { label:'🏁 Доставлен',     color:'#f7b731', border:'#f7b731' },
-  completed:  { label:'🎉 Завершена',     color:'#27ae60', border:'#27ae60' },
-  disputed:   { label:'⚠️ Спор',          color:'#e74c3c', border:'#e74c3c' },
-  canceled:   { label:'✕ Отменена',      color:'#aaa',    border:'#ddd'    },
-};
-
-function renderDealCard(d){
-  const st = DEAL_STATUS[d.status] || DEAL_STATUS.confirmed;
-  const isShipper = user && d.shipper_id === user.userId;
-  const isCarrier = user && d.carrier_id === user.userId;
-  const price = d.agreed_price ? `${d.currency==='GEL'?'₾':'$'}${Number(d.agreed_price).toLocaleString()}` : '—';
-
-  // Кнопки действий в зависимости от статуса и роли
-  let actions = '';
-  if(d.status === 'confirmed' && isCarrier){
-    actions = `<button onclick="dealAction(${d.id},'loading')" style="background:#3498db;color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600">📦 Приступил к загрузке</button>`;
-  } else if(d.status === 'loading' && isCarrier){
-    actions = `<button onclick="dealAction(${d.id},'in_transit')" style="background:#9b59b6;color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600">🚛 Груз отправлен</button>`;
-  } else if(d.status === 'in_transit'){
-    actions = `<button onclick="confirmDelivery(${d.id})" style="background:#f7b731;color:#1a1a2e;border:none;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:700">🏁 Подтвердить доставку</button>`;
-  } else if(d.status === 'delivered'){
-    const myConfirmed = (isShipper && d.shipper_confirmed) || (isCarrier && d.carrier_confirmed);
-    actions = myConfirmed
-      ? `<span style="font-size:12px;color:#2ecc71">✅ Вы подтвердили — ждём вторую сторону</span>`
-      : `<button onclick="confirmDelivery(${d.id})" style="background:#2ecc71;color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-weight:700">✅ Подтвердить получение</button>`;
-  } else if(d.status === 'completed'){
-    actions = `<a href="${'https://api-production-f3ea.up.railway.app'}/api/deals/${d.id}/act.pdf?token=${getToken()}" target="_blank" style="display:inline-block;background:#1a1a2e;color:#fff;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none">📄 Скачать акт</a>`;
-  }
-
-  return `
-  <div style="padding:14px 16px;background:#fff;border-bottom:1px solid #f2f2f2;border-left:3px solid ${st.border}">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-      <div>
-        <div style="font-weight:700;font-size:14px">${d.from_city||'—'} → ${d.to_city||'—'}</div>
-        <div style="font-size:12px;color:#888;margin-top:2px">Акт № ${d.act_number||'—'} · ${price}</div>
-      </div>
-      <span style="background:${st.border}22;color:${st.color};padding:4px 9px;border-radius:10px;font-size:11px;font-weight:700;white-space:nowrap">${st.label}</span>
-    </div>
-    ${actions ? `<div style="margin-top:8px">${actions}</div>` : ''}
-  </div>`;
-}
-
-async function loadDeals(){
-  if(!user || !getToken()) return;
-  try{
-    const r = await fetch('https://api-production-f3ea.up.railway.app/api/deals/my', {
-      headers: {'Authorization': 'Bearer ' + getToken()}
-    });
-    if(r.ok){
-      const data = await r.json();
-      // Обогащаем сделки данными о грузе
-      _deals = await Promise.all((data.deals||[]).map(async d => {
-        try{
-          const lr = await fetch(`https://api-production-f3ea.up.railway.app/api/loads/${d.load_id}`);
-          if(lr.ok){ const ld = await lr.json(); d.from_city=ld.from; d.to_city=ld.to; }
-        }catch(e){}
-        return d;
-      }));
-      _renderOrders();
-    }
-  }catch(e){ console.warn('[Deals]', e); }
-}
-
-async function dealAction(dealId, status){
-  if(!getToken()) return;
-  try{
-    const r = await fetch(`https://api-production-f3ea.up.railway.app/api/deals/${dealId}/status`, {
-      method:'PUT',
-      headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json'},
-      body: JSON.stringify({status})
-    });
-    if(r.ok){
-      const d = await r.json();
-      const idx = _deals.findIndex(x=>x.id===dealId);
-      if(idx>-1) Object.assign(_deals[idx], d);
-      _renderOrders();
-      pushNotif('✅ Статус обновлён', DEAL_STATUS[status]?.label || status, []);
-    }
-  }catch(e){ alert('Ошибка: '+e.message); }
-}
-
-async function confirmDelivery(dealId){
-  if(!getToken()) return;
-  try{
-    const r = await fetch(`https://api-production-f3ea.up.railway.app/api/deals/${dealId}/confirm`, {
-      method:'POST',
-      headers:{'Authorization':'Bearer '+getToken()}
-    });
-    if(r.ok){
-      const d = await r.json();
-      const idx = _deals.findIndex(x=>x.id===dealId);
-      if(idx>-1) Object.assign(_deals[idx], d);
-      _renderOrders();
-      if(d.status==='completed'){
-        pushNotif('🎉 Сделка завершена!', 'Акт выполненных работ доступен для скачивания', []);
-      } else {
-        pushNotif('✅ Подтверждено', 'Ожидаем подтверждения второй стороны', []);
-      }
-    }
-  }catch(e){ alert('Ошибка: '+e.message); }
-}
 // Отклики на мои грузы: {loadId: [{id, name, truck, tonnage, rating, status}]}
 let _loadResponses = {};
 
@@ -2224,10 +1771,7 @@ function showSection(name, el){
   const bnav=document.querySelectorAll('.bitem');
   if(map[name]!==undefined) bnav[map[name]].classList.add('active');
   if(name==='trucks') renderTrucks();
-  if(name==='orders' && typeof _renderOrders==='function'){
-    _renderOrders();
-    if(typeof loadDeals==='function') loadDeals();
-  }
+  if(name==='orders' && typeof _renderOrders==='function') _renderOrders();
 }
 
 // ── SCOPE ─────────────────────────────────────────────
@@ -2237,7 +1781,6 @@ function setScope(s, el){
   el.classList.add('active');
   const data=s==='local'?LOCAL:INTL;
   renderLoads(data);
-  syncLoadsFromServer(); // перезагружаем грузы при смене вкладки
   document.getElementById('statLoads').textContent=s==='local'?'187':'96';
   document.getElementById('statTrucks').textContent=s==='local'?'634':'413';
   document.getElementById('fcount').textContent=data.length+' грузов';
@@ -2408,7 +1951,7 @@ document.addEventListener('click',function(e){
 // Статусы заявок
 function _renderOrders(){
   const empty=document.getElementById('ordersEmpty'),list=document.getElementById('ordersList');
-  const hasContent=_orders.length||_myLoads.length||_deals.length;
+  const hasContent=_orders.length||_myLoads.length;
   if(!hasContent){if(empty)empty.style.display='block';if(list)list.style.display='none';return;}
   if(empty)empty.style.display='none';
   if(!list)return;
@@ -2473,28 +2016,7 @@ function _renderOrders(){
     </div>`;
   }).join('');
 
-  // Рендерим сделки из API
-  const dealsSection = _deals.length ? `
-    <div style="padding:10px 16px 6px;background:#f8f9fa;border-bottom:1px solid #eee">
-      <div style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.5px">🤝 Активные сделки</div>
-    </div>
-    ${_deals.map(d => renderDealCard(d)).join('')}
-    <div style="height:8px;background:#f8f9fa"></div>
-  ` : '';
-
-  const myLoadsHeader = _myLoads.length ? `
-    <div style="padding:10px 16px 6px;background:#f8f9fa;border-bottom:1px solid #eee">
-      <div style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.5px">📦 Мои грузы</div>
-    </div>
-  ` : '';
-
-  const ordersHeader = _orders.length ? `
-    <div style="padding:10px 16px 6px;background:#f8f9fa;border-bottom:1px solid #eee">
-      <div style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.5px">🚛 Мои отклики</div>
-    </div>
-  ` : '';
-
-  list.innerHTML = dealsSection + myLoadsHeader + myLoadsHtml + ordersHeader + ordersHtml;
+  list.innerHTML = myLoadsHtml + ordersHtml;
 }
 function _acceptOrder(id){const o=_orders.find(x=>x.id===id);if(!o)return;o.status='accepted';_renderOrders();pushNotif('✅ Принято!',`Груз "${o.title}" принят.`,[{l:'🚛 Доставлен',c:'ni-done',fn:`_delivered(${id})`}]);}
 function _delivered(id){const o=_orders.find(x=>x.id===id);if(!o)return;o.status='done';_renderOrders();pushNotif('🎉 Доставлен!',`"${o.title}" доставлен. Оставьте отзыв.`,[{l:'⭐ Оценить',c:'ni-done',fn:`_rate(${id})`}]);}
@@ -2518,12 +2040,10 @@ try{
       showUserState();
       // Восстанавливаем JWT токен
       if(user.token && typeof setToken!=='undefined') setToken(user.token);
-      // Восстанавливаем currentUserId из сохранённого userId
-      if(user.userId) currentUserId = Number(user.userId);
       // Синхронизируем грузы с сервером
       setTimeout(()=>{
         if(typeof syncLoadsFromServer==='function') syncLoadsFromServer();
-      }, 300);
+      }, 500);
     }
   }
 }catch(e){try{_lsDel('ch_user');}catch(e2){}}
@@ -2535,10 +2055,9 @@ if(_dateInput){
 }
 // Гарантируем рендер после загрузки DOM
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',()=>{ renderLoads(LOCAL); syncLoadsFromServer(); });
+  document.addEventListener('DOMContentLoaded',()=>renderLoads(LOCAL));
 } else {
   renderLoads(LOCAL);
-  syncLoadsFromServer();
 }
 </script>
 <!-- MODAL: SETTINGS -->
@@ -2707,6 +2226,6 @@ if(document.readyState==='loading'){
 </div>
 
 <script src="api.js"></script>
-<script src="ai-dispatcher.js" defer></script>
+<script src="ai-dispatcher.js"></script>
 </body>
 </html>
