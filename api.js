@@ -156,15 +156,23 @@ async function syncLoadsFromServer(){
     }
 
     // Загружаем свои грузы если залогинен
-    if(tok){
+    if(tok && currentUserId){
       const myLoads = await CaucasAPI.getMyLoads();
       if(myLoads && myLoads.length){
+        // Очищаем серверные грузы из _myLoads (оставляем только локальные)
+        _myLoads = _myLoads.filter(l => !l.fromServer);
         myLoads.forEach(l => {
-          if(!_myLoads.find(m => m.serverId === l.id)){
-            const mapped = mapServerLoad(l);
-            _myLoads.unshift(mapped);
-          }
+          const mapped = mapServerLoad(l);
+          _myLoads.unshift(mapped);
+          // Обновляем userId в LOCAL/INTL массиве
+          const inLocal = LOCAL.find(x => x.id === l.id);
+          if(inLocal) inLocal.userId = l.user_id;
+          const inIntl = INTL.find(x => x.id === l.id);
+          if(inIntl) inIntl.userId = l.user_id;
         });
+        window.allLoads = [...LOCAL, ...INTL];
+        // Перерисовываем список грузов чтобы обновить кнопки
+        if(typeof renderLoads === 'function') renderLoads(scope === 'local' ? LOCAL : INTL);
         if(typeof _renderOrders === 'function') _renderOrders();
       }
     }
