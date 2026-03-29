@@ -723,7 +723,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       </div>
     </div>
     <div class="success-msg" id="respondSuccess">✅ Заявка отправлена! Заказчик получит уведомление.</div>
-    <div style="display:flex;gap:10px">
+    <div id="respondActions" style="display:flex;gap:10px">
       <button id="btnRespond" style="flex:1;background:#f7b731;color:#1a1a2e;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer" onclick="doRespond()">Откликнуться на груз</button>
       <button style="background:#f0f2f5;border:none;padding:14px;border-radius:10px;font-size:18px;cursor:pointer;width:54px" onclick="showPhone()">📞</button>
     </div>
@@ -1076,6 +1076,7 @@ function userHasPlan(min){
 }
 
 let scope='local', lang='ru', user=null, cargoData=[...LOCAL];
+let currentUserId=null; // user_id из JWT
 
 // ── DATE RANGE SYNC ───────────────────────────────────
 function syncDateMin(){
@@ -1135,7 +1136,7 @@ function renderLoads(data){
       <div><span class="tag" style="background:${d.typeClr};color:${d.typeClrT}">${d.typeLabel}</span></div>
       <div class="price">${d.cur||"\$"}${d.price.toLocaleString()}</div>
       <div><div style="font-size:12px;font-weight:600;color:${dateClr}">${dateStr}</div></div>
-      <div><button class="btn-resp" style="margin-top:10px;display:block;width:100%" onclick="event.stopPropagation();openCargo({...window.allLoads.find(x=>x.id==${d.id})})">Отклик</button></div>
+      <div>${(currentUserId && d.userId === currentUserId) ? `<div style="display:flex;gap:4px"><button style="background:#e8f5e9;color:#2e7d32;border:none;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;flex:1" onclick="event.stopPropagation();editMyLoad(${d.id})">✏️</button><button style="background:#fce4ec;color:#c62828;border:none;padding:6px 10px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer" onclick="event.stopPropagation();deleteMyLoad(${d.id})">🗑️</button></div>` : `<button class="btn-resp" style="margin-top:10px;display:block;width:100%" onclick="event.stopPropagation();openCargo({...window.allLoads.find(x=>x.id==${d.id})})">Отклик</button>`}</div>
     `;
     list.appendChild(row);
   });
@@ -1209,8 +1210,19 @@ function openCargo(d){
   document.getElementById('mPrice').textContent=`${d.cur||'\$'}${d.price.toLocaleString()}`;
   document.getElementById('mKm').textContent=d.km;
   document.getElementById('respondSuccess').style.display='none';
-  document.getElementById('btnRespond').disabled=false;
-  document.getElementById('btnRespond').textContent='Откликнуться на груз';
+  // Кнопки: Мой груз → Edit+Delete, чужой → Откликнуться+Телефон
+  const _isOwn = currentUserId && d.userId === currentUserId;
+  const _actRow = document.getElementById('respondActions');
+  if(_actRow){
+    if(_isOwn){
+      _actRow.innerHTML = `<button onclick="editMyLoad(${d.id})" style="flex:1;background:#1a1a2e;color:#fff;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer">✏️ Редактировать</button><button onclick="closeModal('cargoOverlay');deleteMyLoad(${d.id})" style="background:#e74c3c;color:#fff;border:none;padding:14px;border-radius:10px;font-size:18px;cursor:pointer;min-width:54px">🗑️</button>`;
+    } else {
+      _actRow.innerHTML = `<button id="btnRespond" style="flex:1;background:#f7b731;color:#1a1a2e;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer" onclick="doRespond()">Откликнуться на груз</button><button onclick="alert('📞 Контакт доступен после регистрации')" style="background:#f0f2f5;border:none;padding:14px;border-radius:10px;font-size:18px;cursor:pointer;min-width:54px">📞</button>`;
+    }
+  } else {
+    const btn = document.getElementById('btnRespond');
+    if(btn){ btn.disabled=false; btn.textContent='Откликнуться на груз'; }
+  }
   document.getElementById('cargoOverlay').classList.add('on');
 }
 
@@ -1430,6 +1442,7 @@ async function doLogin(){
     const r=await CaucasAPI.login({email,password:pass});
     if(r.ok){
       userData={...userData,userId:r.user_id,role:r.role,token:r.token};
+      currentUserId=r.user_id; // обновляем сразу
     } else {
       if(btn){btn.textContent='Войти в аккаунт';btn.disabled=false;}
       // Если сервер недоступен — разрешаем локальный вход
@@ -1472,6 +1485,7 @@ async function doRegister(){
     const r=await CaucasAPI.register({email,password:pass,name,phone,role});
     if(r.ok){
       userData={...userData,userId:r.user_id,token:r.token};
+      currentUserId=r.user_id; // обновляем сразу
     } else {
       if(btn){btn.textContent='Создать аккаунт';btn.disabled=false;}
       if(r.status===0){ userData.offline=true; }
@@ -1781,6 +1795,7 @@ function setScope(s, el){
   el.classList.add('active');
   const data=s==='local'?LOCAL:INTL;
   renderLoads(data);
+  syncLoadsFromServer(); // перезагружаем грузы при смене вкладки
   document.getElementById('statLoads').textContent=s==='local'?'187':'96';
   document.getElementById('statTrucks').textContent=s==='local'?'634':'413';
   document.getElementById('fcount').textContent=data.length+' грузов';
@@ -2055,9 +2070,10 @@ if(_dateInput){
 }
 // Гарантируем рендер после загрузки DOM
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',()=>renderLoads(LOCAL));
+  document.addEventListener('DOMContentLoaded',()=>{ renderLoads(LOCAL); syncLoadsFromServer(); });
 } else {
   renderLoads(LOCAL);
+  syncLoadsFromServer();
 }
 </script>
 <!-- MODAL: SETTINGS -->

@@ -73,7 +73,6 @@ const CaucasAPI = {
   },
 
   async createLoad(load){
-    // Конвертируем формат фронтенда в формат API
     const body = {
       from_city: load.from,
       from_address: load.from2 || load.from,
@@ -92,7 +91,6 @@ const CaucasAPI = {
     };
     const r = await apiRequest('POST', '/api/loads/', body);
     if(r.ok && r.data?.id){
-      // Обновляем id груза серверным
       return { ok: true, load: { ...load, id: r.data.id, serverId: r.data.id } };
     }
     return { ok: false, error: 'Ошибка сохранения' };
@@ -100,13 +98,15 @@ const CaucasAPI = {
 
   async updateLoad(serverId, updates){
     const body = {};
-    if(updates.from) body.from_city = updates.from;
-    if(updates.to)   body.to_city   = updates.to;
-    if(updates.kg)   body.weight_kg = updates.kg;
-    if(updates.desc) body.cargo_desc = updates.desc;
+    if(updates.from)  body.from_city    = updates.from;
+    if(updates.to)    body.to_city      = updates.to;
+    if(updates.kg)    body.weight_kg    = updates.kg;
+    if(updates.desc)  body.cargo_desc   = updates.desc;
+    if(updates.type)  body.truck_type   = updates.type;
+    if(updates.pay)   body.payment_type = updates.pay;
+    if(updates.urgent !== undefined) body.is_urgent = updates.urgent;
     if(updates.price && updates.cur === '₾') body.price_gel = updates.price;
     if(updates.price && updates.cur === '$') body.price_usd = updates.price;
-    if(updates.pay)  body.payment_type = updates.pay;
     const r = await apiRequest('PUT', `/api/loads/${serverId}`, body);
     return { ok: r.ok };
   },
@@ -118,32 +118,55 @@ const CaucasAPI = {
 
 };
 
-// ── SYNC: при старте загружаем грузы с сервера ────────
-async function syncLoadsFromServer(){
-  if(!getToken()) return;
+// ── Расшифровка JWT → user_id ─────────────────────────
+function decodeJwtUserId(token){
   try {
-    // Получаем свои грузы
-    const myLoads = await CaucasAPI.getMyLoads();
-    if(myLoads.length){
-      // Добавляем в _myLoads и LOCAL если их там нет
-      myLoads.forEach(l => {
-        l.fromServer = true;
-        if(!_myLoads.find(m=>m.serverId===l.id)){
-          const mapped = mapServerLoad(l);
-          _myLoads.unshift(mapped);
-          if(!LOCAL.find(x=>x.id===l.id)) LOCAL.unshift(mapped);
-        }
-      });
-      window.allLoads = [...LOCAL, ...INTL];
-      if(typeof renderLoads === 'function') renderLoads(scope==='local'?LOCAL:INTL);
-      if(typeof _renderOrders === 'function') _renderOrders();
+    const p = token.split('.')[1];
+    const d = JSON.parse(atob(p.replace(/-/g,'+').replace(/_/g,'/')));
+    const sub = d.sub !== undefined ? d.sub : (d.user_id || d.id);
+    return sub !== undefined ? Number(sub) : null;
+  } catch(e){ return null; }
+}
+
+// ── SYNC: загружаем грузы с сервера при старте ────────
+async function syncLoadsFromServer(){
+  try {
+    // Определяем currentUserId из токена
+    const tok = getToken();
+    if(tok){
+      currentUserId = decodeJwtUserId(tok);
+    } else {
+      currentUserId = null;
     }
 
-    // Загружаем все активные грузы
-    const allLoads = await CaucasAPI.getLoads({ scope: scope });
-    if(allLoads.length){
-      // Заменяем демо-данные серверными если их достаточно
-      console.log('[API] Loaded', allLoads.length, 'loads from server');
+    // Загружаем публичные грузы с сервера (для всех, не только залогиненных)
+    const serverLoads = await CaucasAPI.getLoads({ scope: scope });
+    if(serverLoads && serverLoads.length > 0){
+      const mapped = serverLoads.map(l => mapServerLoad(l));
+      if(scope === 'local'){
+        LOCAL.length = 0;
+        mapped.forEach(l => LOCAL.push(l));
+      } else {
+        INTL.length = 0;
+        mapped.forEach(l => INTL.push(l));
+      }
+      window.allLoads = [...LOCAL, ...INTL];
+      if(typeof renderLoads === 'function') renderLoads(scope === 'local' ? LOCAL : INTL);
+      console.log('[API] Loaded', serverLoads.length, 'loads from server');
+    }
+
+    // Загружаем свои грузы если залогинен
+    if(tok){
+      const myLoads = await CaucasAPI.getMyLoads();
+      if(myLoads && myLoads.length){
+        myLoads.forEach(l => {
+          if(!_myLoads.find(m => m.serverId === l.id)){
+            const mapped = mapServerLoad(l);
+            _myLoads.unshift(mapped);
+          }
+        });
+        if(typeof _renderOrders === 'function') _renderOrders();
+      }
     }
   } catch(e) {
     console.warn('[syncLoads]', e);
@@ -151,37 +174,41 @@ async function syncLoadsFromServer(){
 }
 
 function mapServerLoad(l){
-  // Маппинг серверного формата во фронтенд формат
   const typeClrs = {
-    tent:      {typeClr:'#f3e5f5',typeClrT:'#6a1b9a',typeLabel:'Тент'},
-    ref:       {typeClr:'#e3f2fd',typeClrT:'#1565c0',typeLabel:'Рефриж.'},
-    bort:      {typeClr:'#e8f5e9',typeClrT:'#2e7d32',typeLabel:'Борт'},
-    termos:    {typeClr:'#fff3e0',typeClrT:'#bf360c',typeLabel:'Термос'},
-    gazel:     {typeClr:'#fce4ec',typeClrT:'#880e4f',typeLabel:'Фургон'},
-    container: {typeClr:'#f0f2f5',typeClrT:'#555',   typeLabel:'Контейнер'},
+    tent:      { typeClr:'#f3e5f5', typeClrT:'#6a1b9a', typeLabel:'Тент'      },
+    ref:       { typeClr:'#e3f2fd', typeClrT:'#1565c0', typeLabel:'Рефриж.'   },
+    bort:      { typeClr:'#e8f5e9', typeClrT:'#2e7d32', typeLabel:'Борт'       },
+    termos:    { typeClr:'#fff3e0', typeClrT:'#bf360c', typeLabel:'Термос'     },
+    gazel:     { typeClr:'#fce4ec', typeClrT:'#880e4f', typeLabel:'Фургон'     },
+    container: { typeClr:'#f0f2f5', typeClrT:'#555',    typeLabel:'Контейнер'  },
+    auto:      { typeClr:'#e8eaf6', typeClrT:'#283593', typeLabel:'Автовоз'   },
+    other:     { typeClr:'#f0f2f5', typeClrT:'#555',    typeLabel:'Другой'    },
   };
   const tc = typeClrs[l.type] || typeClrs.tent;
   return {
-    id: l.id,
-    serverId: l.id,
-    from: l.from,
-    from2: l.from2 || l.from,
-    to: l.to,
-    to2: l.to2 || l.to,
-    scope: l.scope || 'local',
-    kg: l.kg,
-    type: l.type || 'tent',
+    id:        l.id,
+    serverId:  l.id,
+    userId:    l.user_id || null,   // ← владелец груза
+    from:      l.from  || '',
+    from2:     l.from2 || l.from || '',
+    to:        l.to    || '',
+    to2:       l.to2   || l.to || '',
+    scope:     l.scope || 'local',
+    kg:        l.kg    || 0,
+    type:      l.type  || 'tent',
     ...tc,
-    price: l.price || 0,
-    cur: l.cur || '₾',
-    desc: l.desc || '',
-    pay: l.pay || 'Нал',
-    urgent: l.urgent || false,
-    date: l.date || '',
-    co: l.co || user?.name || 'CaucasHub',
-    rat: '5.0',
-    trips: 0,
-    badge: l.urgent ? 'urgent' : null,
+    price:     l.price || 0,
+    cur:       l.cur   || '₾',
+    desc:      l.desc  || '',
+    pay:       l.pay   || 'Нал',
+    urgent:    l.urgent || false,
+    date:      l.date  || '',
+    date2:     null,
+    km:        '—',
+    co:        l.co    || 'CaucasHub',
+    rat:       l.rat   || '5.0',
+    trips:     l.trips || 0,
+    badge:     l.urgent ? 'urgent' : (l.badge || null),
     fromServer: true,
   };
 }
