@@ -162,6 +162,9 @@ async function syncLoadsFromServer(){
       }
       window.allLoads = [...LOCAL, ...INTL];
       if(typeof renderLoads === 'function') renderLoads(scope === 'local' ? LOCAL : INTL);
+      // Обновляем счётчик реальными данными
+      const _statEl = document.getElementById('statLoads');
+      if(_statEl) _statEl.textContent = serverLoads.length;
       console.log('[API] Loaded', serverLoads.length, 'loads from server');
     }
 
