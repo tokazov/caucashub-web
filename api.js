@@ -119,6 +119,23 @@ const CaucasAPI = {
     return { ok: r.ok };
   },
 
+  async getProfile(){
+    const r = await apiRequest('GET', '/api/users/me');
+    return r.ok ? r.data : null;
+  },
+
+  async updateProfile({ company_name, phone, inn, org_type, city, lang }){
+    const r = await apiRequest('PUT', '/api/users/me', {
+      company_name: company_name || null,
+      phone:        phone        || null,
+      inn:          inn          || null,
+      org_type:     org_type     || null,
+      city:         city         || null,
+      lang:         lang         || null,
+    });
+    return r.ok ? r.data : { ok: false, error: r.data?.detail };
+  },
+
   async forgotPassword(email){
     const r = await apiRequest('POST', '/api/auth/forgot-password', { email });
     return r.data || { ok: false };
