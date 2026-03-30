@@ -253,3 +253,14 @@ function mapServerLoad(l){
     fromServer: true,
   };
 }
+
+
+// FIX: openPlansModal — open paywall instead of /plans page
+window.openPlansModal = function(e){
+  if(e) e.stopPropagation();
+  if(typeof closeModal==='function') closeModal('authOverlay');
+  setTimeout(function(){
+    var pw = document.getElementById('paywallOverlay');
+    if(pw) pw.classList.add('on');
+  }, 150);
+};
