@@ -2962,7 +2962,7 @@ setTimeout(renderNotifs, 100);
 
 // ═══ ЯНДЕКС КАРТА В МОДАЛЕ ═══
 let _routeMap = null;
-function openRouteMap(){
+window.openRouteMap = function(){
   const from = document.getElementById('mFrom')?.textContent?.trim();
   const to   = document.getElementById('mTo')?.textContent?.trim();
   if(!from || !to){ alert('Не указан маршрут'); return; }
