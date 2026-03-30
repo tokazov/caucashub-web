@@ -269,8 +269,10 @@ window.openPlansModal = function(e){
 // ═══ ЯНДЕКС КАРТА В МОДАЛЕ ═══
 var _routeMap = null;
 window.openRouteMap = function(){
-  var from = document.getElementById('mFrom') ? document.getElementById('mFrom').textContent.trim() : '';
-  var to = document.getElementById('mTo') ? document.getElementById('mTo').textContent.trim() : '';
+  var title = document.getElementById('mTitle') ? document.getElementById('mTitle').textContent.trim() : '';
+  var parts = title.split(' → ');
+  var from = parts[0] ? parts[0].trim() : '';
+  var to = parts[1] ? parts[1].trim() : '';
   if(!from || !to){ alert('Не указан маршрут'); return; }
   
   var block = document.getElementById('routeMapBlock');
