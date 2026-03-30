@@ -291,6 +291,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <button class="nav-tab" onclick="showSection('trucks',this)">🚛 Транспорт</button>
     <button class="nav-tab" onclick="showSection('rates',this)">📊 Ставки</button>
     <button class="nav-tab" onclick="showSection('orders',this)">📋 Мои заказы</button>
+      <button class="nav-tab" onclick="showSection('deals',this)">🤝 Мои сделки</button>
   </div>
 </div>
 
@@ -464,6 +465,30 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   </div>
   <div id="ordersList" style="display:none"></div>
 </div>
+
+<!-- ═══ SECTION: DEALS ═══ -->
+<div class="section" id="sec-deals">
+  <div style="max-width:800px;margin:0 auto;padding:16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-size:18px;font-weight:900;color:#1a1a2e">🤝 Мои сделки</div>
+      <button onclick="loadDeals()" style="background:#f0f2f5;border:none;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer">🔄 Обновить</button>
+    </div>
+    <div id="dealsLoading" style="display:none;text-align:center;padding:32px;color:#999">Загрузка...</div>
+    <div id="dealsList"></div>
+    <div style="background:#fff;border-radius:12px;padding:16px;margin-top:24px;border:2px solid #e3f2fd">
+      <div style="font-size:15px;font-weight:700;margin-bottom:12px;color:#1565c0">📊 Экспорт для rs.ge</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <div><div style="font-size:11px;color:#aaa;margin-bottom:4px">Дата с</div><input type="date" onchange="exportDateFrom=this.value" style="border:1.5px solid #e0e0e0;border-radius:8px;padding:7px 10px;font-size:13px;outline:none"></div>
+        <div><div style="font-size:11px;color:#aaa;margin-bottom:4px">Дата по</div><input type="date" onchange="exportDateTo=this.value" style="border:1.5px solid #e0e0e0;border-radius:8px;padding:7px 10px;font-size:13px;outline:none"></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="exportDealsData('json')" style="background:#1565c0;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">📥 JSON</button>
+        <button onclick="exportDealsData('csv')" style="background:#2e7d32;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">📊 CSV (Excel)</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 <!-- ═══ MODAL: AUTH ═══ -->
 <div class="overlay" id="authOverlay" onclick="closeOverlay('authOverlay',event)">
@@ -2211,6 +2236,7 @@ function filterLoads(){
 function showSection(name, el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+name).classList.add('active');
+  if(name==='deals') setTimeout(loadDeals, 50);
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   if(el) el.classList.add('active');
   document.querySelectorAll('.bitem').forEach(b=>b.classList.remove('active'));
@@ -2748,6 +2774,98 @@ function openPlansModal(e){
   closeModal('authOverlay'); 
   setTimeout(function(){ document.getElementById('paywallOverlay').classList.add('on'); }, 150); 
 }
+
+// ═══ DEALS (Мои сделки) ═══
+const DEAL_STATUS_MAP = {
+  pending:   {label:'⏳ Ожидание',    color:'#e67e22', bg:'#fff3e0'},
+  confirmed: {label:'✅ Подтверждена',color:'#27ae60', bg:'#e8f5e9'},
+  loading:   {label:'📦 Погрузка',    color:'#2980b9', bg:'#e3f2fd'},
+  in_transit:{label:'🚛 В пути',      color:'#8e44ad', bg:'#f3e5f5'},
+  delivered: {label:'📍 Доставлено',  color:'#16a085', bg:'#e0f2f1'},
+  completed: {label:'🏆 Завершена',   color:'#27ae60', bg:'#e8f5e9'},
+  cancelled: {label:'❌ Отменена',    color:'#e74c3c', bg:'#fce4ec'},
+};
+const DEAL_NEXT_MAP = {confirmed:'loading',loading:'in_transit',in_transit:'delivered'};
+let dealsData = [], exportDateFrom='', exportDateTo='';
+
+async function loadDeals(){
+  const tk = getToken ? getToken() : localStorage.getItem('ch_token');
+  if(!tk){document.getElementById('dealsLoading').style.display='none'; return;}
+  document.getElementById('dealsLoading').style.display='block';
+  document.getElementById('dealsList').innerHTML='';
+  try{
+    const r = await fetch(API_BASE+'/api/deals/',{headers:{'Authorization':'Bearer '+tk}});
+    if(r.ok){const d=await r.json();dealsData=d.deals||d||[];renderDeals();}
+  }catch(e){}
+  document.getElementById('dealsLoading').style.display='none';
+}
+
+function renderDeals(){
+  const el=document.getElementById('dealsList');
+  if(!el) return;
+  if(!dealsData.length){
+    el.innerHTML='<div style="text-align:center;padding:40px;background:#fff;border-radius:12px;color:#999"><div style="font-size:32px;margin-bottom:8px">📂</div><div>Сделок пока нет</div><div style="font-size:13px;margin-top:4px">Примите отклик на груз чтобы создать сделку</div></div>';
+    return;
+  }
+  el.innerHTML=dealsData.map(deal=>{
+    const st=DEAL_STATUS_MAP[deal.status]||{label:deal.status,color:'#555',bg:'#f0f2f5'};
+    const next=DEAL_NEXT_MAP[deal.status];
+    const uid=currentUserId;
+    const iS=uid&&deal.shipper&&deal.shipper.id==uid;
+    const iC=uid&&deal.carrier&&deal.carrier.id==uid;
+    const myConf=iS?deal.shipper_confirmed:iC?deal.carrier_confirmed:false;
+    return '<div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+      +'<div><div style="font-size:16px;font-weight:900">'+(deal.load_from||'?')+' → '+(deal.load_to||'?')+'</div>'
+      +'<div style="font-size:12px;color:#999;margin-top:2px">'+(deal.deal_number||'')+' · '+new Date(deal.created_at).toLocaleDateString('ru')+'</div></div>'
+      +'<span style="background:'+st.bg+';color:'+st.color+';padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700">'+st.label+'</span></div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;font-size:13px">'
+      +'<div><span style="color:#aaa">Груз: </span>'+((deal.load_kg||0)).toLocaleString()+' кг</div>'
+      +'<div><span style="color:#aaa">Сумма: </span><strong>'+(deal.currency||"₾")+((deal.price||0)).toLocaleString()+'</strong></div>'
+      +'<div><span style="color:#aaa">Отправитель: </span>'+(deal.shipper&&deal.shipper.name||'—')+'</div>'
+      +'<div><span style="color:#aaa">Перевозчик: </span>'+(deal.carrier&&deal.carrier.name||'—')+'</div></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      +(next?'<button onclick="updateDealStatus('+deal.id+',''+next+'')" style="background:#1a1a2e;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">→ '+(DEAL_STATUS_MAP[next]&&DEAL_STATUS_MAP[next].label||next)+'</button>':'')
+      +(deal.status==='delivered'&&!myConf?'<button onclick="confirmDeal('+deal.id+')" style="background:#2ecc71;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">✅ Подтвердить</button>':'')
+      +(deal.status==='completed'?'<button onclick="rateDealDialog('+deal.id+',''+( deal.deal_number||'')+'' )" style="background:#f7b731;color:#1a1a2e;border:none;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer">⭐ Оценить</button>':'')
+      +'<button onclick="downloadPDF('+deal.id+',''+(deal.deal_number||'deal')+'')" style="background:#f0f2f5;color:#333;border:none;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer">📄 Акт PDF</button>'
+      +'</div></div>';
+  }).join('');
+}
+
+async function updateDealStatus(id,status){
+  const tk=getToken?getToken():localStorage.getItem('ch_token');
+  if(!tk)return;
+  await fetch(API_BASE+'/api/deals/'+id+'/status',{method:'PUT',headers:{'Authorization':'Bearer '+tk,'Content-Type':'application/json'},body:JSON.stringify({status})});
+  loadDeals();
+}
+async function confirmDeal(id){
+  const tk=getToken?getToken():localStorage.getItem('ch_token');
+  await fetch(API_BASE+'/api/deals/'+id+'/confirm',{method:'POST',headers:{'Authorization':'Bearer '+tk}});
+  loadDeals();
+}
+async function downloadPDF(id,num){
+  const tk=getToken?getToken():localStorage.getItem('ch_token');
+  const r=await fetch(API_BASE+'/api/deals/'+id+'/act.pdf',{headers:{'Authorization':'Bearer '+tk}});
+  if(r.ok){const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(num||'deal')+'.pdf';a.click();}
+}
+async function rateDealDialog(id,num){
+  const s=prompt('Оцените сделку '+num+'\nВведите оценку от 1 до 5:');
+  if(s&&!isNaN(s)&&s>=1&&s<=5){
+    const tk=getToken?getToken():localStorage.getItem('ch_token');
+    await fetch(API_BASE+'/api/deals/'+id+'/rate',{method:'POST',headers:{'Authorization':'Bearer '+tk,'Content-Type':'application/json'},body:JSON.stringify({score:parseInt(s)})});
+    alert('Спасибо за оценку!');loadDeals();
+  }
+}
+async function exportDealsData(fmt){
+  const tk=getToken?getToken():localStorage.getItem('ch_token');
+  let url=API_BASE+'/api/deals/export?format='+fmt;
+  if(exportDateFrom)url+='&from='+exportDateFrom;
+  if(exportDateTo)url+='&to='+exportDateTo;
+  const r=await fetch(url,{headers:{'Authorization':'Bearer '+tk}});
+  if(r.ok){const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='deals.'+fmt;a.click();}
+}
+
 </script>
 </body>
 </html>
