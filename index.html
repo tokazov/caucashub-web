@@ -257,7 +257,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 
 <!-- HEADER -->
 <div class="header">
-  <div>
+  <div style="display:flex;align-items:center;gap:8px">
     <span class="logo" onclick="showSection('loads',document.querySelector('.nav-tab'));" style="cursor:pointer">Caucas<span>Hub</span><span style="font-size:11px;color:#888;font-weight:600;vertical-align:-1px">.ge</span></span>
   </div>
   <div class="hright">
@@ -1303,7 +1303,7 @@ try { _myTrucks = JSON.parse(localStorage.getItem('ch_my_trucks')||'[]'); } catc
 function renderTrucks(){
   const list=document.getElementById('truckList');
   list.innerHTML='';
-  const allTrucks = [..._myTrucks, ...TRUCKS];
+  const allTrucks = [..._myTrucks, ...(window._serverTrucks||[]), ...((_myTrucks.length||(window._serverTrucks||[]).length)?[]:TRUCKS)];
   const countEl = document.getElementById('truckCount');
   if(countEl) countEl.textContent = allTrucks.length + ' машин свободно';
   allTrucks.forEach(t=>{
@@ -1364,6 +1364,13 @@ function doPostTruck(){
     co: user.name || user.email?.split('@')[0] || 'Перевозчик',
     rat: '5.0', trips: 0, isOwn: true,
   };
+  const _tk = getToken ? getToken() : localStorage.getItem('ch_token');
+  if(_tk){
+    fetch(API_BASE+'/api/trucks/', {
+      method:'POST',headers:{'Authorization':'Bearer '+_tk,'Content-Type':'application/json'},
+      body:JSON.stringify({truck_type:type,capacity_kg:kg,available_from:from,available_to:to,plate:plate,phone:phone,available_date:date||null,volume_m3:null})
+    }).then(r=>r.ok?r.json():null).then(d=>{if(d&&d.id) syncTrucksFromServer();}).catch(()=>{});
+  }
   _myTrucks.unshift(truck);
   try { localStorage.setItem('ch_my_trucks', JSON.stringify(_myTrucks)); } catch(e){}
   renderTrucks();
@@ -1371,10 +1378,36 @@ function doPostTruck(){
   setTimeout(()=>closeModal('postTruckOverlay'), 1200);
 }
 
+async function syncTrucksFromServer(){
+  const tk = getToken ? getToken() : localStorage.getItem('ch_token');
+  if(!tk) return;
+  try{
+    const r = await fetch(API_BASE+'/api/trucks/', {headers:{'Authorization':'Bearer '+tk}});
+    if(r.ok){
+      const d = await r.json();
+      const uid = currentUserId;
+      const all = (d.trucks||[]).map(t=>({
+        id:'srv_'+t.id,from:t.available_from||'Тбилиси',to:t.available_to||'Любое',
+        type:t.truck_type,kg:t.capacity_kg,plate:t.plate||'—',phone:t.phone||'',
+        co:t.company||'Перевозчик',rat:t.rating||'5.0',trips:t.trips||0,
+        isOwn:(t.user_id==uid),date:t.available_date||''
+      }));
+      _myTrucks = all.filter(t=>t.isOwn);
+      window._serverTrucks = all.filter(t=>!t.isOwn);
+      renderTrucks();
+    }
+  }catch(e){}
+}
+
 function deleteMyTruck(id){
   if(!confirm('Удалить машину из списка?')) return;
-  _myTrucks = _myTrucks.filter(t => t.id !== id);
-  try { localStorage.setItem('ch_my_trucks', JSON.stringify(_myTrucks)); } catch(e){}
+  const _tk = getToken ? getToken() : localStorage.getItem('ch_token');
+  if(id.startsWith('srv_') && _tk){
+    fetch(API_BASE+'/api/trucks/'+id.replace('srv_',''),{method:'DELETE',headers:{'Authorization':'Bearer '+_tk}}).then(()=>syncTrucksFromServer());
+    return;
+  }
+  _myTrucks = _myTrucks.filter(t=>t.id!==id);
+  try{localStorage.setItem('ch_my_trucks',JSON.stringify(_myTrucks));}catch(e){}
   renderTrucks();
 }
 
@@ -1539,7 +1572,7 @@ function acceptResponse(loadId, respId){
   const load = _myLoads.find(l=>l.id===loadId);
   if(load){ load.status='taken'; load.status_label='Принят'; }
   _renderOrders();
-  pushNotif('✅ Принято!', `Перевозчик принят на маршрут ${load?.from||''} → ${load?.to||''}`,[]);
+  pushNotif('✅ Принято!', `Перевозчик принят на маршрут ${load?.from||''} → ${load?.to||''}`,[{label:'Мои сделки',action:()=>{showSection('deals',document.querySelector('[onclick*="deals"]'));}}]);
 }
 
 function rejectResponse(loadId, respId){
@@ -2237,6 +2270,7 @@ function showSection(name, el){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+name).classList.add('active');
   if(name==='deals') setTimeout(loadDeals, 50);
+  if(name==='trucks') setTimeout(syncTrucksFromServer, 50);
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   if(el) el.classList.add('active');
   localStorage.setItem('ch_tab', name);
@@ -2878,6 +2912,60 @@ setTimeout(function(){
   }
 }, 300);
 
+// ═══ УВЕДОМЛЕНИЯ ═══
+let _notifs = [];
+try { _notifs = JSON.parse(localStorage.getItem('ch_notifs')||'[]'); } catch(e){}
+
+function pushNotif(title, body, actions){
+  const n = {id:Date.now(), title, body, actions:actions||[], time:new Date().toLocaleTimeString('ru',{hour:'2-digit',minute:'2-digit'}), read:false};
+  _notifs.unshift(n);
+  if(_notifs.length > 20) _notifs = _notifs.slice(0,20);
+  try{localStorage.setItem('ch_notifs',JSON.stringify(_notifs));}catch(e){}
+  renderNotifs();
+  // Flash bell
+  const bell = document.getElementById('bellBtn');
+  if(bell){ bell.style.animation='none'; setTimeout(()=>{bell.style.animation='bell-ring 0.5s';},10); }
+}
+
+function renderNotifs(){
+  const list = document.getElementById('notifList');
+  const count = document.getElementById('bellCount');
+  if(!list) return;
+  const unread = _notifs.filter(n=>!n.read).length;
+  if(count){ count.style.display = unread ? 'block' : 'none'; count.textContent = unread > 9 ? '9+' : unread; }
+  if(!_notifs.length){ list.innerHTML='<div style="text-align:center;padding:20px;color:#aaa;font-size:13px">Уведомлений нет</div>'; return; }
+  list.innerHTML = _notifs.slice(0,10).map(n=>
+    '<div style="padding:12px 16px;border-bottom:1px solid #f9f9f9;cursor:pointer" onclick="markRead('+n.id+')">'
+    +'<div style="font-weight:600;font-size:13px">'+n.title+'</div>'
+    +'<div style="font-size:12px;color:#888;margin-top:2px">'+n.body+'</div>'
+    +'<div style="font-size:11px;color:#bbb;margin-top:4px">'+n.time+'</div>'
+    +(n.actions&&n.actions.length?'<div style="display:flex;gap:6px;margin-top:6px">'+n.actions.map(a=>'<button onclick="('+a.action.toString()+'()); event.stopPropagation()" style="background:#f7b731;color:#1a1a2e;border:none;padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer">'+a.label+'</button>').join('')+'</div>':'')
+    +'</div>'
+  ).join('');
+}
+
+function markRead(id){ _notifs.forEach(n=>{ if(n.id===id) n.read=true; }); try{localStorage.setItem('ch_notifs',JSON.stringify(_notifs));}catch(e){} renderNotifs(); }
+function clearNotifs(){ _notifs=[]; try{localStorage.removeItem('ch_notifs');}catch(e){} renderNotifs(); document.getElementById('notifPanel').style.display='none'; }
+function toggleNotifPanel(){ 
+  const p=document.getElementById('notifPanel'); 
+  p.style.display=p.style.display==='none'?'block':'none';
+  if(p.style.display==='block'){ _notifs.forEach(n=>n.read=true); try{localStorage.setItem('ch_notifs',JSON.stringify(_notifs));}catch(e){} renderNotifs(); }
+}
+// Закрытие при клике вне панели
+document.addEventListener('click', function(e){ const p=document.getElementById('notifPanel'); const b=document.getElementById('bellBtn'); if(p&&b&&!p.contains(e.target)&&!b.contains(e.target)) p.style.display='none'; });
+// Инициализация
+setTimeout(renderNotifs, 100);
+
 </script>
+<div id="notifPanel" style="display:none;position:fixed;top:54px;right:8px;width:320px;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.15);z-index:500;max-height:400px;overflow-y:auto">
+  <div style="padding:12px 16px;border-bottom:1px solid #f0f0f0;display:flex;justify-content:space-between;align-items:center">
+    <div style="font-weight:700;font-size:14px">🔔 Уведомления</div>
+    <button onclick="clearNotifs()" style="background:none;border:none;color:#aaa;font-size:12px;cursor:pointer">Очистить</button>
+  </div>
+  <div id="notifList" style="padding:8px 0">
+    <div style="text-align:center;padding:20px;color:#aaa;font-size:13px">Уведомлений нет</div>
+  </div>
+</div>
+
 </body>
 </html>
