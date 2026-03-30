@@ -2848,15 +2848,17 @@ function renderDeals(){
     el.innerHTML='<div style="text-align:center;padding:40px;background:#fff;border-radius:12px;color:#999"><div style="font-size:32px;margin-bottom:8px">📂</div><div>Сделок пока нет</div><div style="font-size:13px;margin-top:4px">Примите отклик на груз чтобы создать сделку</div></div>';
     return;
   }
-  el.innerHTML=dealsData.map(deal=>{
+  el.innerHTML='';
+  dealsData.forEach(function(deal){
     const st=DEAL_STATUS_MAP[deal.status]||{label:deal.status,color:'#555',bg:'#f0f2f5'};
     const next=DEAL_NEXT_MAP[deal.status];
     const uid=currentUserId;
     const iS=uid&&deal.shipper&&deal.shipper.id==uid;
     const iC=uid&&deal.carrier&&deal.carrier.id==uid;
     const myConf=iS?deal.shipper_confirmed:iC?deal.carrier_confirmed:false;
-    return '<div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)">'
-      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
+    const card=document.createElement('div');
+    card.style.cssText='background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)';
+    card.innerHTML='<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">'
       +'<div><div style="font-size:16px;font-weight:900">'+(deal.load_from||'?')+' → '+(deal.load_to||'?')+'</div>'
       +'<div style="font-size:12px;color:#999;margin-top:2px">'+(deal.deal_number||'')+' · '+new Date(deal.created_at).toLocaleDateString('ru')+'</div></div>'
       +'<span style="background:'+st.bg+';color:'+st.color+';padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700">'+st.label+'</span></div>'
@@ -2865,13 +2867,14 @@ function renderDeals(){
       +'<div><span style="color:#aaa">Сумма: </span><strong>'+(deal.currency||"₾")+((deal.price||0)).toLocaleString()+'</strong></div>'
       +'<div><span style="color:#aaa">Отправитель: </span>'+(deal.shipper&&deal.shipper.name||'—')+'</div>'
       +'<div><span style="color:#aaa">Перевозчик: </span>'+(deal.carrier&&deal.carrier.name||'—')+'</div></div>'
-      +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
-      +(next?'<button onclick="updateDealStatus('+deal.id+',''+next+'')" style="background:#1a1a2e;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">→ '+(DEAL_STATUS_MAP[next]&&DEAL_STATUS_MAP[next].label||next)+'</button>':'')
-      +(deal.status==='delivered'&&!myConf?'<button onclick="confirmDeal('+deal.id+')" style="background:#2ecc71;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">✅ Подтвердить</button>':'')
-      +(deal.status==='completed'?'<button onclick="rateDealDialog('+deal.id+',''+( deal.deal_number||'')+'' )" style="background:#f7b731;color:#1a1a2e;border:none;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer">⭐ Оценить</button>':'')
-      +'<button onclick="downloadPDF('+deal.id+',''+(deal.deal_number||'deal')+'')" style="background:#f0f2f5;color:#333;border:none;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer">📄 Акт PDF</button>'
-      +'</div></div>';
-  }).join('');
+      +'<div id="deal-btns-'+deal.id+'" style="display:flex;gap:8px;flex-wrap:wrap"></div>';
+    el.appendChild(card);
+    const btns=document.getElementById('deal-btns-'+deal.id);
+    if(next){const b=document.createElement('button');b.textContent='→ '+(DEAL_STATUS_MAP[next]&&DEAL_STATUS_MAP[next].label||next);b.style.cssText='background:#1a1a2e;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer';b.onclick=function(){updateDealStatus(deal.id,next);};btns.appendChild(b);}
+    if(deal.status==='delivered'&&!myConf){const b=document.createElement('button');b.textContent='✅ Подтвердить';b.style.cssText='background:#2ecc71;color:#fff;border:none;padding:8px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer';b.onclick=function(){confirmDeal(deal.id);};btns.appendChild(b);}
+    if(deal.status==='completed'){const b=document.createElement('button');b.textContent='⭐ Оценить';b.style.cssText='background:#f7b731;color:#1a1a2e;border:none;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer';b.onclick=function(){rateDealDialog(deal.id,deal.deal_number||'');};btns.appendChild(b);}
+    const bp=document.createElement('button');bp.textContent='📄 Акт PDF';bp.style.cssText='background:#f0f2f5;color:#333;border:none;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer';bp.onclick=function(){downloadPDF(deal.id,deal.deal_number||'deal');};btns.appendChild(bp);
+  });
 }
 
 async function updateDealStatus(id,status){
