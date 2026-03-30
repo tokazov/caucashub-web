@@ -2742,5 +2742,12 @@ if(document.readyState==='loading'){
 
 <script src="api.js"></script>
 <script src="ai-dispatcher.js" defer></script>
+<script>
+function openPlansModal(e){ 
+  if(e) e.stopPropagation(); 
+  closeModal('authOverlay'); 
+  setTimeout(function(){ document.getElementById('paywallOverlay').classList.add('on'); }, 150); 
+}
+</script>
 </body>
 </html>
