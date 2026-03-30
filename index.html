@@ -2239,6 +2239,7 @@ function showSection(name, el){
   if(name==='deals') setTimeout(loadDeals, 50);
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
   if(el) el.classList.add('active');
+  localStorage.setItem('ch_tab', name);
   document.querySelectorAll('.bitem').forEach(b=>b.classList.remove('active'));
   const map={loads:0,trucks:1,orders:3};
   const bnav=document.querySelectorAll('.bitem');
@@ -2867,6 +2868,15 @@ async function exportDealsData(fmt){
   const r=await fetch(url,{headers:{'Authorization':'Bearer '+tk}});
   if(r.ok){const b=await r.blob();const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='deals.'+fmt;a.click();}
 }
+
+// Восстанавливаем активную вкладку после загрузки
+setTimeout(function(){
+  var savedTab = localStorage.getItem('ch_tab');
+  if(savedTab && savedTab !== 'loads' && document.getElementById('sec-'+savedTab)){
+    var btn = document.querySelector('[onclick*="showSection(\''+savedTab+'\'"]');
+    showSection(savedTab, btn);
+  }
+}, 300);
 
 </script>
 </body>
