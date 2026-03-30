@@ -291,7 +291,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <button class="nav-tab" onclick="showSection('trucks',this)">🚛 Транспорт</button>
     <button class="nav-tab" onclick="showSection('rates',this)">📊 Ставки</button>
     <button class="nav-tab" onclick="showSection('orders',this)">📋 Мои заказы</button>
-      <button class="nav-tab" onclick="showSection('deals',this)">🤝 Мои сделки</button>
   </div>
 </div>
 
@@ -465,30 +464,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   </div>
   <div id="ordersList" style="display:none"></div>
 </div>
-
-<!-- ═══ SECTION: DEALS ═══ -->
-<div class="section" id="sec-deals">
-  <div style="max-width:800px;margin:0 auto;padding:16px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-      <div style="font-size:18px;font-weight:900;color:#1a1a2e">🤝 Мои сделки</div>
-      <button onclick="loadDeals()" style="background:#f0f2f5;border:none;padding:7px 14px;border-radius:8px;font-size:13px;cursor:pointer">🔄 Обновить</button>
-    </div>
-    <div id="dealsLoading" style="display:none;text-align:center;padding:32px;color:#999">Загрузка...</div>
-    <div id="dealsList"></div>
-    <div style="background:#fff;border-radius:12px;padding:16px;margin-top:24px;border:2px solid #e3f2fd">
-      <div style="font-size:15px;font-weight:700;margin-bottom:12px;color:#1565c0">📊 Экспорт для rs.ge</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-        <div><div style="font-size:11px;color:#aaa;margin-bottom:4px">Дата с</div><input type="date" onchange="exportDateFrom=this.value" style="border:1.5px solid #e0e0e0;border-radius:8px;padding:7px 10px;font-size:13px;outline:none"></div>
-        <div><div style="font-size:11px;color:#aaa;margin-bottom:4px">Дата по</div><input type="date" onchange="exportDateTo=this.value" style="border:1.5px solid #e0e0e0;border-radius:8px;padding:7px 10px;font-size:13px;outline:none"></div>
-      </div>
-      <div style="display:flex;gap:8px">
-        <button onclick="exportDealsData('json')" style="background:#1565c0;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">📥 JSON</button>
-        <button onclick="exportDealsData('csv')" style="background:#2e7d32;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">📊 CSV (Excel)</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 
 <!-- ═══ MODAL: AUTH ═══ -->
 <div class="overlay" id="authOverlay" onclick="closeOverlay('authOverlay',event)">
@@ -839,6 +814,21 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
           </div>
         </div>
         <button onclick="choosePlan('pro')" style="margin-top:12px;width:100%;background:#f7b731;color:#1a1a2e;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer">Скоро доступно</button>
+      </div>
+      <!-- Про+ -->
+      <div style="border:2px solid #6c3483;border-radius:12px;padding:16px;background:linear-gradient(135deg,#f9f0ff,#fff)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-weight:800;font-size:15px;color:#6c3483">&#x1F451; Про+</div>
+            <div style="font-size:11px;color:#888;font-style:italic;margin-bottom:6px">Грузы находят тебя сами</div>
+            <div style="font-size:12px;color:#555;line-height:1.8">&#x2705; Всё из Про<br>&#x2705; Мари мониторит биржу и присылает подходящие грузы<br>&#x2705; Уведомления о новых грузах по твоим маршрутам<br>&#x2705; Расширенная аналитика и ставки<br>&#x2705; Персональный менеджер</div>
+          </div>
+          <div style="text-align:right;white-space:nowrap;margin-left:12px">
+            <div style="font-size:22px;font-weight:800;color:#1a1a2e">&#x20BE;150</div>
+            <div style="font-size:11px;color:#aaa">/мес</div>
+          </div>
+        </div>
+        <button onclick="choosePlan('pro_plus')" style="margin-top:12px;width:100%;background:#6c3483;color:#fff;border:none;padding:10px;border-radius:8px;font-weight:700;cursor:pointer">Скоро доступно</button>
       </div>
     </div>
     <div style="text-align:center;font-size:12px;color:#aaa">Сейчас все функции бесплатны 🎁<br>Подписки откроются позже</div>
@@ -2492,6 +2482,8 @@ function _renderOrders(){
   if(empty)empty.style.display='none';
   if(!list)return;
   list.style.display='block';
+  const ds=document.getElementById('dealsSection');
+  if(ds){ds.style.display=getToken()?'block':'none';if(getToken())loadDeals();}
 
   // Мои размещённые грузы
   const myLoadsHtml=_myLoads.map(l=>{
