@@ -29,7 +29,7 @@ async function apiRequest(method, path, body=null){
 const CaucasAPI = {
 
   async register({ email, password, name, phone, role, inn, orgType, city, truckType, tonnage }){
-    const r = await apiRequest('POST', '/api/auth/register/', {
+    const r = await apiRequest('POST', '/api/auth/register', {
       email, password,
       company_name: name,
       phone: phone || '',
@@ -46,7 +46,7 @@ const CaucasAPI = {
   },
 
   async login({ email, password }){
-    const r = await apiRequest('POST', '/api/auth/login/', { email, password });
+    const r = await apiRequest('POST', '/api/auth/login', { email, password });
     if(r.ok && r.data?.token){
       setToken(r.data.token);
       return { ok: true, token: r.data.token, user_id: r.data.user_id, role: r.data.role };
