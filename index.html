@@ -3009,6 +3009,7 @@ window.openRouteMap = function(){
   ymaps.ready(function(){
     setTimeout(function(){
       _routeMap = new ymaps.Map('routeMap', {center:[(fCoords[0]+tCoords[0])/2,(fCoords[1]+tCoords[1])/2], zoom:7, controls:['zoomControl']});
+      _routeMap.container.fitToViewport();
 
       // Маркеры A и B
       const pmA = new ymaps.Placemark(fCoords, {balloonContent:'<b>'+from+'</b>'}, {preset:'islands#greenDotIconWithCaption', iconCaption:'A'});
@@ -3037,7 +3038,7 @@ window.openRouteMap = function(){
           const bounds = ymaps.util.bounds.fromPoints([fCoords, tCoords]);
           _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:60});
         });
-    }, 200);
+    }, 300);
   });
 }
 
