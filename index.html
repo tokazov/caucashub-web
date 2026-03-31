@@ -2912,7 +2912,6 @@ setTimeout(function(){
 }, 300);
 
 // ═══ УВЕДОМЛЕНИЯ ═══
-let _notifs = [];
 try { _notifs = JSON.parse(localStorage.getItem('ch_notifs')||'[]'); } catch(e){}
 
 function pushNotif(title, body, actions){
