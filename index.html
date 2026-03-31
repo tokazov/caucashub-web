@@ -2996,7 +2996,8 @@ window.openRouteMap = function(){
         
         _routeMap.geoObjects.add(route);
         route.model.events.add('requestsuccess', function(){
-          _routeMap.setBounds(route.getBounds(), {checkZoomRange:true, zoomMargin:40});
+          const bounds = route.getBounds();
+          if(bounds) _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:40});
         });
       });
     });
