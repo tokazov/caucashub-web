@@ -1663,7 +1663,7 @@ function showForgotForm(){
 
 let _forgotEmail='';
 async function doForgotStep1(){
-  const email=document.getElementById('forgotEmail').value.trim();
+  const email=document.getElementById('forgotEmail').value.trim()||_forgotEmail;
   const errEl=document.getElementById('forgotError');
   if(!email){errEl.textContent='Введите email';errEl.style.display='block';return;}
   errEl.style.display='none';
