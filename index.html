@@ -853,8 +853,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px" id="mGrid"></div>
     <div style="font-size:13px;color:#444;line-height:1.5;margin-bottom:14px;padding:10px;background:#f8f9fa;border-radius:8px" id="mDesc"></div>
     <button onclick="openRouteMap()" style="width:100%;background:#f0f7ff;color:#1a6ec0;border:1px solid #bee3f8;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:12px">🗺️ Показать маршрут на карте</button>
-    <div id="routeMapBlock" style="display:none;border-radius:10px;overflow:hidden;margin-bottom:12px">
-      <div id="routeMap" style="height:220px;border-radius:10px"></div>
+    <div id="routeMapBlock" style="display:none;border-radius:10px;margin-bottom:12px">
+      <div id="routeMap" style="height:260px;border-radius:10px;overflow:hidden"></div>
     </div>
     <div class="divider"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -2958,9 +2958,13 @@ setTimeout(renderNotifs, 100);
 // ═══ ЯНДЕКС КАРТА В МОДАЛЕ ═══
 let _routeMap = null;
 window.openRouteMap = function(){
-  const from = document.getElementById('mFrom')?.textContent?.trim();
-  const to   = document.getElementById('mTo')?.textContent?.trim();
-  if(!from || !to){ alert('Не указан маршрут'); return; }
+  // Парсим маршрут из заголовка модала (формат: "Тбилиси → Батуми")
+  const titleEl = document.getElementById('mTitle');
+  const titleText = titleEl ? titleEl.textContent.trim() : '';
+  const parts = titleText.split('→').map(s=>s.trim());
+  const from = parts[0] || '';
+  const to   = parts[1] || '';
+  if(!from || !to){ return; }
   
   const block = document.getElementById('routeMapBlock');
   if(!block) return;
@@ -2981,30 +2985,27 @@ window.openRouteMap = function(){
   }
   
   if(_routeMap){ _routeMap.destroy(); _routeMap=null; }
-  
-  setTimeout(function(){
+  document.getElementById('routeMap').innerHTML='';
+
   ymaps.ready(function(){
-    _routeMap = new ymaps.Map('routeMap', {center:[41.7151,44.8271],zoom:7});
-    ymaps.geocode(from+', Грузия',{results:1}).then(function(res){
-      const fromCoords = res.geoObjects.get(0)?.geometry?.getCoordinates();
-      ymaps.geocode(to+', Грузия',{results:1}).then(function(res2){
-        const toCoords = res2.geoObjects.get(0)?.geometry?.getCoordinates();
-        if(!fromCoords||!toCoords) return;
-        
-        const route = new ymaps.multiRouter.MultiRoute({
-          referencePoints: [fromCoords, toCoords],
-          params: {routingMode:'auto'}
-        },{wayPointFinishIconColor:'#e74c3c',routeActiveStrokeWidth:5,routeActiveStrokeColor:'#f7b731'});
-        
-        _routeMap.geoObjects.add(route);
-        route.model.events.add('requestsuccess', function(){
-          const bounds = route.getBounds();
-          if(bounds) _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:40});
-        });
+    setTimeout(function(){
+      _routeMap = new ymaps.Map('routeMap', {center:[41.7151,44.8271], zoom:7, controls:['zoomControl']});
+      // Строим маршрут напрямую по названиям городов
+      const route = new ymaps.multiRouter.MultiRoute({
+        referencePoints: [from+', Грузия', to+', Грузия'],
+        params: {routingMode:'auto'}
+      },{
+        wayPointFinishIconColor:'#e74c3c',
+        routeActiveStrokeWidth:5,
+        routeActiveStrokeColor:'#f7b731'
       });
-    });
+      _routeMap.geoObjects.add(route);
+      route.model.events.add('requestsuccess', function(){
+        const bounds = route.getBounds();
+        if(bounds) _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:40});
+      });
+    }, 200);
   });
-  }, 150);
 }
 
 </script>
