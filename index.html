@@ -2985,7 +2985,10 @@ window.openRouteMap = function(){
   }
   
   if(_routeMap){ _routeMap.destroy(); _routeMap=null; }
-  document.getElementById('routeMap').innerHTML='';
+  const _mapEl = document.getElementById('routeMap');
+  _mapEl.innerHTML='';
+  _mapEl.style.width='100%';
+  _mapEl.style.height='280px';
 
   ymaps.ready(function(){
     setTimeout(function(){
