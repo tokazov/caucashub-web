@@ -3033,17 +3033,17 @@ window.openRouteMap = function(){
 
           _routeMap.geoObjects.add(pmA).add(pmB).add(poly);
 
-          const bounds = ymaps.util.bounds.fromPoints(lineCoords);
-          _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:50});
+          var _b = ymaps.util.bounds.fromPoints(lineCoords);
+          setTimeout(function(){ _routeMap.setBounds(_b, {checkZoomRange:true, zoomMargin:50}); }, 100);
           if(dist) document.getElementById('routeMapDist').textContent = '📍 '+from+' → '+to+' · '+dist+' км · ~'+time+' ч';
         })
         .catch(function(){
-          const pmA = new ymaps.Placemark(fCoords, {balloonContent:'<b>'+from+'</b>'}, {preset:'islands#greenDotIconWithCaption', iconCaption:'A'});
-          const pmB = new ymaps.Placemark(tCoords, {balloonContent:'<b>'+to+'</b>'}, {preset:'islands#redDotIconWithCaption', iconCaption:'B'});
-          const poly = new ymaps.Polyline([fCoords, tCoords], {}, {strokeColor:'#f7b731', strokeWidth:4, strokeOpacity:.7, strokeStyle:'dash'});
-          _routeMap.geoObjects.add(pmA).add(pmB).add(poly);
-          const bounds = ymaps.util.bounds.fromPoints([fCoords, tCoords]);
-          _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:60});
+          var pmA2 = new ymaps.Placemark(fCoords, {balloonContent:'<b>'+from+'</b>'}, {preset:'islands#greenDotIconWithCaption', iconCaption:'A'});
+          var pmB2 = new ymaps.Placemark(tCoords, {balloonContent:'<b>'+to+'</b>'}, {preset:'islands#redDotIconWithCaption', iconCaption:'B'});
+          var poly2 = new ymaps.Polyline([fCoords, tCoords], {}, {strokeColor:'#f7b731', strokeWidth:4, strokeOpacity:.7, strokeStyle:'dash'});
+          _routeMap.geoObjects.add(pmA2).add(pmB2).add(poly2);
+          var _b2 = ymaps.util.bounds.fromPoints([fCoords, tCoords]);
+          setTimeout(function(){ _routeMap.setBounds(_b2, {checkZoomRange:true, zoomMargin:60}); }, 100);
         });
     }, 300);
   });
