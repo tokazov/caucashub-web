@@ -3008,15 +3008,13 @@ window.openRouteMap = function(){
 
   ymaps.ready(function(){
     setTimeout(function(){
-      _routeMap = new ymaps.Map('routeMap', {center:[(fCoords[0]+tCoords[0])/2,(fCoords[1]+tCoords[1])/2], zoom:7, controls:['zoomControl']});
-      _routeMap.container.fitToViewport();
+      _routeMap = new ymaps.Map('routeMap', {
+        center:[(fCoords[0]+tCoords[0])/2,(fCoords[1]+tCoords[1])/2],
+        zoom:7,
+        controls:['zoomControl']
+      });
 
-      // Маркеры A и B
-      const pmA = new ymaps.Placemark(fCoords, {balloonContent:'<b>'+from+'</b>'}, {preset:'islands#greenDotIconWithCaption', iconCaption:'A'});
-      const pmB = new ymaps.Placemark(tCoords, {balloonContent:'<b>'+to+'</b>'}, {preset:'islands#redDotIconWithCaption', iconCaption:'B'});
-      _routeMap.geoObjects.add(pmA).add(pmB);
-
-      // Маршрут через OSRM (не требует ключей и работает на любом домене)
+      // Сначала получаем маршрут через OSRM, потом рисуем на карте
       fetch('https://router.project-osrm.org/route/v1/driving/'+fCoords[1]+','+fCoords[0]+';'+tCoords[1]+','+tCoords[0]+'?overview=full&geometries=geojson')
         .then(function(r){ return r.json(); })
         .then(function(data){
@@ -3026,15 +3024,24 @@ window.openRouteMap = function(){
             : [fCoords, tCoords];
           const dist = route ? Math.round(route.distance/1000) : '';
           const time = route ? Math.round(route.duration/3600*10)/10 : '';
+
+          // Маркеры
+          const pmA = new ymaps.Placemark(fCoords, {balloonContent:'<b>'+from+'</b>'}, {preset:'islands#greenDotIconWithCaption', iconCaption:'A'});
+          const pmB = new ymaps.Placemark(tCoords, {balloonContent:'<b>'+to+'</b>'}, {preset:'islands#redDotIconWithCaption', iconCaption:'B'});
+          // Линия маршрута
           const poly = new ymaps.Polyline(lineCoords, {}, {strokeColor:'#f7b731', strokeWidth:5, strokeOpacity:.95});
-          _routeMap.geoObjects.add(poly);
+
+          _routeMap.geoObjects.add(pmA).add(pmB).add(poly);
+
           const bounds = ymaps.util.bounds.fromPoints(lineCoords);
           _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:50});
           if(dist) document.getElementById('routeMapDist').textContent = '📍 '+from+' → '+to+' · '+dist+' км · ~'+time+' ч';
         })
         .catch(function(){
+          const pmA = new ymaps.Placemark(fCoords, {balloonContent:'<b>'+from+'</b>'}, {preset:'islands#greenDotIconWithCaption', iconCaption:'A'});
+          const pmB = new ymaps.Placemark(tCoords, {balloonContent:'<b>'+to+'</b>'}, {preset:'islands#redDotIconWithCaption', iconCaption:'B'});
           const poly = new ymaps.Polyline([fCoords, tCoords], {}, {strokeColor:'#f7b731', strokeWidth:4, strokeOpacity:.7, strokeStyle:'dash'});
-          _routeMap.geoObjects.add(poly);
+          _routeMap.geoObjects.add(pmA).add(pmB).add(poly);
           const bounds = ymaps.util.bounds.fromPoints([fCoords, tCoords]);
           _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:60});
         });
