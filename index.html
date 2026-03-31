@@ -2982,6 +2982,7 @@ window.openRouteMap = function(){
   
   if(_routeMap){ _routeMap.destroy(); _routeMap=null; }
   
+  setTimeout(function(){
   ymaps.ready(function(){
     _routeMap = new ymaps.Map('routeMap', {center:[41.7151,44.8271],zoom:7});
     ymaps.geocode(from+', Грузия',{results:1}).then(function(res){
@@ -3003,6 +3004,7 @@ window.openRouteMap = function(){
       });
     });
   });
+  }, 150);
 }
 
 </script>
