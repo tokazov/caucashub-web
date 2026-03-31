@@ -2991,51 +2991,52 @@ window.openRouteMap = function(){
   _mapEl.style.width='100%';
   _mapEl.style.height='280px';
 
+  // Ищем координаты из локального массива CITIES (без геокодинга — работает на любом домене)
+  const findCoords = function(cityName){
+    const name = cityName.trim().toLowerCase();
+    const found = CITIES.find(function(c){ return c.name.toLowerCase() === name || c.name.toLowerCase().includes(name) || name.includes(c.name.toLowerCase()); });
+    return found ? [found.lat, found.lng] : null;
+  };
+
+  const fCoords = findCoords(from);
+  const tCoords = findCoords(to);
+
+  if(!fCoords || !tCoords){
+    document.getElementById('routeMap').innerHTML='<div style="padding:20px;text-align:center;color:#999">Координаты не найдены для: '+from+' → '+to+'</div>';
+    return;
+  }
+
   ymaps.ready(function(){
     setTimeout(function(){
-      _routeMap = new ymaps.Map('routeMap', {center:[41.7151,44.8271], zoom:7, controls:['zoomControl']});
+      _routeMap = new ymaps.Map('routeMap', {center:[(fCoords[0]+tCoords[0])/2,(fCoords[1]+tCoords[1])/2], zoom:7, controls:['zoomControl']});
 
-      // Геокодируем оба города, затем строим маршрут через OSRM
-      const geocodeCity = function(name){
-        return ymaps.geocode(name+', Грузия', {results:1}).then(function(res){
-          const obj = res.geoObjects.get(0);
-          return obj ? obj.geometry.getCoordinates() : null;
+      // Маркеры A и B
+      const pmA = new ymaps.Placemark(fCoords, {balloonContent:'<b>'+from+'</b>'}, {preset:'islands#greenDotIconWithCaption', iconCaption:'A'});
+      const pmB = new ymaps.Placemark(tCoords, {balloonContent:'<b>'+to+'</b>'}, {preset:'islands#redDotIconWithCaption', iconCaption:'B'});
+      _routeMap.geoObjects.add(pmA).add(pmB);
+
+      // Маршрут через OSRM (не требует ключей и работает на любом домене)
+      fetch('https://router.project-osrm.org/route/v1/driving/'+fCoords[1]+','+fCoords[0]+';'+tCoords[1]+','+tCoords[0]+'?overview=full&geometries=geojson')
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          const route = data.routes && data.routes[0];
+          const lineCoords = route
+            ? route.geometry.coordinates.map(function(c){ return [c[1],c[0]]; })
+            : [fCoords, tCoords];
+          const dist = route ? Math.round(route.distance/1000) : '';
+          const time = route ? Math.round(route.duration/3600*10)/10 : '';
+          const poly = new ymaps.Polyline(lineCoords, {}, {strokeColor:'#f7b731', strokeWidth:5, strokeOpacity:.95});
+          _routeMap.geoObjects.add(poly);
+          const bounds = ymaps.util.bounds.fromPoints(lineCoords);
+          _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:50});
+          if(dist) document.getElementById('routeMapDist').textContent = '📍 '+from+' → '+to+' · '+dist+' км · ~'+time+' ч';
+        })
+        .catch(function(){
+          const poly = new ymaps.Polyline([fCoords, tCoords], {}, {strokeColor:'#f7b731', strokeWidth:4, strokeOpacity:.7, strokeStyle:'dash'});
+          _routeMap.geoObjects.add(poly);
+          const bounds = ymaps.util.bounds.fromPoints([fCoords, tCoords]);
+          _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:60});
         });
-      };
-
-      Promise.all([geocodeCity(from), geocodeCity(to)]).then(function(coords){
-        const fCoords = coords[0], tCoords = coords[1];
-        if(!fCoords || !tCoords){ return; }
-
-        // Маркеры A и B
-        const pmA = new ymaps.Placemark(fCoords, {balloonContent:'<b>'+from+'</b>'}, {preset:'islands#greenDotIconWithCaption', iconCaption:'A'});
-        const pmB = new ymaps.Placemark(tCoords, {balloonContent:'<b>'+to+'</b>'}, {preset:'islands#redDotIconWithCaption', iconCaption:'B'});
-        _routeMap.geoObjects.add(pmA).add(pmB);
-
-        // Маршрут через OSRM
-        fetch('https://router.project-osrm.org/route/v1/driving/'+fCoords[1]+','+fCoords[0]+';'+tCoords[1]+','+tCoords[0]+'?overview=full&geometries=geojson')
-          .then(function(r){ return r.json(); })
-          .then(function(data){
-            const route = data.routes && data.routes[0];
-            const lineCoords = route
-              ? route.geometry.coordinates.map(function(c){ return [c[1],c[0]]; })
-              : [fCoords, tCoords];
-            const dist = route ? Math.round(route.distance/1000) : '';
-            const time = route ? Math.round(route.duration/3600*10)/10 : '';
-            const poly = new ymaps.Polyline(lineCoords, {}, {strokeColor:'#f7b731', strokeWidth:5, strokeOpacity:.9});
-            _routeMap.geoObjects.add(poly);
-            const bounds = ymaps.util.bounds.fromPoints(lineCoords);
-            _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:50});
-            if(dist) document.getElementById('routeMapDist').textContent = dist+' км · ~'+time+' ч';
-          })
-          .catch(function(){
-            // Прямая линия как fallback
-            const poly = new ymaps.Polyline([fCoords, tCoords], {}, {strokeColor:'#f7b731', strokeWidth:4, strokeOpacity:.7, strokeStyle:'dash'});
-            _routeMap.geoObjects.add(poly);
-            const bounds = ymaps.util.bounds.fromPoints([fCoords, tCoords]);
-            _routeMap.setBounds(bounds, {checkZoomRange:true, zoomMargin:60});
-          });
-      });
     }, 200);
   });
 }
