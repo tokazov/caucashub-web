@@ -2405,7 +2405,7 @@ async function doChangePassword(){
   if(newPass !== newPass2){ showMsg('Пароли не совпадают', false); return; }
 
   try {
-    const token = typeof CaucasAPI !== 'undefined' ? CaucasAPI.getToken() : localStorage.getItem('ch_token');
+    const token = localStorage.getItem('ch_token');
     const r = await fetch('https://api-production-f3ea.up.railway.app/api/auth/change-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
