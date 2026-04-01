@@ -1,0 +1,8 @@
+# Статические файлы - не редиректить
+/api.js /api.js 200
+/ai-dispatcher.js /ai-dispatcher.js 200
+/dispatcher.jpg /dispatcher.jpg 200
+/favicon.ico /favicon.ico 200
+
+# SPA fallback только для остального
+/* /index.html 200
