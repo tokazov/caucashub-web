@@ -3019,8 +3019,17 @@ setTimeout(renderNotifs, 100);
 // ═══ ЯНДЕКС КАРТА В МОДАЛЕ ═══
 let _routeMap = null;
 window.openRouteMap = function(){
-  const from = document.getElementById('mFrom')?.textContent?.trim();
-  const to   = document.getElementById('mTo')?.textContent?.trim();
+  // Берём from/to из текущего открытого груза
+  let from = '', to = '';
+  if(window.currentCargoId && window.allLoads){
+    const d = window.allLoads.find(l=>l.id===window.currentCargoId);
+    if(d){ from = d.from2||d.from||''; to = d.to2||d.to||''; }
+  }
+  // fallback: читаем из mGrid
+  if(!from || !to){
+    const cells = document.querySelectorAll('#mGrid > div > div:last-child');
+    if(cells.length >= 2){ from = cells[0].textContent.trim(); to = cells[1].textContent.trim(); }
+  }
   if(!from || !to){ alert('Не указан маршрут'); return; }
   
   const block = document.getElementById('routeMapBlock');
