@@ -466,6 +466,45 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <button class="btn-primary" style="max-width:200px;margin:0 auto" onclick="openAuth('login')">Войти</button>
   </div>
   <div id="ordersList" style="display:none"></div>
+
+  <!-- ═══ ЭКСПОРТ ДЛЯ RS.GE ═══ -->
+  <div id="exportPanel" style="display:none;flex-direction:column;gap:0;margin:16px;border-radius:12px;overflow:hidden;border:2px solid #e3f2fd">
+    <div style="background:#1565c0;padding:14px 16px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">📊</span>
+      <div>
+        <div style="font-weight:800;color:#fff;font-size:15px">Отчёт для rs.ge</div>
+        <div style="font-size:12px;color:#90caf9;margin-top:2px">Скачайте данные о сделках для налоговой</div>
+      </div>
+    </div>
+    <div style="background:#fff;padding:14px 16px">
+      <div style="font-size:12px;font-weight:700;color:#555;margin-bottom:10px">Период:</div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <div style="flex:1">
+          <div style="font-size:11px;color:#aaa;margin-bottom:4px">Дата с</div>
+          <input type="date" id="exportFrom" onchange="exportDateFrom=this.value"
+            style="width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;box-sizing:border-box"/>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:11px;color:#aaa;margin-bottom:4px">Дата по</div>
+          <input type="date" id="exportTo" onchange="exportDateTo=this.value"
+            style="width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:8px 10px;font-size:13px;outline:none;box-sizing:border-box"/>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="exportDealsData('json')"
+          style="flex:1;background:#1565c0;color:#fff;border:none;padding:11px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
+          📥 JSON
+        </button>
+        <button onclick="exportDealsData('csv')"
+          style="flex:1;background:#2e7d32;color:#fff;border:none;padding:11px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">
+          📊 CSV (Excel)
+        </button>
+      </div>
+      <div style="font-size:11px;color:#aaa;margin-top:10px;text-align:center">
+        Формат совместим с rs.ge · Грузия
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══ MODAL: AUTH ═══ -->
@@ -2085,7 +2124,7 @@ async function loadDeals(){
       _renderOrders();
       // Показываем панель экспорта если есть завершённые сделки
       const _ep = document.getElementById('exportPanel');
-      if(_ep) _ep.style.display = _deals.some(d=>d.status==='completed') ? 'flex' : 'none';
+      if(_ep) _ep.style.display = _deals.length > 0 ? 'flex' : 'none';
     }
   }catch(e){ console.warn('[Deals]', e); }
 }
@@ -2328,6 +2367,9 @@ function showSection(name, el){
   if(name==='orders' && typeof _renderOrders==='function'){
     _renderOrders();
     if(typeof loadDeals==='function') loadDeals();
+    // Показываем exportPanel для залогиненных
+    const _ep2=document.getElementById('exportPanel');
+    if(_ep2) _ep2.style.display = getToken() ? 'flex' : 'none';
   }
 }
 
@@ -2535,6 +2577,9 @@ document.addEventListener('click',function(e){
 function _renderOrders(){
   const empty=document.getElementById('ordersEmpty'),list=document.getElementById('ordersList');
   const hasContent=_orders.length||_myLoads.length||_deals.length;
+  // Показываем exportPanel для залогиненных
+  const _ep=document.getElementById('exportPanel');
+  if(_ep) _ep.style.display = getToken() ? 'flex' : 'none';
   if(!hasContent){if(empty)empty.style.display='block';if(list)list.style.display='none';return;}
   if(empty)empty.style.display='none';
   if(!list)return;
