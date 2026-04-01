@@ -2468,7 +2468,7 @@ function openAnalytics(){
 }
 
 // ── NOTIFICATIONS ─────────────────────────────────────
-let _notifs=[], _orders=[], _deals=[];
+let _notifs=[], _orders=[];
 // Восстанавливаем заявки из localStorage
 try {
   const _savedOrd = JSON.parse(localStorage.getItem('ch_orders')||'[]');
@@ -2954,7 +2954,7 @@ setTimeout(function(){
 }, 300);
 
 // ═══ УВЕДОМЛЕНИЯ ═══
-let _notifs = [];
+// _notifs already declared above
 try { _notifs = JSON.parse(localStorage.getItem('ch_notifs')||'[]'); } catch(e){}
 
 function pushNotif(title, body, actions){
