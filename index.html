@@ -1216,21 +1216,9 @@ function closeMap(){
 }
 
 // ── DATA ────────────────────────────────────────────
-const LOCAL = [
-  {id:1,from:'Тбилиси',to:'Батуми',kg:5000,type:'tent',typeLabel:'Тент',typeClr:'#f3e5f5',typeClrT:'#6a1b9a',price:750,cur:'₾',date:'28.03.26',date2:'30.03.26',urgent:false,scope:'local',desc:'Стройматериалы (плитка). 12 паллет. Документы готовы. Аккуратная загрузка.',co:'Экспресс-Груз',rat:'4.9',trips:142,pay:'Нал, сразу',from2:'Тбилиси, склад Дидубе',to2:'Батуми, порт',km:'~312 км',badge:'new'},
-  {id:2,from:'Поти',to:'Тбилиси',kg:12000,type:'ref',typeLabel:'Рефриж.',typeClr:'#e3f2fd',typeClrT:'#1565c0',price:1200,cur:'₾',date:'29.03.26',date2:'31.03.26',urgent:false,scope:'local',desc:'Замороженные продукты. t -18°С. Строго по времени. Сертификаты готовы.',co:'АгроТранс',rat:'5.0',trips:89,pay:'Безнал 3 дня',from2:'Поти, терминал А',to2:'Тбилиси, рынок Элиава',km:'~380 км',badge:null},
-  {id:3,from:'Тбилиси',to:'Ереван',kg:20000,type:'tent',typeLabel:'Тент',typeClr:'#f3e5f5',typeClrT:'#6a1b9a',price:2400,cur:'₾',date:'28.03.26',date2:'28.03.26',urgent:true,scope:'local',desc:'Промышленное оборудование. Таможня оформлена. Крепление заказчика.',co:'CargoLine',rat:'4.7',trips:203,pay:'Нал на месте',from2:'Тбилиси, Авлабари',to2:'Ереван, Норк',km:'~280 км',badge:'urgent'},
-  {id:4,from:'Кутаиси',to:'Тбилиси',kg:3000,type:'bort',typeLabel:'Борт',typeClr:'#e8f5e9',typeClrT:'#2e7d32',price:480,cur:'₾',date:'28.03.26',date2:'02.04.26',urgent:false,scope:'local',desc:'Мебель разобранная. 6 паллет. Аккуратно, без навала.',co:'ГрузМастер',rat:'4.6',trips:67,pay:'Нал',from2:'Кутаиси, ул.Церетели',to2:'Тбилиси, Глдани',km:'~230 км',badge:null},
-  {id:5,from:'Батуми',to:'Тбилиси',kg:800,type:'gazel',typeLabel:'Фургон (до 3.5т)',typeClr:'#fce4ec',typeClrT:'#880e4f',price:320,cur:'₾',date:'28.03.26',date2:'29.03.26',urgent:false,scope:'local',desc:'Личные вещи. 12 коробок + 2 чемодана. Хрупкое. Контакт при принятии.',co:'ФастДелив',rat:'4.8',trips:311,pay:'Нал',from2:'Батуми, Шератон',to2:'Тбилиси, Руставели',km:'~312 км',badge:'new'},
-  {id:6,from:'Рустави',to:'Поти',kg:8000,type:'termos',typeLabel:'Термос',typeClr:'#fff3e0',typeClrT:'#bf360c',price:910,cur:'₾',date:'29.03.26',date2:'31.03.26',urgent:false,scope:'local',desc:'Хим. сырьё. Все разрешения есть. Перевозчик должен иметь ДОПОГ.',co:'РустГруз',rat:'4.5',trips:44,pay:'Безнал',from2:'Рустави, завод Азот',to2:'Поти, морпорт',km:'~395 км',badge:null},
-];
-const INTL = [
-  {id:7,from:'Тбилиси',to:'Стамбул 🇹🇷',kg:15000,type:'ref',typeLabel:'Рефриж.',typeClr:'#e3f2fd',typeClrT:'#1565c0',price:1200,date:'29.03.26',date2:'01.04.26',urgent:false,scope:'intl',cur:'$',desc:'Свежие цитрусовые. CMR, фитосертификат готовы. Опытный перевозчик.',co:'ЕвроТранс',rat:'4.9',trips:528,pay:'Безнал 50%',from2:'Тбилиси, Ортачала',to2:'Стамбул, Халкалы',km:'~1 100 км',badge:null},
-  {id:8,from:'Поти',to:'Ереван 🇦🇲',kg:18000,type:'tent',typeLabel:'Тент',typeClr:'#f3e5f5',typeClrT:'#6a1b9a',price:750,date:'28.03.26',date2:'28.03.26',urgent:true,scope:'intl',cur:'$',desc:'Импорт после растаможки. Срочно — склад не держит.',co:'КавказЛогистик',rat:'4.8',trips:187,pay:'Нал при разгрузке',from2:'Поти, контейнерный',to2:'Ереван, ТЛЦ Нубарашен',km:'~580 км',badge:'urgent'},
-  {id:9,from:'Тбилиси',to:'Баку 🇦🇿',kg:10000,type:'bort',typeLabel:'Борт',typeClr:'#e8f5e9',typeClrT:'#2e7d32',price:520,date:'30.03.26',date2:'02.04.26',urgent:false,scope:'intl',cur:'$',desc:'Стройматериалы. 20 паллет. Таможня АЗ на грузоотправителе.',co:'АзерЭкспресс',rat:'4.7',trips:93,pay:'Безнал',from2:'Тбилиси, Isani',to2:'Баку, Бинагади',km:'~500 км',badge:'new'},
-  {id:10,from:'Батуми',to:'Стамбул 🇹🇷',kg:22000,type:'tent',typeLabel:'Тент',typeClr:'#f3e5f5',typeClrT:'#6a1b9a',price:1450,date:'31.03.26',date2:'03.04.26',urgent:false,scope:'intl',cur:'$',desc:'Промтовары. Паромная переправа Батуми-Стамбул. Нужен опыт с паромом.',co:'ТурГруз TR',rat:'4.6',trips:231,pay:'Безнал 5 дней',from2:'Батуми, порт',to2:'Стамбул, Амбарлы',km:'~1 400 км',badge:null},
-  {id:11,from:'Тбилиси',to:'Москва 🇷🇺',kg:14000,type:'tent',typeLabel:'Тент',typeClr:'#f3e5f5',typeClrT:'#6a1b9a',price:1800,date:'28.03.26',date2:'30.03.26',urgent:false,scope:'intl',cur:'$',desc:'Текстиль. 22 паллеты. TIR. Документы готовы. Безопасный маршрут.',co:'РосГрузТранс',rat:'4.5',trips:156,pay:'Безнал 7 дней',from2:'Тбилиси, Дидубе',to2:'Москва, МКАДовский склад',km:'~1 800 км',badge:'new'},
-];
+const LOCAL = [];
+
+const INTL = [];
 const TRUCKS = [
   {id:1,from:'Тбилиси',to:'Любое направление',kg:20000,type:'Тент 120м³',date:'Сегодня',co:'Саба Транс',rat:'4.9',trips:87,plate:'GE-123-AB'},
   {id:2,from:'Батуми',to:'Тбилиси / Поти',kg:5000,type:'Газель 15м³',date:'Сегодня',co:'БатумиЭкс',rat:'4.7',trips:234,plate:'GE-456-BC'},
@@ -2381,8 +2369,8 @@ function setScope(s, el){
   const data=s==='local'?LOCAL:INTL;
   renderLoads(data);
   syncLoadsFromServer(); // перезагружаем грузы при смене вкладки
-  document.getElementById('statLoads').textContent=s==='local'?'187':'96';
-  document.getElementById('statTrucks').textContent=s==='local'?'634':'413';
+  // statLoads updated by syncLoadsFromServer
+  // statTrucks updated by syncLoadsFromServer
   document.getElementById('fcount').textContent=data.length+' грузов';
   // Показываем фильтр стран для международных
   const cf=document.getElementById('fCountry');
