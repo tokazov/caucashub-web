@@ -2028,7 +2028,7 @@ function doPostLoad(){
   document.getElementById('postSuccess').style.display='block';
 
   // Сохраняем на сервере асинхронно
-  if(typeof CaucasAPI!=='undefined' && user?.token){
+  if(typeof CaucasAPI!=='undefined' && getToken()){
     CaucasAPI.createLoad(newLoad).then(r=>{
       if(r.ok && r.load?.serverId){
         // Обновляем serverId и userId в массивах
