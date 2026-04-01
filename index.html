@@ -856,7 +856,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <div style="font-size:13px;color:#444;line-height:1.5;margin-bottom:14px;padding:10px;background:#f8f9fa;border-radius:8px" id="mDesc"></div>
     <button onclick="openRouteMap()" style="width:100%;background:#f0f7ff;color:#1a6ec0;border:1px solid #bee3f8;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:12px">🗺️ Показать маршрут на карте</button>
     <div id="routeMapBlock" style="display:none;border-radius:10px;overflow:hidden;margin-bottom:12px">
-      <div id="routeMap" style="height:220px;border-radius:10px"></div>
+      <div id="routeMapModal" style="height:220px;border-radius:10px"></div>
     </div>
     <div class="divider"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -3046,14 +3046,14 @@ window.openRouteMap = function(){
   document.querySelector('[onclick="openRouteMap()"]').textContent = '🗺️ Скрыть карту';
   
   if(typeof ymaps === 'undefined'){ 
-    document.getElementById('routeMap').innerHTML='<div style="padding:20px;text-align:center;color:#999">Карты загружаются...</div>';
+    document.getElementById('routeMapModal').innerHTML='<div style="padding:20px;text-align:center;color:#999">Карты загружаются...</div>';
     return;
   }
   
   if(_routeMap){ _routeMap.destroy(); _routeMap=null; }
   
   ymaps.ready(function(){
-    _routeMap = new ymaps.Map('routeMap', {center:[41.7151,44.8271],zoom:7});
+    _routeMap = new ymaps.Map('routeMapModal', {center:[41.7151,44.8271],zoom:7});
     ymaps.geocode(from+', Грузия',{results:1}).then(function(res){
       const fromCoords = res.geoObjects.get(0)?.geometry?.getCoordinates();
       ymaps.geocode(to+', Грузия',{results:1}).then(function(res2){
