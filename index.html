@@ -1573,6 +1573,24 @@ function acceptResponse(loadId, respId){
   pushNotif('✅ Принято!', `Перевозчик принят на маршрут ${load?.from||''} → ${load?.to||''}`,[{label:'Мои сделки',action:()=>{showSection('deals',document.querySelector('[onclick*="deals"]'));}}]);
 }
 
+async function cancelMyResponse(orderId, serverId){
+  if(!confirm('Отменить заявку?')) return;
+  // Убираем из локального массива
+  const idx = _orders.findIndex(o=>o.id===orderId);
+  if(idx>-1){ _orders.splice(idx,1); persistOrders(); }
+  // Отзываем с сервера если есть serverId
+  if(serverId && getToken()){
+    try{
+      await fetch('https://api-production-f3ea.up.railway.app/api/responses/cancel/'+serverId, {
+        method:'DELETE',
+        headers:{'Authorization':'Bearer '+getToken()}
+      });
+    }catch(e){}
+  }
+  _renderOrders();
+  pushNotif('✅ Заявка отменена', 'Вы можете откликнуться на другой груз', []);
+}
+
 function rejectResponse(loadId, respId){
   const resps = _loadResponses[loadId]||[];
   const r = resps.find(x=>x.id===respId);
