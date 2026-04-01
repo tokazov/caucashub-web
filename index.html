@@ -1744,15 +1744,10 @@ async function doForgotStep1(){
     document.getElementById('forgotStep2').style.display='block';
     // DEV: показываем код прямо на экране пока нет email
     if(d.dev_code){
+      // Код пришёл в ответе - вставляем автоматически
       const codeInput=document.getElementById('forgotCode');
       codeInput.value=d.dev_code;
-      codeInput.style.background='#fffbf0';
-      document.getElementById('forgotError2').textContent='';
-      // Показываем подсказку
-      const hint=document.createElement('div');
-      hint.style='font-size:11px;color:#f7b731;text-align:center;margin-top:6px';
-      hint.textContent='🔧 Код заполнен автоматически (DEV режим)';
-      codeInput.after(hint);
+      codeInput.style.background='#f0fdf4';
     }
   }catch(e){
     if(btn){btn.textContent='Получить код';btn.disabled=false;}
