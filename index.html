@@ -2349,7 +2349,9 @@ function filterLoads(){
 }
 
 // ── SECTIONS ──────────────────────────────────────────
+var _userClickedTab = false; // флаг ручного клика
 function showSection(name, el){
+  _userClickedTab = true;
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.getElementById('sec-'+name).classList.add('active');
   if(name==='deals') setTimeout(loadDeals, 50);
