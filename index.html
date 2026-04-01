@@ -2490,32 +2490,47 @@ function saveSettings(){
   const city=document.getElementById('sCityAll').value;
   const truckType=document.getElementById('sTruckType').value;
   const tonnage=document.getElementById('sTonnage').value;
-  if(user){
-    user.name=name||user.name;
-    user.phone=phone; user.telegram=tg; user.role=role;
-    user.inn=inn; user.orgType=orgType; user.truckType=truckType; user.tonnage=tonnage; user.city=city;
-    _lsSet('ch_user',JSON.stringify(user));
-    document.getElementById('userAvatar').textContent=user.name.slice(0,2).toUpperCase();
-    document.getElementById('profileName').textContent=user.name;
-    // Сохраняем на сервер
-    if(getToken()){
-      fetch('https://api-production-f3ea.up.railway.app/api/users/me', {
-        method:'PUT',
-        headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json'},
-        body: JSON.stringify({
-          company_name: name,
-          phone: phone||null,
-          inn:  inn||null,
-          org_type: orgType||null,
-          city: city||null,
-        })
-      }).then(r=>r.json()).then(d=>{
-        if(d.ok) pushNotif('✅ Сохранено на сервере', 'Реквизиты обновлены в базе данных', []);
-      }).catch(()=>{});
-    }
+
+  if(!user){ user = {}; }
+  user.name=name||user.name||'Пользователь';
+  user.phone=phone; user.telegram=tg; user.role=role;
+  user.inn=inn; user.orgType=orgType; user.truckType=truckType; user.tonnage=tonnage; user.city=city;
+  _lsSet('ch_user',JSON.stringify(user));
+
+  // Обновляем UI
+  const av=document.getElementById('userAvatar');
+  if(av&&user.name) av.textContent=user.name.slice(0,2).toUpperCase();
+  const pn=document.getElementById('profileName');
+  if(pn&&user.name) pn.textContent=user.name;
+
+  // Сохраняем на сервер
+  if(getToken()){
+    fetch('https://api-production-f3ea.up.railway.app/api/users/me', {
+      method:'PUT',
+      headers:{'Authorization':'Bearer '+getToken(),'Content-Type':'application/json'},
+      body: JSON.stringify({
+        company_name: name||null,
+        phone: phone||null,
+        inn: inn||null,
+        org_type: orgType||null,
+        city: city||null,
+        telegram: tg||null,
+        truck_type: truckType||null,
+        tonnage: tonnage||null,
+      })
+    }).then(r=>r.ok?r.json():null).then(d=>{
+      if(d) pushNotif('✅ Данные обновлены', 'Профиль сохранён на сервере', []);
+    }).catch(()=>{});
   }
+
   closeModal('settingsOverlay');
-  pushNotif('✅ Настройки сохранены',`Профиль "${user?.name}" обновлён.`,[]);
+  // Показываем подтверждение прямо на экране
+  const toast = document.createElement('div');
+  toast.textContent = '✅ Настройки сохранены';
+  toast.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#2ecc71;color:#fff;padding:12px 24px;border-radius:30px;font-weight:700;font-size:15px;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.2)';
+  document.body.appendChild(toast);
+  setTimeout(()=>toast.remove(), 2500);
+  pushNotif('✅ Настройки сохранены', 'Профиль обновлён', []);
 }
 
 function openAnalytics(){
