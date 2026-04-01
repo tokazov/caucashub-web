@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700;900&family=Noto+Sans+Georgian:wght@400;700&display=swap" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://api-maps.yandex.ru/2.1/?apikey=aef19e33-8ea1-4039-8353-2f0df688664a&lang=ru_RU&load=package.full&v=2" type="text/javascript"></script>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=aef19e33-8ea1-4039-8353-2f0df688664a&lang=ru_RU" type="text/javascript" async></script>
 <title>CaucasHub.ge — Биржа грузов Кавказа</title>
 
 
@@ -111,6 +111,9 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .form-input:focus { border-color:#f7b731; }
 .form-select { width:100%; border:1.5px solid #e0e0e0; border-radius:8px; padding:10px 12px; font-size:14px; outline:none; background:#fff; }
 .form-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+.eye-btn { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:16px; color:#aaa; padding:4px; }
+.pass-wrap { position:relative; }
 .btn-primary { width:100%; background:#f7b731; color:#1a1a2e; border:none; padding:13px; border-radius:10px; font-size:15px; font-weight:800; cursor:pointer; margin-top:8px; }
 .btn-primary:hover { background:#e6a820; }
 .btn-secondary { width:100%; background:#f0f2f5; color:#333; border:none; padding:11px; border-radius:10px; font-size:14px; cursor:pointer; margin-top:8px; }
@@ -155,7 +158,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 .map-wrap { display:none; background:#fff; border-bottom:1px solid #eee; }
 .map-wrap.open { display:block; }
 #routeMap { height:300px; }
-#routeMapMain { height:300px; }
 .map-info { padding:10px 16px; display:flex; align-items:center; justify-content:space-between; }
 .map-route-label { font-size:14px; font-weight:700; }
 .map-dist { font-size:12px; color:#888; background:#f0f2f5; padding:4px 10px; border-radius:6px; }
@@ -182,7 +184,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   .bnav { display:flex; }
   .cargo-list { padding-bottom:64px; }
   .fsel { font-size:12px; padding:6px 8px; }
-  .post-btn span { display:none; }
+  .post-btn span { display:inline; }
   .fbtn, .post-btn { flex:1; }
 }
 /* AI DISPATCHER */
@@ -331,7 +333,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   <div class="fcount" id="fcount">187 грузов</div>
   <div style="width:100%;display:flex;gap:8px;margin-top:2px">
     <button class="fbtn" onclick="filterLoads()">Найти</button>
-    <button class="post-btn" onclick="openPostLoad()">+ <span>Разместить</span></button>
+    <button class="post-btn" onclick="openPostLoad()">+ Разместить груз</button>
   </div>
 </div>
 
@@ -349,7 +351,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <div class="map-dist" id="mapDist"></div>
     <button class="map-close" onclick="closeMap()">✕</button>
   </div>
-  <div id="routeMapMain"></div>
+  <div id="routeMap"></div>
 </div>
 
 <!-- ═══ SECTION: LOADS ═══ -->
@@ -484,7 +486,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       </div>
       <div class="form-group">
         <label>Пароль</label>
-        <input class="form-input" type="password" id="loginPass" placeholder="••••••••">
+        <div class="pass-wrap"><input class="form-input" type="password" id="loginPass" placeholder="••••••••" style="padding-right:36px"><button type="button" class="eye-btn" onclick="var i=document.getElementById('loginPass');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁':'🙈'">👁</button></div>
       </div>
       <div style="text-align:right;margin-bottom:10px">
         <a href="#" onclick="showForgotForm()" style="font-size:12px;color:#888;text-decoration:underline">Забыли пароль?</a>
@@ -518,7 +520,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
         </div>
         <div class="form-group">
           <label>Новый пароль</label>
-          <input class="form-input" type="password" id="forgotNewPass" placeholder="Минимум 6 символов">
+          <div class="pass-wrap"><input class="form-input" type="password" id="forgotNewPass" placeholder="Минимум 6 символов" style="padding-right:36px"><button type="button" class="eye-btn" onclick="var i=document.getElementById('forgotNewPass');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁':'🙈'">👁</button></div>
         </div>
         <div class="form-group">
           <label>Повторите пароль</label>
@@ -853,9 +855,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px" id="mGrid"></div>
     <div style="font-size:13px;color:#444;line-height:1.5;margin-bottom:14px;padding:10px;background:#f8f9fa;border-radius:8px" id="mDesc"></div>
     <button onclick="openRouteMap()" style="width:100%;background:#f0f7ff;color:#1a6ec0;border:1px solid #bee3f8;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:12px">🗺️ Показать маршрут на карте</button>
-    <div id="routeMapBlock" style="display:none;border-radius:10px;margin-bottom:12px">
-      <div id="routeMapDist" style="font-size:13px;color:#555;padding:6px 0 4px;font-weight:600"></div>
-      <div id="routeMap" style="height:260px;border-radius:10px;overflow:hidden"></div>
+    <div id="routeMapBlock" style="display:none;border-radius:10px;overflow:hidden;margin-bottom:12px">
+      <div id="routeMap" style="height:220px;border-radius:10px"></div>
     </div>
     <div class="divider"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -902,7 +903,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   <button class="bitem active" onclick="showSection('loads',null)"><div class="bicon">📦</div><div>Грузы</div></button>
   <button class="bitem" onclick="showSection('trucks',null)"><div class="bicon">🚛</div><div>Машины</div></button>
   <button class="bitem" onclick="openPostLoad()"><div class="bicon">➕</div><div>Груз</div></button>
-  <button class="bitem" onclick="showSection('orders',null)"><div class="bicon">📋</div><div>Заказы</div></button>
+  <button class="bitem" onclick="showSection('orders',null)"><div class="bicon">📋</div><div>Заявки</div></button>
+  <button class="bitem" onclick="showSection('deals',null)"><div class="bicon">🤝</div><div>Сделки</div></button>
   <button class="bitem" onclick="openProfile()"><div class="bicon">👤</div><div>Профиль</div></button>
 </div>
 
@@ -1113,7 +1115,7 @@ function showRouteMap(){
 
   ymaps.ready(()=>{
     if(!ymap){
-      ymap=new ymaps.Map('routeMapMain',{
+      ymap=new ymaps.Map('routeMap',{
         center:[f.lat,f.lng], zoom:7,
         controls:['zoomControl','typeSelector']
       });
@@ -1663,7 +1665,7 @@ function showForgotForm(){
 
 let _forgotEmail='';
 async function doForgotStep1(){
-  const email=document.getElementById('forgotEmail').value.trim()||_forgotEmail;
+  const email=document.getElementById('forgotEmail').value.trim();
   const errEl=document.getElementById('forgotError');
   if(!email){errEl.textContent='Введите email';errEl.style.display='block';return;}
   errEl.style.display='none';
@@ -1719,11 +1721,27 @@ async function doForgotStep2(){
     if(r.ok&&d.ok){
       document.getElementById('forgotStep2').style.display='none';
       document.getElementById('forgotSuccess').style.display='block';
-      // Подставляем email в форму входа
       document.getElementById('loginEmail').value=_forgotEmail;
       document.getElementById('loginPass').value='';
     } else {
-      errEl.textContent=d.detail||'Неверный код';errEl.style.display='block';
+      // Если пароль уже изменён — код инвалидируется сервером, показываем успех
+      const errMsg = d.detail||'';
+      if(errMsg.toLowerCase().includes('expired')||errMsg.toLowerCase().includes('invalid')||errMsg.toLowerCase().includes('not found')){
+        // Пробуем войти с новым паролем чтобы проверить изменился ли пароль
+        const testLogin = await fetch('https://api-production-f3ea.up.railway.app/api/auth/login/',{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({email:_forgotEmail,password:pass1})
+        }).catch(()=>null);
+        if(testLogin&&testLogin.ok){
+          // Пароль изменён успешно!
+          document.getElementById('forgotStep2').style.display='none';
+          document.getElementById('forgotSuccess').style.display='block';
+          document.getElementById('loginEmail').value=_forgotEmail;
+          document.getElementById('loginPass').value='';
+          return;
+        }
+      }
+      errEl.textContent=errMsg||'Неверный код';errEl.style.display='block';
     }
   }catch(e){
     if(btn){btn.textContent='Сменить пароль';btn.disabled=false;}
@@ -2097,6 +2115,20 @@ let _loadResponses = {};
 
 // Сохранение данных
 function persistMyLoads(){ try{localStorage.setItem('ch_my_loads',JSON.stringify(_myLoads));}catch(e){} }
+
+function renderMyDeals(){
+  const sec = document.getElementById('sDeals');
+  if(!sec) return;
+  if(!user){ sec.innerHTML='<div style="text-align:center;padding:40px;color:#999">Войдите чтобы увидеть сделки</div>'; return; }
+  if(!_deals||!_deals.length){ sec.innerHTML='<div style="text-align:center;padding:40px;color:#999"><div style="font-size:32px">🤝</div><div style="margin-top:8px">Сделок пока нет</div><div style="font-size:13px;margin-top:4px;color:#bbb">Примите отклик на груз чтобы создать сделку</div></div>'; return; }
+  sec.innerHTML = _deals.map(d=>`<div style="background:#fff;border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+    <div style="font-weight:800;font-size:15px">${d.load_from||d.from||''} → ${d.load_to||d.to||''}</div>
+    <div style="font-size:12px;color:#aaa;margin-top:2px">${d.deal_number||'#'+d.id} · ${new Date(d.created_at).toLocaleDateString('ru')}</div>
+    <div style="margin-top:8px;font-size:13px"><span style="color:#aaa">Сумма: </span><strong>${d.currency||'₾'}${(d.price||0).toLocaleString()}</strong></div>
+    <div style="font-size:12px;margin-top:4px;background:#e8f5e9;color:#2e7d32;display:inline-block;padding:2px 10px;border-radius:10px;font-weight:700">${d.status||'active'}</div>
+  </div>`).join('');
+}
+
 function persistOrders(){ try{localStorage.setItem('ch_orders',JSON.stringify(_orders||[]));}catch(e){} }
 
 function addMyLoad(load){
@@ -2387,44 +2419,6 @@ function openSettings(){
   if(role) role.onchange=()=>{ if(cf) cf.style.display=(role.value==='shipper')?'none':'block'; };
   document.getElementById('settingsOverlay').classList.add('on');
 }
-async function doChangePassword(){
-  const oldPass = document.getElementById('chpOld').value;
-  const newPass = document.getElementById('chpNew').value;
-  const newPass2 = document.getElementById('chpNew2').value;
-  const msg = document.getElementById('chpMsg');
-
-  const showMsg = (text, ok) => {
-    msg.textContent = text;
-    msg.style.display = 'block';
-    msg.style.background = ok ? '#e8f5e9' : '#fce4ec';
-    msg.style.color = ok ? '#2e7d32' : '#c62828';
-  };
-
-  if(!oldPass || !newPass || !newPass2){ showMsg('Заполните все поля', false); return; }
-  if(newPass.length < 8){ showMsg('Новый пароль минимум 8 символов', false); return; }
-  if(newPass !== newPass2){ showMsg('Пароли не совпадают', false); return; }
-
-  try {
-    const token = localStorage.getItem('ch_token');
-    const r = await fetch('https://api-production-f3ea.up.railway.app/api/auth/change-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ old_password: oldPass, new_password: newPass })
-    });
-    const d = await r.json();
-    if(r.ok){
-      showMsg('✅ Пароль успешно изменён!', true);
-      document.getElementById('chpOld').value = '';
-      document.getElementById('chpNew').value = '';
-      document.getElementById('chpNew2').value = '';
-    } else {
-      showMsg('❌ ' + (d.detail || 'Неверный текущий пароль'), false);
-    }
-  } catch(e) {
-    showMsg('❌ Ошибка соединения', false);
-  }
-}
-
 function saveSettings(){
   const name=document.getElementById('sName').value;
   const phone=document.getElementById('sPhone').value;
@@ -2474,7 +2468,12 @@ function openAnalytics(){
 }
 
 // ── NOTIFICATIONS ─────────────────────────────────────
-let _notifs=[], _orders=[];
+let _notifs=[], _orders=[], _deals=[];
+// Восстанавливаем заявки из localStorage
+try {
+  const _savedOrd = JSON.parse(localStorage.getItem('ch_orders')||'[]');
+  if(_savedOrd.length) _savedOrd.forEach(o=>_orders.push(o));
+} catch(e){}
 const _STATUS={pending:{l:'⏳ Ожидание',c:'s-pending'},accepted:{l:'✅ Принят',c:'s-accepted'},transit:{l:'🚛 В пути',c:'s-transit'},done:{l:'✔️ Завершён',c:'s-done'},rated:{l:'⭐ Оценён',c:'s-rated'}};
 
 function pushNotif(title,body,actions){
@@ -2654,6 +2653,9 @@ if(document.readyState==='loading'){
   syncLoadsFromServer();
 }
 </script>
+<!-- SECTION: DEALS -->
+<div id="sDeals" class="section" style="display:none;padding:16px;max-width:600px;margin:0 auto"></div>
+
 <!-- MODAL: SETTINGS -->
 <div class="overlay" id="settingsOverlay" onclick="closeOverlay('settingsOverlay',event)">
   <div class="modal">
@@ -2749,26 +2751,6 @@ if(document.readyState==='loading'){
     </div>
     <button class="btn-primary" onclick="saveSettings()">💾 Сохранить</button>
     <button class="btn-secondary" onclick="closeModal('settingsOverlay')">Отмена</button>
-
-    <div style="border-top:1px solid #f0f0f0;margin-top:20px;padding-top:18px">
-      <div style="font-size:13px;font-weight:600;margin-bottom:12px">🔒 Изменить пароль</div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div>
-          <div style="font-size:12px;color:#888;margin-bottom:4px">Текущий пароль</div>
-          <input type="password" id="chpOld" placeholder="••••••••" style="width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:9px 12px;font-size:14px;box-sizing:border-box">
-        </div>
-        <div>
-          <div style="font-size:12px;color:#888;margin-bottom:4px">Новый пароль</div>
-          <input type="password" id="chpNew" placeholder="Минимум 8 символов" style="width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:9px 12px;font-size:14px;box-sizing:border-box">
-        </div>
-        <div>
-          <div style="font-size:12px;color:#888;margin-bottom:4px">Повторите новый пароль</div>
-          <input type="password" id="chpNew2" placeholder="••••••••" style="width:100%;border:1.5px solid #e0e0e0;border-radius:8px;padding:9px 12px;font-size:14px;box-sizing:border-box">
-        </div>
-        <div id="chpMsg" style="display:none;font-size:13px;padding:8px 12px;border-radius:8px"></div>
-        <button onclick="doChangePassword()" style="background:#1a1a2e;color:#fff;border:none;padding:11px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer">Изменить пароль</button>
-      </div>
-    </div>
   </div>
 </div>
 
@@ -2972,6 +2954,7 @@ setTimeout(function(){
 }, 300);
 
 // ═══ УВЕДОМЛЕНИЯ ═══
+let _notifs = [];
 try { _notifs = JSON.parse(localStorage.getItem('ch_notifs')||'[]'); } catch(e){}
 
 function pushNotif(title, body, actions){
@@ -3017,13 +3000,9 @@ setTimeout(renderNotifs, 100);
 // ═══ ЯНДЕКС КАРТА В МОДАЛЕ ═══
 let _routeMap = null;
 window.openRouteMap = function(){
-  // Парсим маршрут из заголовка модала (формат: "Тбилиси → Батуми")
-  const titleEl = document.getElementById('mTitle');
-  const titleText = titleEl ? titleEl.textContent.trim() : '';
-  const parts = titleText.split('→').map(s=>s.trim());
-  const from = parts[0] || '';
-  const to   = parts[1] || '';
-  if(!from || !to){ return; }
+  const from = document.getElementById('mFrom')?.textContent?.trim();
+  const to   = document.getElementById('mTo')?.textContent?.trim();
+  if(!from || !to){ alert('Не указан маршрут'); return; }
   
   const block = document.getElementById('routeMapBlock');
   if(!block) return;
@@ -3044,66 +3023,26 @@ window.openRouteMap = function(){
   }
   
   if(_routeMap){ _routeMap.destroy(); _routeMap=null; }
-  const _mapEl = document.getElementById('routeMap');
-  _mapEl.innerHTML='';
-  _mapEl.style.width='100%';
-  _mapEl.style.height='280px';
-
-  // Ищем координаты из локального массива CITIES (без геокодинга — работает на любом домене)
-  const findCoords = function(cityName){
-    const name = cityName.trim().toLowerCase();
-    const found = CITIES.find(function(c){ return c.name.toLowerCase() === name || c.name.toLowerCase().includes(name) || name.includes(c.name.toLowerCase()); });
-    return found ? [found.lat, found.lng] : null;
-  };
-
-  const fCoords = findCoords(from);
-  const tCoords = findCoords(to);
-
-  if(!fCoords || !tCoords){
-    document.getElementById('routeMap').innerHTML='<div style="padding:20px;text-align:center;color:#999">Координаты не найдены для: '+from+' → '+to+'</div>';
-    return;
-  }
-
+  
   ymaps.ready(function(){
-    setTimeout(function(){
-      _routeMap = new ymaps.Map('routeMap', {
-        center:[(fCoords[0]+tCoords[0])/2,(fCoords[1]+tCoords[1])/2],
-        zoom:7,
-        controls:['zoomControl']
-      });
-
-      // Сначала получаем маршрут через OSRM, потом рисуем на карте
-      fetch('https://router.project-osrm.org/route/v1/driving/'+fCoords[1]+','+fCoords[0]+';'+tCoords[1]+','+tCoords[0]+'?overview=full&geometries=geojson')
-        .then(function(r){ return r.json(); })
-        .then(function(data){
-          const route = data.routes && data.routes[0];
-          const lineCoords = route
-            ? route.geometry.coordinates.map(function(c){ return [c[1],c[0]]; })
-            : [fCoords, tCoords];
-          const dist = route ? Math.round(route.distance/1000) : '';
-          const time = route ? Math.round(route.duration/3600*10)/10 : '';
-
-          // Маркеры
-          const pmA = new ymaps.Placemark(fCoords, {balloonContent:'<b>'+from+'</b>'}, {preset:'islands#greenDotIconWithCaption', iconCaption:'A'});
-          const pmB = new ymaps.Placemark(tCoords, {balloonContent:'<b>'+to+'</b>'}, {preset:'islands#redDotIconWithCaption', iconCaption:'B'});
-          // Линия маршрута
-          const poly = new ymaps.Polyline(lineCoords, {}, {strokeColor:'#f7b731', strokeWidth:5, strokeOpacity:.95});
-
-          _routeMap.geoObjects.add(pmA).add(pmB).add(poly);
-
-          var _b = ymaps.util.bounds.fromPoints(lineCoords);
-          setTimeout(function(){ _routeMap.setBounds(_b, {checkZoomRange:true, zoomMargin:50}); }, 100);
-          if(dist) document.getElementById('routeMapDist').textContent = '📍 '+from+' → '+to+' · '+dist+' км · ~'+time+' ч';
-        })
-        .catch(function(){
-          var pmA2 = new ymaps.Placemark(fCoords, {balloonContent:'<b>'+from+'</b>'}, {preset:'islands#greenDotIconWithCaption', iconCaption:'A'});
-          var pmB2 = new ymaps.Placemark(tCoords, {balloonContent:'<b>'+to+'</b>'}, {preset:'islands#redDotIconWithCaption', iconCaption:'B'});
-          var poly2 = new ymaps.Polyline([fCoords, tCoords], {}, {strokeColor:'#f7b731', strokeWidth:4, strokeOpacity:.7, strokeStyle:'dash'});
-          _routeMap.geoObjects.add(pmA2).add(pmB2).add(poly2);
-          var _b2 = ymaps.util.bounds.fromPoints([fCoords, tCoords]);
-          setTimeout(function(){ _routeMap.setBounds(_b2, {checkZoomRange:true, zoomMargin:60}); }, 100);
+    _routeMap = new ymaps.Map('routeMap', {center:[41.7151,44.8271],zoom:7});
+    ymaps.geocode(from+', Грузия',{results:1}).then(function(res){
+      const fromCoords = res.geoObjects.get(0)?.geometry?.getCoordinates();
+      ymaps.geocode(to+', Грузия',{results:1}).then(function(res2){
+        const toCoords = res2.geoObjects.get(0)?.geometry?.getCoordinates();
+        if(!fromCoords||!toCoords) return;
+        
+        const route = new ymaps.multiRouter.MultiRoute({
+          referencePoints: [fromCoords, toCoords],
+          params: {routingMode:'auto'}
+        },{wayPointFinishIconColor:'#e74c3c',routeActiveStrokeWidth:5,routeActiveStrokeColor:'#f7b731'});
+        
+        _routeMap.geoObjects.add(route);
+        route.model.events.add('requestsuccess', function(){
+          _routeMap.setBounds(route.getBounds(), {checkZoomRange:true, zoomMargin:40});
         });
-    }, 300);
+      });
+    });
   });
 }
 
