@@ -2466,9 +2466,11 @@ function openSettings(){
     const sr=document.getElementById('sRole'); if(sr&&user.role) sr.value=user.role;
     document.getElementById('sInn').value=user.inn||'';
     document.getElementById('sInnAll').value=user.inn||'';
+    document.getElementById('sInnAll').value=user.inn||'';
     const sotAll=document.getElementById('sOrgTypeAll'); if(sotAll) sotAll.value=user.orgType||'';
     document.getElementById('sCityAll').value=user.city||'';
     const sot=document.getElementById('sOrgType'); if(sot&&user.orgType) sot.value=user.orgType;
+    const sotAll=document.getElementById('sOrgTypeAll'); if(sotAll&&user.orgType) sotAll.value=user.orgType;
     const stt=document.getElementById('sTruckType'); if(stt&&user.truckType) stt.value=user.truckType;
     document.getElementById('sTonnage').value=user.tonnage||'';
   }
@@ -2761,19 +2763,8 @@ if(document.readyState==='loading'){
     <div id="sCarrierFields">
       <div class="divider"></div>
       <div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:12px">🚛 Данные перевозчика</div>
-      <div class="form-row">
-        <div class="form-group">
-          <label>ИНН / ID код</label>
-          <input class="form-input" id="sInn" placeholder="123456789">
-        </div>
-        <div class="form-group">
-          <label>Форма</label>
-          <select class="form-select" id="sOrgType">
-            <option value="">— выберите —</option>
-            <option>ООО</option><option>ИП</option><option>АО</option><option>Частный перевозчик</option>
-          </select>
-        </div>
-      </div>
+      <input type="hidden" id="sInn">
+      <input type="hidden" id="sOrgType">
       <div class="form-row">
         <div class="form-group">
           <label>Тип кузова</label>
