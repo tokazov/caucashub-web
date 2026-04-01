@@ -894,8 +894,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px" id="mGrid"></div>
     <div style="font-size:13px;color:#444;line-height:1.5;margin-bottom:14px;padding:10px;background:#f8f9fa;border-radius:8px" id="mDesc"></div>
     <button onclick="openRouteMap()" style="width:100%;background:#f0f7ff;color:#1a6ec0;border:1px solid #bee3f8;border-radius:10px;padding:10px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:12px">🗺️ Показать маршрут на карте</button>
-    <div id="routeMapBlock" style="display:none;border-radius:10px;overflow:hidden;margin-bottom:12px">
-      <div id="routeMapModal" style="height:220px;border-radius:10px"></div>
+    <div id="routeMapBlock" style="display:none;border-radius:10px;overflow:hidden;margin-bottom:12px" onclick="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+      <div id="routeMapModal" style="height:220px;border-radius:10px;touch-action:none"></div>
     </div>
     <div class="divider"></div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
@@ -2364,12 +2364,12 @@ function showSection(name, el){
   const bnav=document.querySelectorAll('.bitem');
   if(map[name]!==undefined) bnav[map[name]].classList.add('active');
   if(name==='trucks') renderTrucks();
-  if(name==='orders' && typeof _renderOrders==='function'){
-    _renderOrders();
-    if(typeof loadDeals==='function') loadDeals();
-    // Показываем exportPanel для залогиненных
+  if(name==='orders'){
+    // Показываем exportPanel для залогиненных сразу
     const _ep2=document.getElementById('exportPanel');
     if(_ep2) _ep2.style.display = getToken() ? 'flex' : 'none';
+    if(typeof _renderOrders==='function') _renderOrders();
+    if(typeof loadDeals==='function') loadDeals();
   }
 }
 
@@ -2577,10 +2577,14 @@ document.addEventListener('click',function(e){
 function _renderOrders(){
   const empty=document.getElementById('ordersEmpty'),list=document.getElementById('ordersList');
   const hasContent=_orders.length||_myLoads.length||_deals.length;
-  // Показываем exportPanel для залогиненных
+  // Показываем exportPanel для залогиненных ВСЕГДА (независимо от наличия заказов)
   const _ep=document.getElementById('exportPanel');
   if(_ep) _ep.style.display = getToken() ? 'flex' : 'none';
-  if(!hasContent){if(empty)empty.style.display='block';if(list)list.style.display='none';return;}
+  if(!hasContent){
+    if(empty)empty.style.display='block';
+    if(list)list.style.display='none';
+    return;
+  }
   if(empty)empty.style.display='none';
   if(!list)return;
   list.style.display='block';
