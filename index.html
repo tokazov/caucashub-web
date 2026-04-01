@@ -1470,6 +1470,7 @@ window.allLoads=[...LOCAL,...INTL];
 let currentCargoId=null;
 function openCargo(d){
   currentCargoId=d.id;
+  window.currentCargoData=d; // сохраняем данные для addToOrders
   document.getElementById('mTitle').textContent=`${d.from} → ${d.to}`;
   const _loadCreated = d.created_at ? new Date(d.created_at).toLocaleDateString('ru-RU',{day:'2-digit',month:'2-digit',year:'2-digit'}) : null;
   const _addedStr = _loadCreated ? `Добавлен ${_loadCreated}` : 'Добавлен сегодня';
@@ -1542,8 +1543,10 @@ function doRespond(){
 }
 function addToOrders(){
   // Берём данные текущего груза
-  const d = window.allLoads?.find(l=>l.id===currentCargoId);
-  if(!d) return;
+  const d = window.currentCargoData || 
+            window.allLoads?.find(l=>l.id===currentCargoId) ||
+            window.allLoads?.find(l=>l.id==currentCargoId); // нестрогое сравнение на случай строка/число
+  if(!d){ console.warn('[addToOrders] cargo not found, id:', currentCargoId); return; }
 
   // Добавляем в _orders массив
   const order = {
