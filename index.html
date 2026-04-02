@@ -2343,7 +2343,8 @@ var _userClickedTab = false; // флаг ручного клика
 function showSection(name, el){
   _userClickedTab = true;
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById('sec-'+name).classList.add('active');
+  const _secEl = document.getElementById('sec-'+name);
+  if(_secEl) _secEl.classList.add('active');
   if(name==='deals') setTimeout(loadDeals, 50);
   if(name==='trucks') setTimeout(syncTrucksFromServer, 50);
   document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
@@ -2354,12 +2355,28 @@ function showSection(name, el){
   const bnav=document.querySelectorAll('.bitem');
   if(map[name]!==undefined) bnav[map[name]].classList.add('active');
   if(name==='trucks') renderTrucks();
-  if(name==='orders'){
-    // Показываем exportPanel для залогиненных сразу
-    const _ep2=document.getElementById('exportPanel');
-    if(_ep2) _ep2.style.display = getToken() ? 'flex' : 'none';
+  if(name==='cabinet' || name==='orders'){
+    const ep = document.getElementById('exportPanel');
+    if(ep) ep.style.display = getToken() ? 'flex' : 'none';
     if(typeof _renderOrders==='function') _renderOrders();
     if(typeof loadDeals==='function') loadDeals();
+    if(getToken() && typeof CaucasAPI!=='undefined'){
+      CaucasAPI.getMyLoads().then(myLoads=>{
+        if(myLoads && myLoads.length){
+          _myLoads = myLoads.map(l => typeof mapServerLoad==='function' ? mapServerLoad(l) : l);
+          if(typeof _renderOrders==='function') _renderOrders();
+        }
+      }).catch(()=>{});
+    }
+    // Синхронизируем рендер в cabinet с orders
+    if(name==='cabinet'){
+      const ordersEmpty=document.getElementById('ordersEmpty');
+      const ordersList=document.getElementById('ordersList');
+      const cabinetEmpty=document.getElementById('cabinetEmpty');
+      const cabinetList=document.getElementById('cabinetList');
+      if(ordersEmpty && cabinetEmpty) cabinetEmpty.style.display=ordersEmpty.style.display;
+      if(ordersList && cabinetList) cabinetList.innerHTML=ordersList.innerHTML;
+    }
   }
 }
 
@@ -2727,6 +2744,16 @@ if(document.readyState==='loading'){
   syncLoadsFromServer();
 }
 </script>
+<!-- ═══ SECTION: CABINET ═══ -->
+<div class="section" id="sec-cabinet">
+  <div class="orders-empty" id="cabinetEmpty" style="display:none">
+    <div class="icon">📋</div>
+    <div style="font-size:18px;font-weight:700;color:#555;margin-bottom:8px">Нет активных заказов</div>
+    <div style="font-size:14px;margin-bottom:20px">Войдите в аккаунт чтобы видеть свои заказы</div>
+    <button class="btn-primary" style="max-width:200px;margin:0 auto" onclick="openAuth('login')">Войти</button>
+  </div>
+  <div id="cabinetList"></div>
+</div>
 <!-- SECTION: DEALS -->
 <div id="sDeals" class="section" style="display:none;padding:16px;max-width:600px;margin:0 auto"></div>
 
