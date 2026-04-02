@@ -174,11 +174,17 @@ async function syncLoadsFromServer(){
     if(serverLoads && serverLoads.length > 0){
       const mapped = serverLoads.map(l => mapServerLoad(l));
       if(scope === 'local'){
+        // Сохраняем локальные грузы (без serverId) которые ещё не попали на сервер
+        const localOnly = LOCAL.filter(l => !l.fromServer && !l.serverId);
         LOCAL.length = 0;
         mapped.forEach(l => LOCAL.push(l));
+        // Восстанавливаем локальные грузы (дедуп по id)
+        localOnly.forEach(l => { if(!LOCAL.find(x => x.id === l.id)) LOCAL.unshift(l); });
       } else {
+        const localOnly = INTL.filter(l => !l.fromServer && !l.serverId);
         INTL.length = 0;
         mapped.forEach(l => INTL.push(l));
+        localOnly.forEach(l => { if(!INTL.find(x => x.id === l.id)) INTL.unshift(l); });
       }
       window.allLoads = [...LOCAL, ...INTL];
       if(typeof renderLoads === 'function') renderLoads(scope === 'local' ? LOCAL : INTL);
