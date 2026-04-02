@@ -1456,7 +1456,8 @@ function deleteMyTruck(id){
   try {
     const saved = JSON.parse(localStorage.getItem('ch_my_loads')||'[]');
     if(saved.length){
-      saved.forEach(l=>{ LOCAL.unshift(l); _myLoads.unshift(l); });
+      // Только в _myLoads — LOCAL заполняется с сервера, не из localStorage
+      saved.forEach(l=>{ _myLoads.unshift(l); });
     }
   } catch(e){}
   try {
