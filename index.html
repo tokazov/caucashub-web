@@ -1324,10 +1324,14 @@ function renderLoads(data){
     `;
     list.appendChild(row);
   });
-  const lm=document.createElement('div');
-  lm.className='load-more';
-  lm.innerHTML=`<button onclick="alert('Загружаем ещё...')">Загрузить ещё ${scope==='local'?181:91} груз ↓</button>`;
-  list.appendChild(lm);
+  // Кнопка "Загрузить ещё" — только если сервер вернул больше чем показано
+  const _total = window._serverTotal || 0;
+  if(_total > data.length){
+    const lm=document.createElement('div');
+    lm.className='load-more';
+    lm.innerHTML=`<button onclick="alert('Загружаем ещё...')">Загрузить ещё ${_total - data.length} груз ↓</button>`;
+    list.appendChild(lm);
+  }
 }
 
 // ── RENDER TRUCKS ─────────────────────────────────────
