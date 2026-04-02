@@ -187,10 +187,14 @@ async function syncLoadsFromServer(){
         localOnly.forEach(l => { if(!INTL.find(x => x.id === l.id)) INTL.unshift(l); });
       }
       window.allLoads = [...LOCAL, ...INTL];
+      window._serverTotal = serverLoads.length;
       if(typeof renderLoads === 'function') renderLoads(scope === 'local' ? LOCAL : INTL);
       // Обновляем счётчик реальными данными
       const _statEl = document.getElementById('statLoads');
       if(_statEl) _statEl.textContent = serverLoads.length;
+      // Обновляем fcount тоже
+      const _fcEl = document.getElementById('fcount');
+      if(_fcEl) _fcEl.textContent = serverLoads.length + ' грузов';
       console.log('[API] Loaded', serverLoads.length, 'loads from server');
     }
 
