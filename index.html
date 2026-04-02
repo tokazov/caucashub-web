@@ -88,8 +88,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 
 /* RATES TAB */
 .rates-table { width:100%; border-collapse:collapse; background:#fff; }
-.rates-table th { background:#e8eaf0; padding:10px 16px; text-align:left; font-size:11px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:.5px; }
-.rates-table td { padding:12px 16px; border-bottom:1px solid #f2f2f2; font-size:14px; }
+.rates-table th { background:#e8eaf0; padding:8px 8px; text-align:left; font-size:10px; color:#777; font-weight:700; text-transform:uppercase; letter-spacing:0; }
+.rates-table td { padding:8px 8px; border-bottom:1px solid #f2f2f2; font-size:13px; }
 .rate-up { color:#2ecc71; font-weight:700; }
 .rate-down { color:#e74c3c; font-weight:700; }
 
@@ -185,6 +185,9 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   .bnav { display:flex; }
   .cargo-list { padding-bottom:64px; }
   .section { padding-bottom: 80px !important; }
+  .rates-table th { padding:6px 6px; font-size:9px; }
+  .rates-table td { padding:6px 6px; font-size:12px; }
+  .rates-table td:first-child { font-size:11px; max-width:90px; }
   .fsel { font-size:12px; padding:6px 8px; }
   .post-btn span { display:inline; }
   .fbtn, .post-btn { flex:1; }
@@ -445,8 +448,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   <div style="padding:16px;background:#fff;border-bottom:1px solid #eee">
     <div style="font-size:13px;color:#888;margin-bottom:4px">Средние ставки на маршрутах · обновлено сегодня</div>
   </div>
-  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
-  <table class="rates-table" style="min-width:420px;">
+  <table class="rates-table">
     <thead><tr><th>МАРШРУТ</th><th>ТЕНТ $/км</th><th>РЕФРИЖ $/км</th><th>ТРЕНД</th><th>ОБЪЁМ/НЕД</th></tr></thead>
     <tbody>
       <tr><td><strong>Тбилиси → Батуми</strong></td><td>$0.85–1.10</td><td>$1.20–1.50</td><td class="rate-up">↑ +8%</td><td>47 рейсов</td></tr>
@@ -459,7 +461,6 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <tr><td><strong>Тбилиси → Москва</strong></td><td>$0.95–1.10</td><td>$1.40–1.70</td><td class="rate-up">↑ +3%</td><td>11 рейсов</td></tr>
     </tbody>
   </table>
-</div>
 </div>
 
 <!-- ═══ SECTION: ORDERS ═══ -->
