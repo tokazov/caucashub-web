@@ -2029,22 +2029,43 @@ function doPostLoad(){
   addMyLoad(newLoad);
   document.getElementById('postSuccess').style.display='block';
 
-  // Сохраняем на сервере асинхронно
+  // Сохраняем на сервере — ОБЯЗАТЕЛЬНО, груз без serverId не переживёт рефреш
   if(typeof CaucasAPI!=='undefined' && getToken()){
     CaucasAPI.createLoad(newLoad).then(r=>{
       if(r.ok && r.load?.serverId){
-        // Обновляем serverId и userId в массивах
+        // Успешно сохранено — обновляем serverId
         newLoad.serverId = r.load.serverId;
         newLoad.userId   = currentUserId;
+        newLoad.fromServer = true;
         const mi=_myLoads.findIndex(l=>l.id===newLoad.id);
-        if(mi>-1){ _myLoads[mi].serverId=r.load.serverId; _myLoads[mi].userId=currentUserId; }
+        if(mi>-1){ _myLoads[mi].serverId=r.load.serverId; _myLoads[mi].userId=currentUserId; _myLoads[mi].fromServer=true; }
         const li=LOCAL.findIndex(l=>l.id===newLoad.id);
-        if(li>-1){ LOCAL[li].userId=currentUserId; }
+        if(li>-1){ LOCAL[li].serverId=r.load.serverId; LOCAL[li].userId=currentUserId; LOCAL[li].fromServer=true; }
         window.allLoads=[...LOCAL,...INTL];
         persistMyLoads();
         renderLoads(scope==='local'?LOCAL:INTL);
+        console.log('[createLoad] Saved to server, id='+r.load.serverId);
+      } else {
+        // Сервер не принял — удаляем из LOCAL чтобы не было дублей после sync
+        console.warn('[createLoad] Server rejected, removing from LOCAL');
+        const li=LOCAL.findIndex(l=>l.id===newLoad.id);
+        if(li>-1) LOCAL.splice(li,1);
+        renderLoads(scope==='local'?LOCAL:INTL);
+        alert('⚠️ Груз не удалось сохранить на сервере. Попробуйте ещё раз.');
       }
-    }).catch(()=>{});
+    }).catch((err)=>{
+      console.warn('[createLoad] Network error:', err);
+      alert('⚠️ Нет соединения. Груз не сохранён. Проверьте интернет и попробуйте снова.');
+      const li=LOCAL.findIndex(l=>l.id===newLoad.id);
+      if(li>-1) LOCAL.splice(li,1);
+      renderLoads(scope==='local'?LOCAL:INTL);
+    });
+  } else {
+    // Нет токена — не залогинен
+    alert('⚠️ Войдите в аккаунт чтобы добавить груз.');
+    const li=LOCAL.findIndex(l=>l.id===newLoad.id);
+    if(li>-1) LOCAL.splice(li,1);
+    renderLoads(scope==='local'?LOCAL:INTL);
   }
 
   setTimeout(()=>{
