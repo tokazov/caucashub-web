@@ -336,7 +336,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
     <option value="700-1500">₾700–1500 / $250–500</option>
     <option value="1500-99999">₾1500+ / $500+</option>
   </select>
-  <div class="fcount" id="fcount">187 грузов</div>
+  <div class="fcount" id="fcount">— грузов</div>
   <div style="width:100%;display:flex;gap:8px;margin-top:2px">
     <button class="fbtn" onclick="filterLoads()">Найти</button>
     <button class="post-btn" onclick="openPostLoad()">+ Разместить груз</button>
@@ -345,7 +345,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
 
 <!-- STATS -->
 <div class="stats-bar" id="statsBar">
-  <span><span class="dot"></span><strong id="statLoads">187</strong> грузов</span>
+  <span><span class="dot"></span><strong id="statLoads">—</strong> грузов</span>
   <span><strong id="statTrucks">634</strong> машин онлайн</span>
   <span><strong>2,841</strong> компаний</span>
 </div>
@@ -365,7 +365,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   <div class="thead">
     <div>ОТКУДА → КУДА</div><div>ВЕС</div><div>КУЗОВ</div><div>ЦЕНА</div><div>ДАТА ЗАГРУЗКИ</div><div></div>
   </div>
-  <div class="cargo-list" id="cargoList"></div>
+  <div class="cargo-list" id="cargoList"><div id="cargoLoader" style="text-align:center;padding:40px 20px;color:#aaa;font-size:14px">⏳ Загружаем грузы...</div></div>
 </div>
 
 <!-- ═══ SECTION: TRUCKS ═══ -->
@@ -1298,6 +1298,10 @@ function renderLoads(data){
   document.getElementById('fcount').textContent=data.length+' грузов';
   const list=document.getElementById('cargoList');
   list.innerHTML='';
+  if(!data.length){
+    list.innerHTML='<div style="text-align:center;padding:40px 20px;color:#aaa;font-size:14px">Грузов не найдено</div>';
+    return;
+  }
   data.forEach(d=>{
     const borderClr=d.badge==='urgent'?'#e74c3c':d.badge==='new'?'#2ecc71':d.scope==='intl'?'#3498db':'transparent';
     const dateStr=formatDateRange(d.date,d.date2);
