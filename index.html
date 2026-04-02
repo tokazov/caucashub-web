@@ -14,7 +14,7 @@
 
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f0f2f5; color:#1a1a2e; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f0f2f5; color:#1a1a2e;  overflow-x:hidden; }
 
 /* HEADER */
 .header { background:#1a1a2e; padding:0 16px; display:flex; align-items:center; justify-content:space-between; height:54px; position:sticky; top:0; z-index:200; }
@@ -445,7 +445,8 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
   <div style="padding:16px;background:#fff;border-bottom:1px solid #eee">
     <div style="font-size:13px;color:#888;margin-bottom:4px">Средние ставки на маршрутах · обновлено сегодня</div>
   </div>
-  <table class="rates-table">
+  <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;">
+  <table class="rates-table" style="min-width:420px;">
     <thead><tr><th>МАРШРУТ</th><th>ТЕНТ $/км</th><th>РЕФРИЖ $/км</th><th>ТРЕНД</th><th>ОБЪЁМ/НЕД</th></tr></thead>
     <tbody>
       <tr><td><strong>Тбилиси → Батуми</strong></td><td>$0.85–1.10</td><td>$1.20–1.50</td><td class="rate-up">↑ +8%</td><td>47 рейсов</td></tr>
@@ -458,6 +459,7 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <tr><td><strong>Тбилиси → Москва</strong></td><td>$0.95–1.10</td><td>$1.40–1.70</td><td class="rate-up">↑ +3%</td><td>11 рейсов</td></tr>
     </tbody>
   </table>
+</div>
 </div>
 
 <!-- ═══ SECTION: ORDERS ═══ -->
