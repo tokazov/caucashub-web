@@ -2015,6 +2015,9 @@ function doPostLoad(){
   const pay=document.getElementById('pPay').value;
   const urgent=document.getElementById('pUrgent').checked;
   const typeMap={'Тент':{typeClr:'#f3e5f5',typeClrT:'#6a1b9a'},'Рефрижератор':{typeClr:'#e3f2fd',typeClrT:'#1565c0'},'Бортовой':{typeClr:'#e8f5e9',typeClrT:'#2e7d32'},'Термос':{typeClr:'#fff3e0',typeClrT:'#bf360c'},'Газель':{typeClr:'#fce4ec',typeClrT:'#880e4f'},'Контейнер':{typeClr:'#f0f2f5',typeClrT:'#555'}};
+  // Маппинг русских названий → API enum (tent/ref/bort/termos/gazel/container/auto/other)
+  const truckTypeMap={'тент':'tent','рефрижератор':'ref','рефтент':'ref','мегатент':'tent','бортовой':'bort','термос':'termos','фургон (до 3.5т)':'gazel','газель':'gazel','контейнер':'container','автовоз':'auto','эвакуатор':'auto','цистерна':'other','зерновоз':'other','самосвал':'other'};
+  const truckTypeApi = truckTypeMap[truck.toLowerCase()] || 'other';
   const tc=typeMap[truck]||typeMap['Тент'];
   const rawDate=document.getElementById('pDate').value;
   const rawDate2=document.getElementById('pDate2').value;
@@ -2022,7 +2025,7 @@ function doPostLoad(){
   const loadDate=toDisplay(rawDate)||'28.03.26';
   const loadDate2=rawDate2?toDisplay(rawDate2):null;
   const cur = scope==='intl' ? '$' : '₾';
-  const newLoad={id:Date.now(),from,to,kg,type:truck.toLowerCase(),typeLabel:truck,...tc,price,cur,date:loadDate,date2:loadDate2,urgent,scope:scope==='intl'?'intl':'local',desc,co:user.name,rat:'5.0',trips:0,pay,from2:fromAddr,to2:toAddr,km:'~уточните',badge:urgent?'urgent':'new',ownerId:user.email,userId:currentUserId};
+  const newLoad={id:Date.now(),from,to,kg,type:truckTypeApi,typeLabel:truck,...tc,price,cur,date:loadDate,date2:loadDate2,urgent,scope:scope==='intl'?'intl':'local',desc,co:user.name,rat:'5.0',trips:0,pay,from2:fromAddr,to2:toAddr,km:'~уточните',badge:urgent?'urgent':'new',ownerId:user.email,userId:currentUserId};
 
   LOCAL.unshift(newLoad);
   window.allLoads=[...LOCAL,...INTL];
