@@ -2741,9 +2741,14 @@ if(_dateInput){
 }
 // Гарантируем рендер после загрузки DOM
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',()=>{ renderLoads(LOCAL); syncLoadsFromServer(); });
+  document.addEventListener('DOMContentLoaded',()=>{
+    // Сначала рендерим из localStorage (мгновенно), потом sync с сервером
+    if(LOCAL.length) renderLoads(LOCAL);
+    syncLoadsFromServer();
+  });
 } else {
-  renderLoads(LOCAL);
+  // Сначала рендерим из localStorage (мгновенно), потом sync с сервером
+  if(LOCAL.length) renderLoads(LOCAL);
   syncLoadsFromServer();
 }
 </script>
