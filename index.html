@@ -1785,7 +1785,7 @@ async function doForgotStep2(){
       const errMsg = d.detail||'';
       if(errMsg.toLowerCase().includes('expired')||errMsg.toLowerCase().includes('invalid')||errMsg.toLowerCase().includes('not found')){
         // Пробуем войти с новым паролем чтобы проверить изменился ли пароль
-        const testLogin = await fetch('https://api-production-f3ea.up.railway.app/api/auth/login/',{
+        const testLogin = await fetch('https://api-production-f3ea.up.railway.app/api/auth/login',{
           method:'POST',headers:{'Content-Type':'application/json'},
           body:JSON.stringify({email:_forgotEmail,password:pass1})
         }).catch(()=>null);
