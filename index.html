@@ -396,22 +396,23 @@ body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; backg
       <input class="form-input" id="tTo" placeholder="Любое направление">
     </div>
     <div class="form-group">
-      <label>Тип кузова</label>
-      <select class="form-input" id="tType">
-        <option>Тент</option>
-        <option>Рефрижератор</option>
-        <option>Рефтент</option>
-        <option>Мегатент</option>
-        <option>Бортовой</option>
-        <option>Термос</option>
-        <option>Фургон (до 3.5т)</option>
-        <option>Контейнер</option>
-        <option>Автовоз</option>
-        <option>Эвакуатор</option>
-        <option>Цистерна</option>
-        <option>Зерновоз</option>
-        <option>Самосвал</option>
-      </select>
+      <label>Тип кузова <span style="color:#999;font-size:12px">(выбери все свои)</span></label>
+      <div id="tTypeCheckboxes" style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Тент" style="width:16px;height:16px"> Тент</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Рефрижератор" style="width:16px;height:16px"> Рефрижератор</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Рефтент" style="width:16px;height:16px"> Рефтент</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Мегатент" style="width:16px;height:16px"> Мегатент</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Бортовой" style="width:16px;height:16px"> Бортовой</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Термос" style="width:16px;height:16px"> Термос</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Фургон (до 3.5т)" style="width:16px;height:16px"> Фургон (до 3.5т)</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Контейнер" style="width:16px;height:16px"> Контейнер</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Автовоз" style="width:16px;height:16px"> Автовоз</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Эвакуатор" style="width:16px;height:16px"> Эвакуатор</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Цистерна" style="width:16px;height:16px"> Цистерна</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Зерновоз" style="width:16px;height:16px"> Зерновоз</label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer"><input type="checkbox" value="Самосвал" style="width:16px;height:16px"> Самосвал</label>
+      </div>
+      <div id="tTypeError" style="display:none;color:#e74c3c;font-size:12px;margin-top:4px">Выберите хотя бы один тип</div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="form-group">
@@ -1390,7 +1391,11 @@ function openPostTruck(){
 function doPostTruck(){
   const from  = document.getElementById('tFrom').value.trim() || 'Тбилиси';
   const to    = document.getElementById('tTo').value.trim() || 'Любое направление';
-  const type  = document.getElementById('tType').value;
+  // Собираем все выбранные типы
+  const selectedTypes = Array.from(document.querySelectorAll('#tTypeCheckboxes input:checked')).map(cb=>cb.value);
+  if(selectedTypes.length === 0){ document.getElementById('tTypeError').style.display='block'; return; }
+  document.getElementById('tTypeError').style.display='none';
+  const type = selectedTypes[0]; // первый тип для основной записи
   const kg    = parseInt(document.getElementById('tKg').value) || 20000;
   const plate = document.getElementById('tPlate').value.trim() || '—';
   const date  = document.getElementById('tDate').value;
@@ -1403,13 +1408,19 @@ function doPostTruck(){
     rat: '5.0', trips: 0, isOwn: true,
   };
   const _tk = getToken ? getToken() : localStorage.getItem('ch_token');
+  // Добавляем машину для каждого выбранного типа
   if(_tk){
-    fetch(API_BASE+'/api/trucks/', {
-      method:'POST',headers:{'Authorization':'Bearer '+_tk,'Content-Type':'application/json'},
-      body:JSON.stringify({truck_type:type,capacity_kg:kg,available_from:from,available_to:to,plate:plate,phone:phone,available_date:date||null,volume_m3:null})
-    }).then(r=>r.ok?r.json():null).then(d=>{if(d&&d.id) syncTrucksFromServer();}).catch(()=>{});
+    selectedTypes.forEach(t => {
+      fetch(API_BASE+'/api/trucks/', {
+        method:'POST',headers:{'Authorization':'Bearer '+_tk,'Content-Type':'application/json'},
+        body:JSON.stringify({truck_type:t,capacity_kg:kg,available_from:from,available_to:to,plate:plate,phone:phone,available_date:date||null,volume_m3:null})
+      }).then(r=>r.ok?r.json():null).then(d=>{if(d&&d.id) syncTrucksFromServer();}).catch(()=>{});
+    });
   }
-  _myTrucks.unshift(truck);
+  // Добавляем в локальный список
+  selectedTypes.forEach((t,i)=>{
+    _myTrucks.unshift({...truck, id:'t_'+Date.now()+i, type:t});
+  });
   try { localStorage.setItem('ch_my_trucks', JSON.stringify(_myTrucks)); } catch(e){}
   renderTrucks();
   document.getElementById('postTruckSuccess').style.display='block';
